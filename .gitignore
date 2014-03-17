@@ -1,0 +1,65 @@
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Vim
+*.swp
+
+# Archives
+*.zip
+*.tar
+*.gz
+
+# Images
+*.png
+*.jpg
+*.jpeg
+
+# Java
+*.jar
+*.class
+
+# Simulations
+crowdgeneration/CrowGenCpp/simulations/
+
+# Autoconf & Automake
+
+Makefile
+Makefile.in
+aclocal.m4
+autom4te.cache/
+config.*
+configure
+compile
+depcomp
+install-sh
+libtool
+ltmain.sh
+m4/
+missing
+stamp-h?
+.deps/
+.dirstamp
+.libs/
+*.l[ao]
+*~
+*.lineno
+*.log
