@@ -10,6 +10,7 @@ AC_PROG_CC
 # Checks for programs.
 
 # Checks for libraries.
+AM_PATH_XML2([2.4.0])
 
 # Checks for header files.
 

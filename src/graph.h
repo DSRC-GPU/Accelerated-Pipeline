@@ -4,6 +4,7 @@
 
 typedef struct Point
 {
+  // A location in 2D space.
   int x, y;
 } Point;
 
@@ -11,21 +12,35 @@ typedef Point Vector;
 
 typedef struct Vertex
 {
-  int id;
+  // The vertex id.
+  // A custom label for this vertex.
+  // The first time tick this vertex is valid.
+  // The last time tick this vertex is valid.
+  int id, label, start, end;
+  // The location of the vertex in 2D space.
   Point loc;
+  // The current force on this vertex.
   Vector force;
 } Vertex;
 
 typedef struct Edge
 {
-  Vertex* start;
-  Vertex* end;
+  // The array index of the vertex at the start of this edge.
+  int startVertex;
+  // The array index of the vertex at the end of this edge.
+  int endVertex;
+  // The first time tick this edge is valid, an the last time tick this edge is
+  // valid.
+  int start, end;
 } Edge;
 
 typedef struct Graph
 {
+  // The number of edges and vertices in the graph.
   unsigned int numedges, numvertices;
+  // The array of edges.
   Edge* edges;
+  // The array of vertices.
   Vertex* vertices;
 } Graph;
 
@@ -39,12 +54,8 @@ void applyForceOnGraphVertex(Graph*, void (*func)(Graph*, Vertex*));
 // based on edge information.
 void applyForceOnGraphEdge(Graph*, void (*func)(Graph*, Edge*));
 
-// The getVertexDegrees function calculates the degree of each vertex and writes
-// it to the given unsigned int array. The size of the given array should be
-// equal to the number of vertices in the graph.
-void getVertexDegrees(Graph*, unsigned int*);
-
 // The printGraph function prints the details of the graph to stdout.
 void printGraph(Graph*);
 
 #endif
+

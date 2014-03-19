@@ -4,9 +4,6 @@
 
 #include "graph.h"
 
-void parseGexfFile(Graph* g, char* in)
-{
-  // FIXME Implement.
-}
+void gexfParseFile(Graph* g, const char* in);
 
 #endif

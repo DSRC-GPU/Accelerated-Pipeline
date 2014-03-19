@@ -12,13 +12,18 @@ int main(int argc, char* argv[])
   // Input handling.
   char* inputFile = "";
   unsigned int numTicks = 100;
+  int runForever = 0;
 
-  for (size_t i = 0; i < argc; i++)
+  for (size_t i = 1; i < argc; i++)
   {
     if (!strcmp(argv[i], "-i"))
     {
       // Input file param.
       inputFile = argv[i++];
+    }
+    if (!strcmp(argv[i], "-I"))
+    {
+      runForever = 1;
     }
     else
     {
@@ -29,15 +34,18 @@ int main(int argc, char* argv[])
 
   // Graph parsing.
   Graph* g = NULL;
-  parseGexfFile(g, inputFile);
+  gexfParseFile(g, inputFile);
 
-  for (size_t i = 0; i < numTicks; i++)
+  size_t i = 0;
+  while (i < numTicks || runForever)
   {
     // Computing.
     // applyForceOnGraphEdge(g, myIncludedFunc);
 
     // Printing
     printGraph(g);
+
+    numTicks++;
   } 
 }
 

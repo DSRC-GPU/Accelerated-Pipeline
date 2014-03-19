@@ -20,16 +20,9 @@ void applyForceOnGraphEdge(Graph* g, void (*func)(Graph*, Edge*))
   }
 }
 
-void getVertexDegrees(Graph* g, unsigned int* degrees)
-{
-  for (size_t i = 0; i < g->numedges; i++)
-  {
-    degrees[g->edges[i].start->id]++;
-  }
-}
-
 void printGraph(Graph* g)
 {
+  if (!g) return;
   for (size_t i = 0; i < g->numvertices; i++)
   {
     Vertex* cv = &g->vertices[i];
@@ -40,6 +33,6 @@ void printGraph(Graph* g)
   {
     Edge* ce = &g->edges[i];
     printf("Vertex %i\tand %i\tare connected by an edge.\n",
-        ce->start->id, ce->end->id);
+        ce->start, ce->end);
   }
 }
