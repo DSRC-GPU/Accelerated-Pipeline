@@ -26,7 +26,7 @@ void printGraph(Graph* g)
   for (size_t i = 0; i < g->numvertices; i++)
   {
     Vertex* cv = &g->vertices[i];
-    printf("Vertex %i is at location (%i,%i) with force vector (%i,%i).\n", 
+    printf("Vertex %i\tis at location (%i,%i)\twith force vector (%i,%i).\n", 
         cv->id, cv->loc.x, cv->loc.y, cv->force.x, cv->force.y);
   }
   for (size_t i = 0; i < g->numedges; i++)

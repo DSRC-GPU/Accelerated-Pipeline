@@ -114,6 +114,17 @@ void gexfParseEdges(xmlNode* gexf, Edge* edges)
 
 void gexfParseFile(Graph* g, const char* in)
 {
+  if (!g)
+  {
+    printf("Invalid Graph pointer. Exit.\n");
+    exit(EXIT_FAILURE);
+  }
+  else if(!in)
+  {
+    printf("Invalid Input file pointer. Exit.\n");
+    exit(EXIT_FAILURE);
+  }
+
   xmlDoc *doc = NULL;
   xmlNode *root_element = NULL;
 
@@ -132,6 +143,9 @@ void gexfParseFile(Graph* g, const char* in)
   // Create graph data structure.
   unsigned int numNodes = xmlwGetNumNodes(root_element);
   unsigned int numEdges = xmlwGetNumEdges(root_element);
+
+  g->numvertices = numNodes;
+  g->numedges = numEdges;
 
   Vertex* vertices = calloc(numNodes, sizeof(Vertex));
   Edge* edges = calloc(numEdges, sizeof(Edge));

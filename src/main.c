@@ -9,8 +9,8 @@
 
 int main(int argc, char* argv[])
 {
-  // Input handling.
-  char* inputFile = "";
+  // Input parsing.
+  const char* inputFile = NULL;
   unsigned int numTicks = 100;
   int runForever = 0;
 
@@ -19,9 +19,9 @@ int main(int argc, char* argv[])
     if (!strcmp(argv[i], "-i"))
     {
       // Input file param.
-      inputFile = argv[i++];
+      inputFile = argv[++i];
     }
-    if (!strcmp(argv[i], "-I"))
+    else if (!strcmp(argv[i], "-I"))
     {
       runForever = 1;
     }
@@ -32,9 +32,27 @@ int main(int argc, char* argv[])
     }
   }
 
+  // Input checking.
+  if (!inputFile)
+  {
+    printf("No input file specified. Exit.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  // Feedback to user.
+  printf("Using input file %s.\n", inputFile);
+  if (runForever)
+    printf("Running simulation indefinately.\n");
+  else
+    printf("Running simulation for %d ticks.\n", numTicks);
+
   // Graph parsing.
-  Graph* g = NULL;
+  printf("Parsing graph...");
+  Graph* g = calloc(1, sizeof(Graph));
   gexfParseFile(g, inputFile);
+  printf(" done!\n");
+
+  printf("Graph nodes: %d, Graph edges: %d.\n", g->numvertices, g->numedges);
 
   size_t i = 0;
   while (i < numTicks || runForever)
@@ -45,7 +63,9 @@ int main(int argc, char* argv[])
     // Printing
     printGraph(g);
 
-    numTicks++;
+    i++;
   } 
+
+  free(g);
 }
 
