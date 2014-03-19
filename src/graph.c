@@ -4,19 +4,11 @@
 
 #include "graph.h"
 
-void applyForceOnGraphVertex(Graph* g, void (*func)(Graph*, Vertex*))
+void applyForceOnGraphVertex(Graph* g, simpleForce sf)
 {
   for (size_t i = 0; i < g->numvertices; i++)
   {
-    func(g, &g->vertices[i]);
-  }
-}
-
-void applyForceOnGraphEdge(Graph* g, void (*func)(Graph*, Edge*))
-{
-  for (size_t i = 0; i < g->numedges; i++)
-  {
-    func(g, &g->edges[i]);
+    sf(g, &g->vertices[i]);
   }
 }
 

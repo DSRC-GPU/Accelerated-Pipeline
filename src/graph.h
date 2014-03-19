@@ -44,15 +44,23 @@ typedef struct Graph
   Vertex* vertices;
 } Graph;
 
+typedef void (*simpleForce)(Graph*, Vertex*);
+typedef void (*dataForce)(Graph*, Vertex*, void*);
+
+typedef struct ForceWithData
+{
+  dataForce force;
+  void* data;
+} ForceWithData;
+
 // The applyForceOnGraphVertex function is a convenience function that iterates
 // over all vertices in the graph. This allows the user to update Vertex forces
 // based on vertex information.
-void applyForceOnGraphVertex(Graph*, void (*func)(Graph*, Vertex*));
+void applySimpleForceOnGraph(Graph*, simpleForce);
+void applyDataForceOnGraph(Graph*, dataForce);
 
-// The applyForceOnGraphEdge function is a convenience function that iterates
-// over all edges in the graph. This allows the user to update Vertex forces
-// based on edge information.
-void applyForceOnGraphEdge(Graph*, void (*func)(Graph*, Edge*));
+void setSimpleForces(simpleForce*);
+void setDataForces(ForceWithData*);
 
 // The printGraph function prints the details of the graph to stdout.
 void printGraph(Graph*);

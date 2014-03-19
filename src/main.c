@@ -14,7 +14,7 @@ int main(int argc, char* argv[])
   unsigned int numTicks = 100;
   int runForever = 0;
 
-  for (size_t i = 1; i < argc; i++)
+  for (int i = 1; i < argc; i++)
   {
     if (!strcmp(argv[i], "-i"))
     {
