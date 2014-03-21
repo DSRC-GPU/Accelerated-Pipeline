@@ -54,11 +54,13 @@ int main(int argc, char* argv[])
 
   printf("Graph nodes: %d, Graph edges: %d.\n", g->numvertices, g->numedges);
 
+  // add forces
+
   size_t i = 0;
   while (i < numTicks || runForever)
   {
     // Computing.
-    // applyForceOnGraphEdge(g, myIncludedFunc);
+    // compute
 
     // Printing
     printGraph(g);

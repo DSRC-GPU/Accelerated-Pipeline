@@ -4,14 +4,6 @@
 
 #include "graph.h"
 
-void applyForceOnGraphVertex(Graph* g, simpleForce sf)
-{
-  for (size_t i = 0; i < g->numvertices; i++)
-  {
-    sf(g, &g->vertices[i]);
-  }
-}
-
 void printGraph(Graph* g)
 {
   if (!g) return;
@@ -28,3 +20,4 @@ void printGraph(Graph* g)
         ce->start, ce->end);
   }
 }
+
