@@ -1,7 +1,6 @@
 
 #include <string.h>
 #include <stdio.h>
-
 #include "graph.h"
 
 void printGraph(Graph* g)

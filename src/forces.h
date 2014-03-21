@@ -2,6 +2,8 @@
 #ifndef FORCES_H
 #define FORCES_H
 
+#include "graph.h"
+
 typedef void (*simpleForce)(Graph*, Vertex*);
 typedef void (*dataForce)(Graph*, Vertex*, void*);
 

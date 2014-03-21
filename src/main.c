@@ -3,9 +3,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
 #include "gexfparser.h"
 #include "graph.h"
+#include "forces.h"
+#include "force-atlas-2.h"
 
 int main(int argc, char* argv[])
 {
@@ -54,13 +55,11 @@ int main(int argc, char* argv[])
 
   printf("Graph nodes: %d, Graph edges: %d.\n", g->numvertices, g->numedges);
 
-  // add forces
-
   size_t i = 0;
   while (i < numTicks || runForever)
   {
     // Computing.
-    // compute
+    runForcesOnGraph(g, FA2_NUMFORCES, FA2_FORCES);
 
     // Printing
     printGraph(g);

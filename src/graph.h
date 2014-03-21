@@ -37,11 +37,13 @@ typedef struct Edge
 typedef struct Graph
 {
   // The number of edges and vertices in the graph.
-  unsigned int numedges, numvertices;
+  unsigned int numedges, numvertices, numneighbours;
   // The array of edges.
   Edge* edges;
   // The array of vertices.
   Vertex* vertices;
+  // The array of vertex neighbours.
+  Vertex* neighbours;
 } Graph;
 
 
