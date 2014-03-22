@@ -14,8 +14,15 @@ typedef struct ForceWithData
 } ForceWithData;
 
 // Give a set of forces that are to be used by the spring embedding core.
-void runForcesOnGraph(Graph*, unsigned int, simpleForce*);
-void runDataForcesOnGraph(Graph*, unsigned int, ForceWithData*);
+void updateForcesOnGraph(Graph*, unsigned int, simpleForce*);
+void updateDataForcesOnGraph(Graph*, unsigned int, ForceWithData*);
+void updateSpeedOnGraph(Graph*);
+void updateLocationOnGraph(Graph*);
+void resetForcesOnGraph(Graph*);
+
+void getVectorBetweenVertex(Vertex*, Vertex*, Vector*);
+void addVectors(Vector*, Vector*);
+void subtractVectors(Vector*, Vector*);
 
 #endif
 

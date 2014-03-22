@@ -61,7 +61,10 @@ int main(int argc, char* argv[])
   while (i < numTicks || runForever)
   {
     // Computing.
-    runForcesOnGraph(g, FA2_NUMFORCES, FA2_FORCES);
+    updateForcesOnGraph(g, FA2_NUMFORCES, FA2_FORCES);
+    updateSpeedOnGraph(g);
+    updateLocationOnGraph(g);
+    resetForcesOnGraph(g);
 
     // Printing
     printGraph(g);

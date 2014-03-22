@@ -11,7 +11,8 @@ void printGraph(Graph* g)
     Vertex* cv = &g->vertices[i];
     printf("Vertex %i\tis at location (%i,%i)\twith force vector (%i,%i).\n", 
         cv->id, cv->loc.x, cv->loc.y, cv->force.x, cv->force.y);
-    printf("Vertex neighbours start at %d.\n", cv->neighbourIndex);
+    printf("Vertex has %d neighbours, starting at %d.\n", cv->numNeighbours,
+        cv->neighbourIndex);
   }
   for (size_t i = 0; i < g->numedges; i++)
   {

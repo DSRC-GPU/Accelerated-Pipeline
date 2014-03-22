@@ -22,7 +22,7 @@ typedef struct Vertex
   // The current force on this vertex.
   Vector force, speed;
   // Index in the edges array where the neighbours of this Vertex are located.
-  int neighbourIndex;
+  int neighbourIndex, numNeighbours;
 } Vertex;
 
 typedef struct Edge

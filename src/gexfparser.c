@@ -60,6 +60,7 @@ void gexfParseVertex(xmlNode* n, Vertex* v)
   v->force.x = 0;
   v->force.y = 0;
   v->neighbourIndex = -1;
+  v->numNeighbours = 0;
 }
 
 void gexfParseEdge(xmlNode* n, Edge* e)
@@ -119,7 +120,10 @@ void connectEdgesVertices(Graph* g)
   for (size_t i = 0; i < g->numedges; i++)
   {
     unsigned int edgeIndex = g->numedges - (i + 1);
-    g->vertices[g->edges[edgeIndex].startVertex].neighbourIndex = edgeIndex;
+    Vertex* v = &g->vertices[g->edges[edgeIndex].startVertex];
+    if (v->neighbourIndex == edgeIndex + 1)
+     v->numNeighbours++;
+    v->neighbourIndex = edgeIndex;
   }
 }
 
