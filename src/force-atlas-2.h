@@ -6,6 +6,7 @@
 #include "forces.h"
 
 #define FA2_NUMFORCES 3
+#define K_R 1
 
 extern simpleForce FA2_FORCES[];
 

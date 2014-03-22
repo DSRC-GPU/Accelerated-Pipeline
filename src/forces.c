@@ -1,5 +1,6 @@
 
 #include <stdlib.h>
+#include <math.h>
 #include "forces.h"
 #include "graph.h"
 
@@ -74,6 +75,11 @@ void getVectorBetweenVertex(Vertex* v1, Vertex* v2, Vector* vec)
   subtractVectors(vec, (Vector*) &v1->loc);
 }
 
+float getVectorLength(Vector* v)
+{
+  return sqrt(v->x * v->x + v->y * v->y);
+}
+
 void addVectors(Vector* v1, Vector* v2)
 {
   v1->x += v2->x;
@@ -84,5 +90,23 @@ void subtractVectors(Vector* v1, Vector* v2)
 {
   v1->x -= v2->x;
   v1->y -= v2->y;
+}
+
+void normalizeVector(Vector* v)
+{
+  float c = getVectorLength(v);
+  v->x /= c;
+  v->y /= c;
+}
+
+void inverseVector(Vector* v)
+{
+  multiplyVector(v, -1);
+}
+
+void multiplyVector(Vector* v, float f)
+{
+  v->x *= f;
+  v->y *= f;
 }
 

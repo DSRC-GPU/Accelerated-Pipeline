@@ -27,8 +27,12 @@ void updateLocationOnGraph(Graph*);
 void resetForcesOnGraph(Graph*);
 
 void getVectorBetweenVertex(Vertex*, Vertex*, Vector*);
+float getVectorLength(Vector* v);
 void addVectors(Vector*, Vector*);
 void subtractVectors(Vector*, Vector*);
+void normalizeVector(Vector*);
+void inverseVector(Vector*);
+void multiplyVector(Vector*, float);
 
 #endif
 

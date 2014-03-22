@@ -110,6 +110,15 @@ void gexfParseEdges(xmlNode* gexf, Edge* edges)
   while (node)
   {
     gexfParseEdge(node, &edges[i++]);
+
+    // Create the same edges, with start and end swapped.
+    // This gives us an undirected graph.
+    edges[i] = edges[i-1];
+    int tmp = edges[i].startVertex;
+    edges[i].startVertex = edges[i].endVertex;
+    edges[i].endVertex = tmp;
+
+    i++;
     node = node->next;
   }
 }
@@ -122,7 +131,7 @@ void connectEdgesVertices(Graph* g)
     unsigned int edgeIndex = g->numedges - (i + 1);
     Vertex* v = &g->vertices[g->edges[edgeIndex].startVertex];
     if (v->neighbourIndex == edgeIndex + 1)
-     v->numNeighbours++;
+      v->numNeighbours++;
     v->neighbourIndex = edgeIndex;
   }
 }
@@ -157,7 +166,7 @@ void gexfParseFile(Graph* g, const char* in)
 
   // Create graph data structure.
   unsigned int numNodes = xmlwGetNumNodes(root_element);
-  unsigned int numEdges = xmlwGetNumEdges(root_element);
+  unsigned int numEdges = xmlwGetNumEdges(root_element) * 2;
 
   g->numvertices = numNodes;
   g->numedges = numEdges;
