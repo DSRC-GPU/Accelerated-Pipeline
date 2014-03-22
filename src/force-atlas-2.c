@@ -28,6 +28,7 @@ void fa2UpdateTract(Graph*, VertexData*);
 void fa2UpdateSwingGraph(Graph*, VertexData*);
 void fa2UpdateTractGraph(Graph*, VertexData*);
 void fa2UpdateSpeed(Graph*, VertexData*, float);
+void fa2SaveOldForces(Graph*, VertexData*);
 
 void fa2Gravity(Graph* g, Vertex* v)
 {
@@ -92,7 +93,13 @@ void fa2Attraction(Graph* g, Vertex* v)
 
 void fa2UpdateSwing(Graph* g, VertexData* vd)
 {
-  // FIXME Implement.
+  for (size_t i = 0; i < g->numvertices; i++)
+  {
+    Vector v = g->vertices[i].force;
+    subtractVectors(&v, &vd[i].oldForce);
+    float vlen = getVectorLength(&v);
+    vd[i].swg = vlen;
+  }
 }
 
 void fa2UpdateTract(Graph* g, VertexData* vd)
@@ -111,6 +118,11 @@ void fa2UpdateTractGraph(Graph* g, VertexData* vd)
 }
 
 void fa2UpdateSpeed(Graph* g, VertexData* vd, float gs)
+{
+  // FIXME Implement.
+}
+
+void fa2SaveOldForces(Graph* g, VertexData* vd)
 {
   // FIXME Implement.
 }
@@ -143,6 +155,9 @@ void fa2RunOnGraph(Graph* g)
 
     // Update speed of vertices.
     fa2UpdateSpeed(g, vdata, graphSpeed);
+
+    // Set current forces as old forces in vertex data.
+    fa2SaveOldForces(g, vdata);
 
     // Update vertex locations based on speed.
     updateLocationOnGraph(g);
