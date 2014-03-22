@@ -20,7 +20,7 @@ typedef struct Vertex
   // The location of the vertex in 2D space.
   Point loc;
   // The current force on this vertex.
-  Vector force;
+  Vector force, speed;
 } Vertex;
 
 typedef struct Edge
@@ -42,8 +42,6 @@ typedef struct Graph
   Edge* edges;
   // The array of vertices.
   Vertex* vertices;
-  // The array of vertex neighbours.
-  Vertex* neighbours;
 } Graph;
 
 

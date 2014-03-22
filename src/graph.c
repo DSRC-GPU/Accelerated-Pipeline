@@ -16,7 +16,7 @@ void printGraph(Graph* g)
   {
     Edge* ce = &g->edges[i];
     printf("Vertex %i\tand %i\tare connected by an edge.\n",
-        ce->start, ce->end);
+        ce->startVertex, ce->endVertex);
   }
 }
 
