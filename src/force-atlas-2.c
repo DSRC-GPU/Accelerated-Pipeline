@@ -91,6 +91,7 @@ void fa2Attraction(Graph* g, Vertex* v)
   }
 }
 
+// Updates the swing for each vertex, as described in the Force Atlas 2 paper.
 void fa2UpdateSwing(Graph* g, VertexData* vd)
 {
   for (size_t i = 0; i < g->numvertices; i++)
@@ -102,9 +103,16 @@ void fa2UpdateSwing(Graph* g, VertexData* vd)
   }
 }
 
+
 void fa2UpdateTract(Graph* g, VertexData* vd)
 {
-  // FIXME Implement.
+  for (size_t i = 0; i < g->numvertices; i++)
+  {
+    Vector v = g->vertices[i].force;
+    addVectors(&v, &vd[i].oldForce);
+    float vlen = getVectorLength(&v);
+    vd[i].swg = vlen / 2;
+  }
 }
 
 void fa2UpdateSwingGraph(Graph* g, VertexData* vd)
