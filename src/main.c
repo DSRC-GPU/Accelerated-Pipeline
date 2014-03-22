@@ -65,10 +65,7 @@ int main(int argc, char* argv[])
     printGraph(g);
 
     // Computing.
-    updateForcesOnGraph(g, FA2_NUMFORCES, FA2_FORCES);
-    updateSpeedOnGraph(g);
-    updateLocationOnGraph(g);
-    resetForcesOnGraph(g);
+    fa2RunOnGraph(g);
 
     i++;
   } 

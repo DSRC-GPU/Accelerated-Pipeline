@@ -11,6 +11,7 @@ void applyDataForceOnGraph(Graph*, ForceWithData*);
 void runForcesOnGraph(Graph*, unsigned int, simpleForce*);
 void runDataForcesOnGraph(Graph*, unsigned int, ForceWithData*);
 
+// FIXME sent tick num, to ignore disabled vertices.
 void applyForceOnGraph(Graph* g, simpleForce sf)
 {
   for (size_t i = 0; i < g->numvertices; i++)
@@ -19,6 +20,7 @@ void applyForceOnGraph(Graph* g, simpleForce sf)
   }
 }
 
+// FIXME sent tick num, to ignore disabled vertices.
 void applyDataForceOnGraph(Graph* g, ForceWithData* fwd)
 {
   for (size_t i = 0; i < g->numvertices; i++)
@@ -41,14 +43,6 @@ void updateDataForcesOnGraph(Graph* g, unsigned int num, ForceWithData* fwd)
   for (size_t i = 0; i < num; i++)
   {
     applyDataForceOnGraph(g, &fwd[i]);
-  }
-}
-
-void updateSpeedOnGraph(Graph* g)
-{
-  for (size_t i = 0; i < g->numvertices; i++)
-  {
-    addVectors(&g->vertices[i].speed, &g->vertices[i].force);
   }
 }
 
