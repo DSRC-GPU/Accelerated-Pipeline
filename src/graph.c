@@ -9,13 +9,19 @@ void printGraph(Graph* g)
   for (size_t i = 0; i < g->numvertices; i++)
   {
     Vertex* cv = &g->vertices[i];
-    printf("Vertex %i\tis at location (%i,%i)\twith force vector (%i,%i).\n", 
-        cv->id, cv->loc.x, cv->loc.y, cv->force.x, cv->force.y);
+    printf("Vertex %d\tis at location (%f,%f)\twith speed vector (%f,%f).\n", 
+        cv->id, cv->loc.x, cv->loc.y, cv->speed.x, cv->speed.y);
     printf("Vertex has %d neighbours, starting at %d.\n", cv->numNeighbours,
         cv->neighbourIndex);
+    
+    // DEBUG break.
+    break;
   }
   for (size_t i = 0; i < g->numedges; i++)
   {
+    // DEBUG break.
+    break;
+
     Edge* ce = &g->edges[i];
     printf("Vertex %i\tand %i\tare connected by an edge.\n",
         ce->startVertex, ce->endVertex);

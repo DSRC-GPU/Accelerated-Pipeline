@@ -5,7 +5,7 @@
 typedef struct Point
 {
   // A location in 2D space.
-  int x, y;
+  float x, y;
 } Point;
 
 typedef Point Vector;

@@ -1,17 +1,18 @@
 
 #include <stddef.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <time.h>
+#include "force-atlas-2.h"
+#include "forces.h"
 #include "gexfparser.h"
 #include "graph.h"
-#include "forces.h"
-#include "force-atlas-2.h"
-
-
 
 int main(int argc, char* argv[])
 {
+  srand(time(NULL));
+
   // Input parsing.
   const char* inputFile = NULL;
   unsigned int numTicks = 100;

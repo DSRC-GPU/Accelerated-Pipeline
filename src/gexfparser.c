@@ -55,8 +55,8 @@ void gexfParseVertex(xmlNode* n, Vertex* v)
       v->end = atoi((const char*) xmlGetProp(spell, (const xmlChar*) "end"));
     }
   }
-  v->loc.x = 0;
-  v->loc.y = 0;
+  v->loc.x = (float)rand()/(float)RAND_MAX;
+  v->loc.y = (float)rand()/(float)RAND_MAX;
   v->force.x = 0;
   v->force.y = 0;
   v->neighbourIndex = -1;
