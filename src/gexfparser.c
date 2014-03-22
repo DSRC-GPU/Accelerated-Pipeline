@@ -59,6 +59,7 @@ void gexfParseVertex(xmlNode* n, Vertex* v)
   v->loc.y = 0;
   v->force.x = 0;
   v->force.y = 0;
+  v->neighbourIndex = -1;
 }
 
 void gexfParseEdge(xmlNode* n, Edge* e)
@@ -112,6 +113,16 @@ void gexfParseEdges(xmlNode* gexf, Edge* edges)
   }
 }
 
+void connectEdgesVertices(Graph* g)
+{
+  qsort(g->edges, g->numedges, sizeof(Edge), compare_edges);
+  for (size_t i = 0; i < g->numedges; i++)
+  {
+    unsigned int edgeIndex = g->numedges - (i + 1);
+    g->vertices[g->edges[edgeIndex].startVertex].neighbourIndex = edgeIndex;
+  }
+}
+
 void gexfParseFile(Graph* g, const char* in)
 {
   if (!g)
@@ -155,6 +166,7 @@ void gexfParseFile(Graph* g, const char* in)
 
   gexfParseVertices(root_element, vertices);
   gexfParseEdges(root_element, edges);
+  connectEdgesVertices(g);
 
   /*free the document */
   xmlFreeDoc(doc);

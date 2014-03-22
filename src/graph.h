@@ -21,6 +21,8 @@ typedef struct Vertex
   Point loc;
   // The current force on this vertex.
   Vector force, speed;
+  // Index in the edges array where the neighbours of this Vertex are located.
+  int neighbourIndex;
 } Vertex;
 
 typedef struct Edge
@@ -47,6 +49,9 @@ typedef struct Graph
 
 // The printGraph function prints the details of the graph to stdout.
 void printGraph(Graph*);
+
+// Compares edges based on their start vertex. Used in sorting.
+int compare_edges(const void*, const void*);
 
 #endif
 
