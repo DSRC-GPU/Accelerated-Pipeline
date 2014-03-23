@@ -25,7 +25,7 @@ simpleForce FA2_FORCES[]  = { fa2Gravity, fa2Repulsion, fa2Attraction };
 
 void fa2UpdateSwing(Graph*, VertexData*);
 void fa2UpdateTract(Graph*, VertexData*);
-void fa2UpdateSwingGraph(Graph*, VertexData*);
+void fa2UpdateSwingGraph(Graph*, VertexData*, float*);
 void fa2UpdateTractGraph(Graph*, VertexData*);
 void fa2UpdateSpeed(Graph*, VertexData*, float);
 void fa2SaveOldForces(Graph*, VertexData*);
@@ -103,7 +103,8 @@ void fa2UpdateSwing(Graph* g, VertexData* vd)
   }
 }
 
-
+// Updates the traction for each vertex, as described in the Force Atlas 2
+// paper.
 void fa2UpdateTract(Graph* g, VertexData* vd)
 {
   for (size_t i = 0; i < g->numvertices; i++)
@@ -115,9 +116,14 @@ void fa2UpdateTract(Graph* g, VertexData* vd)
   }
 }
 
-void fa2UpdateSwingGraph(Graph* g, VertexData* vd)
+// Calculate the current swing of the graph.
+void fa2UpdateSwingGraph(Graph* g, VertexData* vd, float* gswing)
 {
-  // FIXME Implement.
+  *gswing = 0;
+  for (size_t i = 0; i < g->numvertices; i++)
+  {
+    *gswing += (g->vertices[i].numNeighbours + 1) * vd[i].swg;
+  }
 }
 
 void fa2UpdateTractGraph(Graph* g, VertexData* vd)
@@ -130,9 +136,13 @@ void fa2UpdateSpeed(Graph* g, VertexData* vd, float gs)
   // FIXME Implement.
 }
 
+// Save current forces as the previous forces for the next tick.
 void fa2SaveOldForces(Graph* g, VertexData* vd)
 {
-  // FIXME Implement.
+  for (size_t i = 0; i < g->numvertices; i++)
+  {
+    vd[i].oldForce = g->vertices[i].force;
+  }
 }
 
 void fa2RunOnGraph(Graph* g)
@@ -156,7 +166,7 @@ void fa2RunOnGraph(Graph* g)
     fa2UpdateTract(g, vdata);
 
     // Update swing of Graph.
-    fa2UpdateSwingGraph(g, vdata);
+    fa2UpdateSwingGraph(g, vdata, &graphSwing);
 
     // Update trachtion of Graph.
     fa2UpdateTractGraph(g, vdata);
