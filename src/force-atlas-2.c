@@ -1,4 +1,5 @@
 
+#include <stdio.h>
 #include <stdlib.h>
 #include "force-atlas-2.h"
 #include "math.h"
@@ -8,6 +9,7 @@
 #define K_S 0.1
 #define K_SMAX 10.0
 #define TAU 1.0
+#define EPSILON 0.1
 
 typedef struct VertexData
 {
@@ -142,16 +144,25 @@ void fa2UpdateTractGraph(Graph* g, VertexData* vd, float* gtract)
 
 void fa2UpdateSpeedGraph(float gswing, float gtract, float* gspeed)
 {
-  *gspeed = TAU * (gtract / gswing);
+  *gspeed = gswing > 0 ? TAU * (gtract / gswing) : EPSILON;
+  if (*gspeed <= 0)
+    *gspeed = EPSILON;
 }
 
 void fa2UpdateSpeed(Graph* g, VertexData* vd, float gs)
 {
   for (size_t i = 0; i < g->numvertices; i++)
   {
-    vd[i].speed = K_S * gs / (1 + (gs * sqrt(vd[i].swg)));
+    float vSwg = vd[i].swg;
+    if (vSwg <= 0)
+      vSwg = EPSILON;
+    float vForceLen = getVectorLength(&g->vertices[i].force);
+    if (vForceLen <= 0)
+      vForceLen = EPSILON;
+      
+    vd[i].speed = K_S * gs / (1 + (gs * sqrt(vSwg)));
     vd[i].speed = fmin(vd[i].speed,
-        K_SMAX / getVectorLength(&g->vertices[i].force));
+        K_SMAX / vForceLen);
   }
 }
 
