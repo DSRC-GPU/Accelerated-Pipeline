@@ -3,9 +3,10 @@
 #include "force-atlas-2.h"
 
 #define FA2_NUMFORCES 3
-#define K_R 1
+#define K_R 1.0
 #define K_S 0.1
-#define K_SMAX = 10
+#define K_SMAX 10.0
+#define TAU 1.0
 
 typedef struct VertexData
 {
@@ -26,7 +27,8 @@ simpleForce FA2_FORCES[]  = { fa2Gravity, fa2Repulsion, fa2Attraction };
 void fa2UpdateSwing(Graph*, VertexData*);
 void fa2UpdateTract(Graph*, VertexData*);
 void fa2UpdateSwingGraph(Graph*, VertexData*, float*);
-void fa2UpdateTractGraph(Graph*, VertexData*);
+void fa2UpdateTractGraph(Graph*, VertexData*, float*);
+void fa2UpdateSpeedGraph(float, float, float*);
 void fa2UpdateSpeed(Graph*, VertexData*, float);
 void fa2SaveOldForces(Graph*, VertexData*);
 
@@ -126,9 +128,19 @@ void fa2UpdateSwingGraph(Graph* g, VertexData* vd, float* gswing)
   }
 }
 
-void fa2UpdateTractGraph(Graph* g, VertexData* vd)
+// Calculate the current traction of the graph.
+void fa2UpdateTractGraph(Graph* g, VertexData* vd, float* gtract)
 {
-  // FIXME Implement.
+  *gtract = 0;
+  for (size_t i = 0; i < g->numvertices; i++)
+  {
+    *gtract += (g->vertices[i].numNeighbours + 1) * vd[i].tra;
+  }
+}
+
+void fa2UpdateSpeedGraph(float gswing, float gtract, float* gspeed)
+{
+  *gspeed = TAU * (gtract / gswing);
 }
 
 void fa2UpdateSpeed(Graph* g, VertexData* vd, float gs)
@@ -168,8 +180,11 @@ void fa2RunOnGraph(Graph* g)
     // Update swing of Graph.
     fa2UpdateSwingGraph(g, vdata, &graphSwing);
 
-    // Update trachtion of Graph.
-    fa2UpdateTractGraph(g, vdata);
+    // Update traction of Graph.
+    fa2UpdateTractGraph(g, vdata, &graphTract);
+
+    // Update speed of Graph.
+    fa2UpdateSpeedGraph(graphSwing, graphTract, &graphSpeed);
 
     // Update speed of vertices.
     fa2UpdateSpeed(g, vdata, graphSpeed);
