@@ -31,6 +31,7 @@ void fa2UpdateSwingGraph(Graph*, VertexData*, float*);
 void fa2UpdateTractGraph(Graph*, VertexData*, float*);
 void fa2UpdateSpeedGraph(float, float, float*);
 void fa2UpdateSpeed(Graph*, VertexData*, float);
+void fa2UpdateDisplacement(Graph*, VertexData*);
 void fa2SaveOldForces(Graph*, VertexData*);
 
 void fa2Gravity(Graph* g, Vertex* v)
@@ -163,45 +164,57 @@ void fa2SaveOldForces(Graph* g, VertexData* vd)
   }
 }
 
+void fa2UpdateDisplacement(Graph* g, VertexData* vd)
+{
+  for (size_t i = 0; i < g->numvertices; i++)
+  {
+    g->vertices[i].displacement = g->vertices[i].force;
+    multiplyVector(&g->vertices[i].displacement, vd[i].speed);
+  }
+}
+
 void fa2RunOnGraph(Graph* g)
 {
-    static VertexData* vdata = NULL;
-    static float graphSwing = 0.0;
-    static float graphTract = 0.0;
-    static float graphSpeed = 0.0;
+  static VertexData* vdata = NULL;
+  static float graphSwing = 0.0;
+  static float graphTract = 0.0;
+  static float graphSpeed = 0.0;
 
-    if (!vdata)
-      vdata = calloc(g->numvertices, sizeof(VertexData)); 
+  if (!vdata)
+    vdata = calloc(g->numvertices, sizeof(VertexData)); 
 
-    // Compute forces.
-    updateForcesOnGraph(g, FA2_NUMFORCES, FA2_FORCES);
+  // Compute forces.
+  updateForcesOnGraph(g, FA2_NUMFORCES, FA2_FORCES);
 
-    // Calculate speed of vertices.
-    // Update swing of vertices.
-    fa2UpdateSwing(g, vdata);
+  // Calculate speed of vertices.
+  // Update swing of vertices.
+  fa2UpdateSwing(g, vdata);
 
-    // Update traction of vertices.
-    fa2UpdateTract(g, vdata);
+  // Update traction of vertices.
+  fa2UpdateTract(g, vdata);
 
-    // Update swing of Graph.
-    fa2UpdateSwingGraph(g, vdata, &graphSwing);
+  // Update swing of Graph.
+  fa2UpdateSwingGraph(g, vdata, &graphSwing);
 
-    // Update traction of Graph.
-    fa2UpdateTractGraph(g, vdata, &graphTract);
+  // Update traction of Graph.
+  fa2UpdateTractGraph(g, vdata, &graphTract);
 
-    // Update speed of Graph.
-    fa2UpdateSpeedGraph(graphSwing, graphTract, &graphSpeed);
+  // Update speed of Graph.
+  fa2UpdateSpeedGraph(graphSwing, graphTract, &graphSpeed);
 
-    // Update speed of vertices.
-    fa2UpdateSpeed(g, vdata, graphSpeed);
+  // Update speed of vertices.
+  fa2UpdateSpeed(g, vdata, graphSpeed);
 
-    // Set current forces as old forces in vertex data.
-    fa2SaveOldForces(g, vdata);
+  // Update displacement of vertices.
+  fa2UpdateDisplacement(g, vdata);
 
-    // Update vertex locations based on speed.
-    updateLocationOnGraph(g);
+  // Set current forces as old forces in vertex data.
+  fa2SaveOldForces(g, vdata);
 
-    // Reset forces on vertices to 0.
-    resetForcesOnGraph(g);
+  // Update vertex locations based on speed.
+  updateLocationOnGraph(g);
+
+  // Reset forces on vertices to 0.
+  resetForcesOnGraph(g);
 }
 
