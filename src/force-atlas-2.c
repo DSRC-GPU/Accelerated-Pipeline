@@ -1,6 +1,7 @@
 
 #include <stdlib.h>
 #include "force-atlas-2.h"
+#include "math.h"
 
 #define FA2_NUMFORCES 3
 #define K_R 1.0
@@ -10,7 +11,7 @@
 
 typedef struct VertexData
 {
-  float tra, swg;
+  float tra, swg, speed;
   Vector oldForce;
 } VertexData;
 
@@ -145,7 +146,12 @@ void fa2UpdateSpeedGraph(float gswing, float gtract, float* gspeed)
 
 void fa2UpdateSpeed(Graph* g, VertexData* vd, float gs)
 {
-  // FIXME Implement.
+  for (size_t i = 0; i < g->numvertices; i++)
+  {
+    vd[i].speed = K_S * gs / (1 + (gs * sqrt(vd[i].swg)));
+    vd[i].speed = fmin(vd[i].speed,
+        K_SMAX / getVectorLength(&g->vertices[i].force));
+  }
 }
 
 // Save current forces as the previous forces for the next tick.
