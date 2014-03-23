@@ -20,7 +20,7 @@ typedef struct Vertex
   // The location of the vertex in 2D space.
   Point loc;
   // The current force on this vertex.
-  Vector force, speed;
+  Vector force, displacement;
   // Index in the edges array where the neighbours of this Vertex are located.
   int neighbourIndex, numNeighbours;
 } Vertex;

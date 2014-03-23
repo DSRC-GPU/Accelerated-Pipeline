@@ -128,7 +128,7 @@ void connectEdgesVertices(Graph* g)
   qsort(g->edges, g->numedges, sizeof(Edge), compare_edges);
   for (size_t i = 0; i < g->numedges; i++)
   {
-    unsigned int edgeIndex = g->numedges - (i + 1);
+    int edgeIndex = g->numedges - (i + 1);
     Vertex* v = &g->vertices[g->edges[edgeIndex].startVertex];
     if (v->neighbourIndex == edgeIndex + 1)
       v->numNeighbours++;

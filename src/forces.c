@@ -50,7 +50,7 @@ void updateLocationOnGraph(Graph* g)
 {
   for (size_t i = 0; i < g->numvertices; i++)
   {
-    addVectors((Vector*) &g->vertices[i].loc, &g->vertices[i].speed);
+    addVectors((Vector*) &g->vertices[i].loc, &g->vertices[i].displacement);
   }
 }
 
@@ -65,7 +65,7 @@ void resetForcesOnGraph(Graph* g)
 
 void getVectorBetweenVertex(Vertex* v1, Vertex* v2, Vector* vec)
 {
-  *vec = (Vector) v2->loc;
+  *vec = v2->loc;
   subtractVectors(vec, (Vector*) &v1->loc);
 }
 

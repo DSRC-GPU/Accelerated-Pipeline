@@ -9,8 +9,9 @@ void printGraph(Graph* g)
   for (size_t i = 0; i < g->numvertices; i++)
   {
     Vertex* cv = &g->vertices[i];
-    printf("Vertex %d\tis at location (%f,%f)\twith speed vector (%f,%f).\n", 
-        cv->id, cv->loc.x, cv->loc.y, cv->speed.x, cv->speed.y);
+    printf("Vertex %d\tis at location (%f,%f)\t\
+        with displacement vector (%f,%f).\n",
+        cv->id, cv->loc.x, cv->loc.y, cv->displacement.x, cv->displacement.y);
     printf("Vertex has %d neighbours, starting at %d.\n", cv->numNeighbours,
         cv->neighbourIndex);
     
