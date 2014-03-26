@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include "force-atlas-2.h"
 #include "math.h"
+#include "vector.h"
 
 #define FA2_NUMFORCES 3
 #define K_R 1.0

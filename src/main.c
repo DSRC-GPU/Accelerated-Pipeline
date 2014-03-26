@@ -5,9 +5,9 @@
 #include <string.h>
 #include <time.h>
 #include "force-atlas-2.h"
-#include "forces.h"
 #include "gexfparser.h"
 #include "graph.h"
+#include "vector.h"
 
 int main(int argc, char* argv[])
 {

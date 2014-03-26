@@ -59,7 +59,7 @@ void gexfParseEdge(xmlNode* n, unsigned int* edgeSource,
 
 void gexfParseVertices(xmlNode* gexf, int* vertexXLocs, int* vertexYLocs)
 {
-  if (!gexf || !vertices) return;
+  if (!gexf || !vertexXLocs || !vertexYLocs) return;
   xmlNode* graph = xmlwGetChild(gexf, "graph");
   if (!graph) return;
   xmlNode* nodes = xmlwGetChild(graph, "nodes");
@@ -78,7 +78,7 @@ void gexfParseVertices(xmlNode* gexf, int* vertexXLocs, int* vertexYLocs)
 void gexfParseEdges(xmlNode* gexf, unsigned int* edgeTargets,
     unsigned int* edgeSources)
 {
-  if (!gexf || !edges) return;
+  if (!gexf || !edgeTargets || !edgeSources) return;
   xmlNode* graph = xmlwGetChild(gexf, "graph");
   if (!graph) return;
   xmlNode* xmledges = xmlwGetChild(graph, "edges");
