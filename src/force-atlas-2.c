@@ -151,9 +151,13 @@ void fa2UpdateTractGraph(Graph* g, VertexData* vd, float* gtract)
 
 void fa2UpdateSpeedGraph(float gswing, float gtract, float* gspeed)
 {
+  float oldSpeed = *gspeed;
   *gspeed = gswing > 0 ? TAU * (gtract / gswing) : EPSILON;
   if (*gspeed <= 0)
     *gspeed = EPSILON;
+  // Do not allow more then 50% speed increase.
+  if (oldSpeed > FLOAT_EPSILON && *gspeed > 1.5 * oldSpeed)
+    *gspeed = 1.5 * oldSpeed;
 }
 
 void fa2UpdateSpeed(Graph* g, VertexData* vd, float gs)
