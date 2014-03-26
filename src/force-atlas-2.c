@@ -1,6 +1,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "force-atlas-2.h"
 #include "math.h"
 #include "vector.h"
@@ -197,7 +198,7 @@ void fa2UpdateDisplacement(Graph* g, float* speed, float* forceX,
   {
     dispX[i] = forceX[i];
     dispY[i] = forceY[i];
-    vectorMultiply(&forceX[i], &forceY[i], speed[i]);
+    vectorMultiply(&dispX[i], &dispY[i], speed[i]);
   }
 }
 
@@ -281,6 +282,7 @@ void fa2RunOnGraph(Graph* g)
   fa2UpdateLocation(g, dispX, dispY);
 
   // Reset forces on vertices to 0.
-  // FIXME Memset
+  memset(forceX, 0, sizeof(float) * g->numvertices);
+  memset(forceY, 0, sizeof(float) * g->numvertices);
 }
 
