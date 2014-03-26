@@ -10,7 +10,7 @@ void printGraph(Graph* g)
   {
     Vertex* cv = &g->vertices[i];
     printf("Vertex %d\tis at location (%f,%f).\n",
-        cv->id, cv->loc.x, cv->loc.y, cv->displacement.x, cv->displacement.y);
+        cv->id, cv->loc.x, cv->loc.y);
   }
 }
 

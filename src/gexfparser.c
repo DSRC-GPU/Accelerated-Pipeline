@@ -135,6 +135,8 @@ void connectEdgesVertices(Graph* g)
     Vertex* v = &g->vertices[g->edges[edgeIndex].startVertex];
     if (v->neighbourIndex == edgeIndex + 1)
       v->numNeighbours++;
+    else
+      v->numNeighbours = 1;
     v->neighbourIndex = edgeIndex;
   }
 }
