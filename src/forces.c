@@ -1,8 +1,11 @@
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <math.h>
 #include "forces.h"
 #include "graph.h"
+
+#define FLOAT_EPSILON 0.0000001
 
 void applyForceOnGraph(Graph*, simpleForce);
 void applyDataForceOnGraph(Graph*, ForceWithData*);
@@ -71,7 +74,13 @@ void getVectorBetweenVertex(Vertex* v1, Vertex* v2, Vector* vec)
 
 float getVectorLength(Vector* v)
 {
-  return sqrt(v->x * v->x + v->y * v->y);
+  if (!v || isnan(v->x) || isnan(v->y))
+  {
+    printf("Cannot get length of vector.\n");
+    exit(EXIT_FAILURE);
+  }
+  float res = sqrt(v->x * v->x + v->y * v->y);
+  return res;
 }
 
 void addVectors(Vector* v1, Vector* v2)
@@ -88,9 +97,22 @@ void subtractVectors(Vector* v1, Vector* v2)
 
 void normalizeVector(Vector* v)
 {
+  if (!v || isnan(v->x) || isnan(v->y))
+  {
+    printf("Cannot normalize invalid vector.\n");
+    exit(EXIT_FAILURE);
+  }
   float c = getVectorLength(v);
-  v->x /= c;
-  v->y /= c;
+  if (c < FLOAT_EPSILON)
+  {
+    v->x = 0;
+    v->y = 0;
+  }
+  else
+  {
+    v->x /= c;
+    v->y /= c;
+  }
 }
 
 void inverseVector(Vector* v)
@@ -104,3 +126,11 @@ void multiplyVector(Vector* v, float f)
   v->y *= f;
 }
 
+void validVectorCheck(Vector* v, char* text)
+{
+  if (!v || isnan(v->x) || isnan(v->y))
+  {
+    printf("ERR: %s\n", text);
+    exit(EXIT_FAILURE);
+  }
+}

@@ -10,6 +10,7 @@
 #define K_SMAX 10.0
 #define TAU 1.0
 #define EPSILON 0.1
+#define FLOAT_EPSILON 0.0000001
 
 typedef struct VertexData
 {
@@ -38,6 +39,7 @@ void fa2SaveOldForces(Graph*, VertexData*);
 
 void fa2Gravity(Graph* g, Vertex* v)
 {
+  validVectorCheck(&v->force, "Gravity");
   if (!g || !v) return;
   int k_g = 5;
   int deg = v->numNeighbours;
@@ -50,6 +52,7 @@ void fa2Gravity(Graph* g, Vertex* v)
 
 void fa2Repulsion(Graph* g, Vertex* v)
 {
+  validVectorCheck(&v->force, "Repulsion");
   if (!g || !v) return;
   if (v->neighbourIndex >= 0)
   {
@@ -67,6 +70,8 @@ void fa2Repulsion(Graph* g, Vertex* v)
         int deg_n1 = v->numNeighbours + 1;
         int deg_n2 = g->vertices[e->endVertex].numNeighbours + 1;
         float dist = getVectorLength(&force);
+        if (dist < FLOAT_EPSILON)
+          dist = EPSILON;
 
         multiplyVector(&force, K_R * ((deg_n1 + deg_n2) / dist));
         multiplyVector(&force, 0.5);
@@ -79,6 +84,7 @@ void fa2Repulsion(Graph* g, Vertex* v)
 
 void fa2Attraction(Graph* g, Vertex* v)
 {
+  validVectorCheck(&v->force, "Attraction");
   if (!g || !v) return;
   if (v->neighbourIndex >= 0)
   {
@@ -103,6 +109,7 @@ void fa2UpdateSwing(Graph* g, VertexData* vd)
   for (size_t i = 0; i < g->numvertices; i++)
   {
     Vector v = g->vertices[i].force;
+    validVectorCheck(&v, "Swing");
     subtractVectors(&v, &vd[i].oldForce);
     float vlen = getVectorLength(&v);
     vd[i].swg = vlen;
@@ -159,7 +166,7 @@ void fa2UpdateSpeed(Graph* g, VertexData* vd, float gs)
     float vForceLen = getVectorLength(&g->vertices[i].force);
     if (vForceLen <= 0)
       vForceLen = EPSILON;
-      
+
     vd[i].speed = K_S * gs / (1 + (gs * sqrt(vSwg)));
     vd[i].speed = fmin(vd[i].speed,
         K_SMAX / vForceLen);

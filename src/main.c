@@ -29,6 +29,10 @@ int main(int argc, char* argv[])
     {
       runForever = 1;
     }
+    else if (!strcmp(argv[i], "-n"))
+    {
+      numTicks = atoi(argv[++i]);
+    }
     else
     {
       printf("Unrecognized parameter: %s.\n", argv[i]);

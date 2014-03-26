@@ -5,6 +5,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define NODE_START_X 100
+#define NODE_START_Y 100
+
 xmlNode* xmlwGetChild(xmlNode* node, const char* name)
 {
   xmlNode* child = node->children;
@@ -55,8 +58,8 @@ void gexfParseVertex(xmlNode* n, Vertex* v)
       v->end = atoi((const char*) xmlGetProp(spell, (const xmlChar*) "end"));
     }
   }
-  v->loc.x = (float)rand()/(float)RAND_MAX;
-  v->loc.y = (float)rand()/(float)RAND_MAX;
+  v->loc.x = NODE_START_X;
+  v->loc.y = NODE_START_Y;
   v->force.x = 0;
   v->force.y = 0;
   v->neighbourIndex = -1;

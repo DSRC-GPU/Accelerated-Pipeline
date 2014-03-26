@@ -33,6 +33,7 @@ void subtractVectors(Vector*, Vector*);
 void normalizeVector(Vector*);
 void inverseVector(Vector*);
 void multiplyVector(Vector*, float);
+void validVectorCheck(Vector*, char*);
 
 #endif
 
