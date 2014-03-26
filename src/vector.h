@@ -5,7 +5,7 @@
 #include "graph.h"
 
 void vectorAdd(float*, float*, float, float);
-void vectorsubtract(float*, float*, float, float);
+void vectorSubtract(float*, float*, float, float);
 void vectorNormalize(float*, float*);
 void vectorInverse(float*, float*);
 void vectorMultiply(float*, float*, float);
