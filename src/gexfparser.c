@@ -42,48 +42,22 @@ unsigned int xmlwGetNumEdges(xmlNode* gexf)
   return atoi((const char*) xmlGetProp(edges, (const xmlChar*) "count"));
 }
 
-void gexfParseVertex(xmlNode* n, Vertex* v)
+void gexfParseVertex(xmlNode* n, int* vertexXLoc, int* vertexYLoc)
 {
-  if (!n || !v) return;
-  v->id = atoi((const char*) xmlGetProp(n, (const xmlChar*)  "id"));
-  v->label = atoi((const char*) xmlGetProp(n, (const xmlChar*) "label"));
-  xmlNode* spells = xmlwGetChild(n, "spells");
-  if (spells)
-  {
-    xmlNode* spell = xmlwGetChild(spells, "spell");
-    if (spell)
-    {
-      v->start = atoi((const char*) xmlGetProp(spell,
-            (const xmlChar*) "start"));
-      v->end = atoi((const char*) xmlGetProp(spell, (const xmlChar*) "end"));
-    }
-  }
-  v->loc.x = NODE_START_X;
-  v->loc.y = NODE_START_Y;
-  v->force.x = 0;
-  v->force.y = 0;
-  v->neighbourIndex = -1;
-  v->numNeighbours = 0;
+  if (!n || !vertexXLoc || !vertexYLoc) return;
+  *vertexXLoc = NODE_START_X;
+  *vertexYLoc = NODE_START_Y;
 }
 
-void gexfParseEdge(xmlNode* n, Edge* e)
+void gexfParseEdge(xmlNode* n, unsigned int* edgeSource,
+    unsigned int* edgeTarget)
 {
-  if (!n || !e) return;
-  e->startVertex = atoi((const char*) xmlGetProp(n, (const xmlChar*) "source"));
-  e->endVertex = atoi((const char*) xmlGetProp(n, (const xmlChar*) "target"));
-  xmlNode* spells = xmlwGetChild(n, "spells");
-  if (spells)
-  {
-    xmlNode* spell = xmlwGetChild(spells, "spell");
-    if (spell)
-    {
-      e->start = atoi((const char*) xmlGetProp(spell, (const xmlChar*) "start"));
-      e->end = atoi((const char*) xmlGetProp(spell, (const xmlChar*) "end"));
-    }
-  }
+  if (!n || !edgeSource || !edgeTarget) return;
+  *edgeSource = atoi((const char*) xmlGetProp(n, (const xmlChar*) "source"));
+  *edgeTarget = atoi((const char*) xmlGetProp(n, (const xmlChar*) "target"));
 }
 
-void gexfParseVertices(xmlNode* gexf, Vertex* vertices)
+void gexfParseVertices(xmlNode* gexf, int* vertexXLocs, int* vertexYLocs)
 {
   if (!gexf || !vertices) return;
   xmlNode* graph = xmlwGetChild(gexf, "graph");
@@ -95,12 +69,14 @@ void gexfParseVertices(xmlNode* gexf, Vertex* vertices)
   xmlNode* node = nodes->children;
   while (node)
   {
-    gexfParseVertex(node, &vertices[i++]);
+    gexfParseVertex(node, &vertexXLocs[i], &vertexYLocs[i]);
+    i++;
     node = node->next;
   }
 }
 
-void gexfParseEdges(xmlNode* gexf, Edge* edges)
+void gexfParseEdges(xmlNode* gexf, unsigned int* edgeTargets,
+    unsigned int* edgeSources)
 {
   if (!gexf || !edges) return;
   xmlNode* graph = xmlwGetChild(gexf, "graph");
@@ -112,30 +88,12 @@ void gexfParseEdges(xmlNode* gexf, Edge* edges)
   xmlNode* node = xmledges->children;
   while (node)
   {
-    gexfParseEdge(node, &edges[i++]);
-
-    // Create the same edges, with start and end swapped.
-    // This gives us an undirected graph.
-    edges[i] = edges[i-1];
-    int tmp = edges[i].startVertex;
-    edges[i].startVertex = edges[i].endVertex;
-    edges[i].endVertex = tmp;
-
+    gexfParseEdge(node, &edgeSources[i], &edgeTargets[i]);
     i++;
-    node = node->next;
-  }
-}
+    gexfParseEdge(node, &edgeTargets[i], &edgeSources[i]);
+    i++;
 
-void connectEdgesVertices(Graph* g)
-{
-  qsort(g->edges, g->numedges, sizeof(Edge), compare_edges);
-  for (size_t i = 0; i < g->numedges; i++)
-  {
-    int edgeIndex = g->numedges - (i + 1);
-    Vertex* v = &g->vertices[g->edges[edgeIndex].startVertex];
-    if (v->neighbourIndex == edgeIndex + 1)
-      v->numNeighbours++;
-    v->neighbourIndex = edgeIndex;
+    node = node->next;
   }
 }
 
@@ -174,15 +132,18 @@ void gexfParseFile(Graph* g, const char* in)
   g->numvertices = numNodes;
   g->numedges = numEdges;
 
-  Vertex* vertices = calloc(numNodes, sizeof(Vertex));
-  Edge* edges = calloc(numEdges, sizeof(Edge));
+  int* vertexXLoc = calloc(numNodes, sizeof(int));
+  int* vertexYLoc = calloc(numNodes, sizeof(int));
+  unsigned int* edgeStart = calloc(numEdges, sizeof(unsigned int));
+  unsigned int* edgeEnd = calloc(numEdges, sizeof(unsigned int));
 
-  g->vertices = vertices;
-  g->edges = edges;
+  g->vertexXLoc = vertexXLoc;
+  g->vertexYLoc = vertexYLoc;
+  g->edgeStart = edgeStart;
+  g->edgeEnd = edgeEnd;
 
-  gexfParseVertices(root_element, vertices);
-  gexfParseEdges(root_element, edges);
-  connectEdgesVertices(g);
+  gexfParseVertices(root_element, vertexXLoc, vertexYLoc);
+  gexfParseEdges(root_element, edgeStart, edgeEnd);
 
   /*free the document */
   xmlFreeDoc(doc);
