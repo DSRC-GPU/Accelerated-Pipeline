@@ -5,7 +5,6 @@
 #include "math.h"
 #include "vector.h"
 
-#define FA2_NUMFORCES 3
 #define K_R 1.0
 #define K_S 0.1
 #define K_SMAX 10.0
@@ -26,17 +25,15 @@ void fa2Repulsion(Graph*, Vertex*);
 // Attraction on edges
 void fa2Attraction(Graph*, Vertex*);
 
-// Array of forces.
-simpleForce FA2_FORCES[]  = { fa2Gravity, fa2Repulsion, fa2Attraction };
-
-void fa2UpdateSwing(Graph*, VertexData*);
-void fa2UpdateTract(Graph*, VertexData*);
-void fa2UpdateSwingGraph(Graph*, VertexData*, float*);
-void fa2UpdateTractGraph(Graph*, VertexData*, float*);
+void fa2UpdateSwing(Graph*, float*, float*, float*, float*, float*);
+void fa2UpdateTract(Graph*, float*, float*, float*, float*, float*);
+void fa2UpdateSwingGraph(Graph*, float*, float*, float*);
+void fa2UpdateTractGraph(Graph*, float*, float*, float*);
 void fa2UpdateSpeedGraph(float, float, float*);
-void fa2UpdateSpeed(Graph*, VertexData*, float);
-void fa2UpdateDisplacement(Graph*, VertexData*);
-void fa2SaveOldForces(Graph*, VertexData*);
+void fa2UpdateSpeed(Graph*, float*, float);
+void fa2UpdateDisplacement(Graph*, float*, float*, float*, float*, float*);
+void fa2SaveOldForces(Graph*, float*, float*, float*, float*);
+void updateLocationOnGraph(Graph*, float*, float*);
 
 void fa2Gravity(Graph* g, Vertex* v)
 {
@@ -198,43 +195,68 @@ void fa2UpdateDisplacement(Graph* g, VertexData* vd)
 
 void fa2RunOnGraph(Graph* g)
 {
-  static VertexData* vdata = NULL;
+  static int firstRun = 1;
+  static int* numNeighbours = NULL;
+  static float* tra = NULL;
+  static float* swg = NULL;
+  static float* speed = NULL;
+  static float* forceX = NULL;
+  static float* forceY = NULL;
+  static float* oldForceX = NULL;
+  static float* oldForceY = NULL;
+  static float* dispX = NULL;
+  static float* dispY = NULL;
+
   static float graphSwing = 0.0;
   static float graphTract = 0.0;
   static float graphSpeed = 0.0;
 
-  if (!vdata)
-    vdata = calloc(g->numvertices, sizeof(VertexData)); 
+  if (firstRun)
+  {
+    numNeighbours = calloc(g->numvertices, sizeof(int));
+    calcNumNeighbours(g, numNeighbours);
+    tra = calloc(g->numvertices, sizeof(float));
+    swg = calloc(g->numvertices, sizeof(float));
+    speed = calloc(g->numvertices, sizeof(float));
+    forceX = calloc(g->numvertices, sizeof(float));
+    forceY = calloc(g->numvertices, sizeof(float));
+    oldForceX = calloc(g->numvertices, sizeof(float));
+    oldForceY = calloc(g->numvertices, sizeof(float));
+    dispX = calloc(g->numvertices, sizeof(float));
+    dispY = calloc(g->numvertices, sizeof(float));
+
+    firstRun = 0;
+  }
 
   // Calculate speed of vertices.
   // Update swing of vertices.
-  fa2UpdateSwing(g, vdata);
+  fa2UpdateSwing(g, forceX, forceY, oldForceX, oldForceY, swg);
 
   // Update traction of vertices.
-  fa2UpdateTract(g, vdata);
+  fa2UpdateTract(g, forceX, forceY, oldForceX, oldForceY, tra);
 
   // Update swing of Graph.
-  fa2UpdateSwingGraph(g, vdata, &graphSwing);
+  fa2UpdateSwingGraph(g, swg, numNeighbours, &graphSwing);
 
   // Update traction of Graph.
-  fa2UpdateTractGraph(g, vdata, &graphTract);
+  fa2UpdateTractGraph(g, tra, numNeighbours, &graphTract);
 
   // Update speed of Graph.
   fa2UpdateSpeedGraph(graphSwing, graphTract, &graphSpeed);
 
   // Update speed of vertices.
-  fa2UpdateSpeed(g, vdata, graphSpeed);
+  fa2UpdateSpeed(g, swg, graphSpeed);
 
   // Update displacement of vertices.
-  fa2UpdateDisplacement(g, vdata);
+  fa2UpdateDisplacement(g, speed, forceX, forceY, dispX, dispY);
 
   // Set current forces as old forces in vertex data.
-  fa2SaveOldForces(g, vdata);
+  fa2SaveOldForces(g, forceX, forceY, oldForceX, oldForceY);
 
   // Update vertex locations based on speed.
-  updateLocationOnGraph(g);
+  updateLocationOnGraph(g, dispX, dispY);
 
   // Reset forces on vertices to 0.
-  resetForcesOnGraph(g);
+  // FIXME Memset
 }
 
