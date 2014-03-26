@@ -190,8 +190,8 @@ void fa2SaveOldForces(Graph* g, float* forceX, float* forceY,
   }
 }
 
-void fa2UpdateDisplacement(Graph* g, float* forceX, float* forceY,
-    float* speed, float* dispX, float* dispY)
+void fa2UpdateDisplacement(Graph* g, float* speed, float* forceX,
+    float* forceY, float* dispX, float* dispY)
 {
   for (size_t i = 0; i < g->numvertices; i++)
   {
