@@ -125,7 +125,7 @@ void fa2UpdateTract(Graph* g, VertexData* vd)
     Vector v = g->vertices[i].force;
     addVectors(&v, &vd[i].oldForce);
     float vlen = getVectorLength(&v);
-    vd[i].swg = vlen / 2;
+    vd[i].tra = vlen / 2;
   }
 }
 
