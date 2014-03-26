@@ -205,9 +205,6 @@ void fa2RunOnGraph(Graph* g)
   if (!vdata)
     vdata = calloc(g->numvertices, sizeof(VertexData)); 
 
-  // Compute forces.
-  updateForcesOnGraph(g, FA2_NUMFORCES, FA2_FORCES);
-
   // Calculate speed of vertices.
   // Update swing of vertices.
   fa2UpdateSwing(g, vdata);

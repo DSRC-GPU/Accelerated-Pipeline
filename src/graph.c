@@ -9,14 +9,8 @@ void printGraph(Graph* g)
   for (size_t i = 0; i < g->numvertices; i++)
   {
     Vertex* cv = &g->vertices[i];
-    printf("Vertex %d\tis at location (%f,%f)\t\
-        with displacement vector (%f,%f).\n",
-        cv->id, cv->loc.x, cv->loc.y, cv->displacement.x, cv->displacement.y);
+    printf("Vertex %u\tis at location (%f,%f).\n",
+        i, g->vertexXLocs[i], g->vertexYLocs[i]);
   }
-}
-
-int compare_edges(const void* e1, const void* e2)
-{
-  return ((Edge*) e1)->startVertex - ((Edge*) e2)->startVertex;
 }
 
