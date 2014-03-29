@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <cuda.h>
 #include "fa2-cuda.h"
 #include "math.h"
 #include "vector-cuda.h"
@@ -50,12 +51,6 @@ __device__ void fa2UpdateDisplacement(unsigned int gid,
     float* dispX, float* dispY);
 __device__ void fa2UpdateLocation(unsigned int gid, unsigned int numvertices,
     float* vxLocs, float* vyLocs, float* xdisp, float* ydisp);
-
-__device__ void atomicFloatAdd(float* address, float value)
-{
-  float old = value;  
-  while ((old = atomicExch(address, atomicExch(address, 0.0f)+old))!=0.0f);
-};
 
 __device__ void fa2Gravity(unsigned int gid, unsigned int numvertices,
     float* vxLocs, float* vyLocs, float* forceX, float* forceY,
@@ -194,7 +189,7 @@ __device__ void fa2UpdateSwingGraph(unsigned int gid, unsigned int numvertices,
 
   // Do atomic add per block to obtain final value.
   if (tx == 0)
-    atomicFloatAdd(gswing, scratch[tx]);
+    atomicAdd(gswing, scratch[tx]);
 }
 
 // Calculate the current traction of the graph.
@@ -236,7 +231,7 @@ __device__ void fa2UpdateTractGraph(unsigned int gid, unsigned int numvertices,
 
   // Do atomic add per block to obtain final value.
   if (tx == 0)
-    atomicFloatAdd(gtract, scratch[tx]);
+    atomicAdd(gtract, scratch[tx]);
 }
 
 __device__ void fa2UpdateSpeedGraph(float gswing, float gtract, float* gspeed)
