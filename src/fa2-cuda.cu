@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <cuda.h>
 #include "fa2-cuda.h"
 #include "math.h"
 #include "vector-cuda.h"
@@ -310,12 +309,11 @@ __global__ void fa2kernel(
     float* tra, float* swg, float* speed,
     float* forceX, float* forceY, float* oldForceX, float* oldForceY,
     float* dispX, float* dispY,
+    float* graphSwing,
+    float* graphTract,
+    float* graphSpeed,
     unsigned int iterations)
 {
-  float graphSwing = 0.0;
-  float graphTract = 0.0;
-  float graphSpeed = 0.0;
-
   unsigned int gid = threadIdx.x + (blockIdx.x * BLOCK_SIZE);
 
   // Gravity force
@@ -334,16 +332,16 @@ __global__ void fa2kernel(
   fa2UpdateTract(gid, numvertices, forceX, forceY, oldForceX, oldForceY, tra);
 
   // Update swing of Graph.
-  fa2UpdateSwingGraph(gid, numvertices, swg, numNeighbours, &graphSwing);
+  fa2UpdateSwingGraph(gid, numvertices, swg, numNeighbours, graphSwing);
 
   // Update traction of Graph.
-  fa2UpdateTractGraph(gid, numvertices, tra, numNeighbours, &graphTract);
+  fa2UpdateTractGraph(gid, numvertices, tra, numNeighbours, graphTract);
 
   // Update speed of Graph.
-  fa2UpdateSpeedGraph(graphSwing, graphTract, &graphSpeed);
+  fa2UpdateSpeedGraph(*graphSwing, *graphTract, graphSpeed);
 
   // Update speed of vertices.
-  fa2UpdateSpeed(gid, numvertices, speed, swg, forceX, forceY, graphSpeed);
+  fa2UpdateSpeed(gid, numvertices, speed, swg, forceX, forceY, *graphSpeed);
 
   // Update displacement of vertices.
   fa2UpdateDisplacement(gid, numvertices, speed, forceX, forceY, dispX, dispY);
@@ -370,6 +368,9 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
   float* oldForceY = NULL;
   float* dispX = NULL;
   float* dispY = NULL;
+  float* graphSwing = NULL;
+  float* graphTract = NULL;
+  float* graphSpeed = NULL;
 
   cudaMalloc(&numNeighbours, g->numvertices * sizeof(int));
   cudaMalloc(&tra, g->numvertices * sizeof(float));
@@ -381,6 +382,9 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
   cudaMalloc(&oldForceY, g->numvertices * sizeof(float));
   cudaMalloc(&dispX, g->numvertices * sizeof(float));
   cudaMalloc(&dispY, g->numvertices * sizeof(float));
+  cudaMalloc(&graphSwing, sizeof(float));
+  cudaMalloc(&graphTract, sizeof(float));
+  cudaMalloc(&graphSpeed, sizeof(float));
 
   unsigned int numblocks = ceil(g->numvertices / (float) BLOCK_SIZE);
 
@@ -401,6 +405,9 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
       oldForceY,
       dispX,
       dispY,
+      graphSwing,
+      graphTract,
+      graphSpeed,
       iterations);
 }
 

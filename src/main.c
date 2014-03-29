@@ -56,7 +56,7 @@ int main(int argc, char* argv[])
 
   // Graph parsing.
   printf("Parsing graph...");
-  Graph* g = calloc(1, sizeof(Graph));
+  Graph* g = (Graph*) calloc(1, sizeof(Graph));
   gexfParseFile(g, inputFile);
   printf(" done!\n");
 

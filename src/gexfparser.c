@@ -132,10 +132,10 @@ void gexfParseFile(Graph* g, const char* in)
   g->numvertices = numNodes;
   g->numedges = numEdges;
 
-  float* vertexXLoc = calloc(numNodes, sizeof(float));
-  float* vertexYLoc = calloc(numNodes, sizeof(float));
-  unsigned int* edgeStart = calloc(numEdges, sizeof(unsigned int));
-  unsigned int* edgeEnd = calloc(numEdges, sizeof(unsigned int));
+  float* vertexXLoc = (float*) calloc(numNodes, sizeof(float));
+  float* vertexYLoc = (float*) calloc(numNodes, sizeof(float));
+  unsigned int* edgeStart = (unsigned int*) calloc(numEdges, sizeof(unsigned int));
+  unsigned int* edgeEnd = (unsigned int*) calloc(numEdges, sizeof(unsigned int));
 
   g->vertexXLocs = vertexXLoc;
   g->vertexYLocs = vertexYLoc;
