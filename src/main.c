@@ -36,7 +36,7 @@ int main(int argc, char* argv[])
     else
     {
       printf("Unrecognized parameter: %s.\n", argv[i]);
-      exit(EXIT_FAILURE);
+   //   exit(EXIT_FAILURE);
     }
   }
 
@@ -67,6 +67,9 @@ int main(int argc, char* argv[])
 
   // Computing.
   fa2RunOnGraph(g, numTicks);
+
+  // Printing
+  printGraph(g);
 
   free(g);
 }
