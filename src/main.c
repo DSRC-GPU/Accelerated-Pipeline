@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include "force-atlas-2.h"
+#include "fa2-cuda.h"
 #include "gexfparser.h"
 #include "graph.h"
 #include "vector.h"
@@ -69,7 +69,7 @@ int main(int argc, char* argv[])
     printGraph(g);
 
     // Computing.
-    fa2RunOnGraph(g);
+    fa2RunOnGraph(g, 1);
 
     i++;
   } 

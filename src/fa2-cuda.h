@@ -4,7 +4,7 @@
 
 #include "graph.h"
 
-void fa2RunOnGraph(Graph*);
+void fa2RunOnGraph(Graph*, unsigned int);
 
 #endif
 

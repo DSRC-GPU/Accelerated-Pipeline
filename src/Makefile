@@ -2,22 +2,26 @@
 CC = g++
 CPPFLAGS = -I/usr/include/libxml2
 CFLAGS = -DDEBUG -Wall -Wextra -pedantic
-LDFLAGS = -lxml2 -lm
+LDFLAGS = -lm -lxml2 -lpthread
 
 NVCC = nvcc
-NVCCFLAGS = -DDEBUG -arch=compute_35 -code=sm_35 --ptxas-options=-v -dc
-NVCCLDFLAGS = -dlink -arch=compute_35 -code=sm_35
+CUDA_LINK = link.o
+CUDA_ARCH = -arch=sm_20
+NVCCFLAGS	= $(CUDA_ARCH) -dc --ptxas-options=-v
+CUDA_LDFLAGS	:= $(LDFLAGS) -lcudart
+LIBS = 
+CUDA_LIBS	= $(LIBS) -L"$(CUDA_INSTALL_PATH)/lib64"
 
 TARGETS = springembedr
 
 OBJECTS = main.c.o graph.c.o gexfparser.c.o
 OBJECTS_SEQ = vector.c.o force-atlas-2.c.o
-OBJECTS_PAR = fa2-cuda.cuo vector-cuda.cuo 
+OBJECTS_PAR = fa2-cuda.o vector-cuda.o
 
 %.c.o: %.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
-%.cuo: %.cu
+%.o: %.cu
 	$(NVCC) $(NVCCFLAGS) -c $< -o $@
 
 all: seq
@@ -26,8 +30,9 @@ seq: $(OBJECTS) $(OBJECTS_SEQ)
 	$(CC) -o $(TARGETS) $(CFLAGS) $(LDFLAGS) $^
 
 par: $(OBJECTS_PAR) $(OBJECTS)
-	$(NVCC) -o $(TARGETS) $(NVCCLDFLAGS) $^
-
+	$(NVCC) $(CUDA_ARCH) $(OBJECTS_PAR) -dlink -o $(CUDA_LINK)
+	$(CC) -o $(TARGETS) $(CUDA_LINK) $^ $(CUDA_LIBS) $(CUDA_LDFLAGS)
+	
 
 clean:
 	rm -rf *.o

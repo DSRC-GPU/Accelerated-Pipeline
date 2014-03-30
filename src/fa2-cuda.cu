@@ -321,8 +321,9 @@ __global__ void fa2kernel(
   // Repulsion between vertices
   fa2Repulsion(gid, numvertices, vxLocs, vyLocs, forceX, forceY, numNeighbours);
   // Attraction on edges
-  fa2Attraction(gid, numvertices, vxLocs, vyLocs, numedges, edgeSources,
-      edgeTargets, forceX, forceY, numNeighbours);
+  // FIXME
+//  fa2Attraction(gid, numvertices, vxLocs, vyLocs, numedges, edgeSources,
+  //    edgeTargets, forceX, forceY, numNeighbours);
 
   // Calculate speed of vertices.
   // Update swing of vertices.
