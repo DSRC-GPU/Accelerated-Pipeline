@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include "fa2-cuda.h"
+#include "force-atlas-2.h"
 #include "gexfparser.h"
 #include "graph.h"
 #include "vector.h"
@@ -62,17 +62,11 @@ int main(int argc, char* argv[])
 
   printf("Graph nodes: %d, Graph edges: %d.\n", g->numvertices, g->numedges);
 
-  size_t i = 0;
-  while (i < numTicks || runForever)
-  {
-    // Printing
-    printGraph(g);
+  // Printing
+  printGraph(g);
 
-    // Computing.
-    fa2RunOnGraph(g, 1);
-
-    i++;
-  } 
+  // Computing.
+  fa2RunOnGraph(g, numTicks);
 
   free(g);
 }

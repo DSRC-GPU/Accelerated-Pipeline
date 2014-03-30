@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "fa2-cuda.h"
+#include "force-atlas-2.h"
 #include "math.h"
-#include "vector-cuda.h"
+#include "vector.h"
 
 #define K_R 1.0
 #define K_S 0.1

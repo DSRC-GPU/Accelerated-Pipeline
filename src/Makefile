@@ -16,7 +16,7 @@ TARGETS = springembedr
 
 OBJECTS = main.c.o graph.c.o gexfparser.c.o
 OBJECTS_SEQ = vector.c.o force-atlas-2.c.o
-OBJECTS_PAR = fa2-cuda.o vector-cuda.o
+OBJECTS_PAR = vector.o force-atlas-2.o
 
 %.c.o: %.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@

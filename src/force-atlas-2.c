@@ -211,7 +211,7 @@ void fa2UpdateLocation(Graph* g, float* xdisp, float* ydisp)
   }
 }
 
-void fa2RunOnGraph(Graph* g)
+void fa2RunOnce(Graph* g)
 {
   static int firstRun = 1;
   static int* numNeighbours = NULL;
@@ -231,17 +231,17 @@ void fa2RunOnGraph(Graph* g)
 
   if (firstRun)
   {
-    numNeighbours = calloc(g->numvertices, sizeof(int));
+    numNeighbours = (int*) calloc(g->numvertices, sizeof(int));
     calcNumNeighbours(g, numNeighbours);
-    tra = calloc(g->numvertices, sizeof(float));
-    swg = calloc(g->numvertices, sizeof(float));
-    speed = calloc(g->numvertices, sizeof(float));
-    forceX = calloc(g->numvertices, sizeof(float));
-    forceY = calloc(g->numvertices, sizeof(float));
-    oldForceX = calloc(g->numvertices, sizeof(float));
-    oldForceY = calloc(g->numvertices, sizeof(float));
-    dispX = calloc(g->numvertices, sizeof(float));
-    dispY = calloc(g->numvertices, sizeof(float));
+    tra = (float*) calloc(g->numvertices, sizeof(float));
+    swg = (float*) calloc(g->numvertices, sizeof(float));
+    speed = (float*) calloc(g->numvertices, sizeof(float));
+    forceX = (float*) calloc(g->numvertices, sizeof(float));
+    forceY = (float*) calloc(g->numvertices, sizeof(float));
+    oldForceX = (float*) calloc(g->numvertices, sizeof(float));
+    oldForceY = (float*) calloc(g->numvertices, sizeof(float));
+    dispX = (float*) calloc(g->numvertices, sizeof(float));
+    dispY = (float*) calloc(g->numvertices, sizeof(float));
 
     firstRun = 0;
   }
@@ -284,5 +284,13 @@ void fa2RunOnGraph(Graph* g)
   // Reset forces on vertices to 0.
   memset(forceX, 0, sizeof(float) * g->numvertices);
   memset(forceY, 0, sizeof(float) * g->numvertices);
+}
+
+void fa2RunOnGraph(Graph* g, unsigned int n)
+{
+  for (size_t i = 0; i < n; i++)
+  {
+    fa2RunOnce(g);
+  }
 }
 

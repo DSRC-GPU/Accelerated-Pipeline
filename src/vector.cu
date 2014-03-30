@@ -1,6 +1,6 @@
 
 #include <stdio.h>
-#include "vector-cuda.h"
+#include "vector.h"
 #include "graph.h"
 
 #define FLOAT_EPSILON 0.0000001
