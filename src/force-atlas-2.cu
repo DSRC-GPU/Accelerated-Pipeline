@@ -27,8 +27,7 @@ __device__ void fa2Repulsion(unsigned int gid, unsigned int numvertices,
 // Attraction on edges
 __device__ void fa2Attraction(unsigned int gid, unsigned int numvertices,
     float* vxLocs, float* vyLocs, int numedges, unsigned int* edgeSources,
-    unsigned int* edgeTargets, float* forceX, float* forceY,
-    unsigned int* deg);
+    unsigned int* edgeTargets, float* forceX, float* forceY, unsigned int* deg);
 
 __device__ void fa2UpdateSwing(unsigned int gid, unsigned int numvertices,
     float* forceX, float* forceY, float* oldForceX, float* oldForceY,
@@ -97,26 +96,35 @@ __device__ void fa2Repulsion(unsigned int gid, unsigned int numvertices,
   }
 }
 
-// FIXME Broken.
 __device__ void fa2Attraction(unsigned int gid, unsigned int numvertices,
-    float* vxLocs, float* vyLocs, int numedges, int* edgeSources,
-    int* edgeTargets, float* forceX, float* forceY, unsigned int* deg)
+    float* vxLocs, float* vyLocs, unsigned int numedges,
+    unsigned int* edgeSources, unsigned int* edgeTargets, float* forceX,
+    float* forceY, unsigned int* deg)
 {
-  if (gid < numedges)
+  if (gid < numvertices)
   {
-    int v1Index = edgeSources[gid];
-    int v2Index = edgeTargets[gid];
+    float vx1 = vxLocs[gid];
+    float vy1 = vyLocs[gid];
+    // Complete scan on edge array.
+    for (size_t i = 0; i < numedges; i++)
+    {
+      unsigned int source = edgeSources[i];
+      unsigned int target = edgeSources[i];
+      // Edge source is this vertex.
+      if (source == gid)
+      {
+        // Increase the degree of this node by one.
+        deg[gid]++;
 
-    float vx1 = vxLocs[v1Index];
-    float vy1 = vyLocs[v1Index];
-    float vx2 = vxLocs[v2Index];
-    float vy2 = vyLocs[v2Index];
+        // Compute attraction force.
+        float vx2 = vxLocs[target];
+        float vy2 = vyLocs[target];
 
-    vectorSubtract(&vx2, &vy2, vx1, vy1);
-    vectorMultiply(&vx2, &vy2, 0.5);
-
-
-    vectorAdd(&forceX[v1Index], &forceY[v1Index], vx2, vy2);
+        vectorSubtract(&vx2, &vy2, vx1, vy1);
+        vectorMultiply(&vx2, &vy2, 0.5);
+        vectorAdd(&forceX[gid], &forceY[gid], vx2, vy2);
+      }
+    }
   }
 }
 
@@ -335,9 +343,8 @@ __global__ void fa2kernel(
     // Repulsion between vertices
     fa2Repulsion(gid, numvertices, vxLocs, vyLocs, forceX, forceY, numNeighbours);
     // Attraction on edges
-    // FIXME
-    //  fa2Attraction(gid, numvertices, vxLocs, vyLocs, numedges, edgeSources,
-    //    edgeTargets, forceX, forceY, numNeighbours);
+    fa2Attraction(gid, numvertices, vxLocs, vyLocs, numedges, edgeSources,
+        edgeTargets, forceX, forceY, numNeighbours);
 
     // Calculate speed of vertices.
     // Update swing of vertices.
@@ -416,13 +423,13 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
 
   // Copy vertices and edges to device.
   cudaMemcpy((void*) vxLocs, g->vertexXLocs, g->numvertices * sizeof(float),
-    cudaMemcpyHostToDevice);
+      cudaMemcpyHostToDevice);
   cudaMemcpy((void*) vyLocs, g->vertexYLocs, g->numvertices * sizeof(float),
-    cudaMemcpyHostToDevice);
+      cudaMemcpyHostToDevice);
   cudaMemcpy((void*) edgeSources, g->edgeSources,
-    g->numedges * sizeof(unsigned int), cudaMemcpyHostToDevice);
+      g->numedges * sizeof(unsigned int), cudaMemcpyHostToDevice);
   cudaMemcpy((void*) edgeTargets, g->edgeTargets,
-    g->numedges * sizeof(unsigned int), cudaMemcpyHostToDevice);
+      g->numedges * sizeof(unsigned int), cudaMemcpyHostToDevice);
 
   unsigned int numblocks = ceil(g->numvertices / (float) BLOCK_SIZE);
 
@@ -451,12 +458,12 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
 
   // Update graph with new vertex positions.
   cudaMemcpy((void*) g->vertexXLocs, vxLocs, g->numvertices * sizeof(float),
-    cudaMemcpyDeviceToHost);
+      cudaMemcpyDeviceToHost);
   cudaMemcpy((void*) g->vertexYLocs, vyLocs, g->numvertices * sizeof(float),
-    cudaMemcpyDeviceToHost);
+      cudaMemcpyDeviceToHost);
   cudaMemcpy((void*) g->edgeSources, edgeSources,
-    g->numedges * sizeof(unsigned int), cudaMemcpyDeviceToHost);
+      g->numedges * sizeof(unsigned int), cudaMemcpyDeviceToHost);
   cudaMemcpy((void*) g->edgeTargets, edgeTargets,
-    g->numedges * sizeof(unsigned int), cudaMemcpyDeviceToHost);
+      g->numedges * sizeof(unsigned int), cudaMemcpyDeviceToHost);
 }
 
