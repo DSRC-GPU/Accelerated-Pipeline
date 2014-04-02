@@ -52,6 +52,9 @@ __device__ void fa2UpdateLocation(unsigned int gid, unsigned int numvertices,
 __device__ void fa2ResetForces(unsigned int gid, unsigned int numvertices,
     float* forceX, float* forceY);
 
+__global__ void fa2ComputeDegrees(unsigned int numvertices,
+    unsigned int numedges, unsigned int* edgeSources, unsigned int* deg);
+
 __device__ void fa2Gravity(unsigned int gid, unsigned int numvertices,
     float* vxLocs, float* vyLocs, float* forceX, float* forceY,
     unsigned int* deg)
@@ -319,6 +322,23 @@ __device__ void fa2ResetForces(unsigned int gid, unsigned int numvertices,
   }
 }
 
+__global__ void fa2ComputeDegrees(unsigned int numvertices,
+    unsigned int numedges, unsigned int* edgeSources, unsigned int* deg)
+{
+  unsigned int gid = threadIdx.x + (blockIdx.x * BLOCK_SIZE);
+  if (gid < numvertices)
+  {
+    deg[gid] = 0;
+    for (size_t i = 0; i < numedges; i++)
+    {
+      if (edgeSources[i] == gid)
+      {
+        deg[gid]++;
+      }
+    }
+  }
+}
+
 __global__ void fa2kernel(
     float* vxLocs, float* vyLocs,
     unsigned int numvertices,
@@ -331,52 +351,48 @@ __global__ void fa2kernel(
     float* dispX, float* dispY,
     float* graphSwing,
     float* graphTract,
-    float* graphSpeed,
-    unsigned int iterations)
+    float* graphSpeed)
 {
   unsigned int gid = threadIdx.x + (blockIdx.x * BLOCK_SIZE);
 
-  for (size_t i = 0; i < iterations; i++)
-  {
-    // Gravity force
-    fa2Gravity(gid, numvertices, vxLocs, vyLocs, forceX, forceY, numNeighbours);
-    // Repulsion between vertices
-    fa2Repulsion(gid, numvertices, vxLocs, vyLocs, forceX, forceY, numNeighbours);
-    // Attraction on edges
-    fa2Attraction(gid, numvertices, vxLocs, vyLocs, numedges, edgeSources,
-        edgeTargets, forceX, forceY, numNeighbours);
+  // Gravity force
+  fa2Gravity(gid, numvertices, vxLocs, vyLocs, forceX, forceY, numNeighbours);
+  // Repulsion between vertices
+  fa2Repulsion(gid, numvertices, vxLocs, vyLocs, forceX, forceY, numNeighbours);
+  // Attraction on edges
+  fa2Attraction(gid, numvertices, vxLocs, vyLocs, numedges, edgeSources,
+      edgeTargets, forceX, forceY, numNeighbours);
 
-    // Calculate speed of vertices.
-    // Update swing of vertices.
-    fa2UpdateSwing(gid, numvertices, forceX, forceY, oldForceX, oldForceY, swg);
+  // Calculate speed of vertices.
+  // Update swing of vertices.
+  fa2UpdateSwing(gid, numvertices, forceX, forceY, oldForceX, oldForceY, swg);
 
-    // Update traction of vertices.
-    fa2UpdateTract(gid, numvertices, forceX, forceY, oldForceX, oldForceY, tra);
+  // Update traction of vertices.
+  fa2UpdateTract(gid, numvertices, forceX, forceY, oldForceX, oldForceY, tra);
 
-    // Update swing of Graph.
-    fa2UpdateSwingGraph(gid, numvertices, swg, numNeighbours, graphSwing);
+  // Update swing of Graph.
+  fa2UpdateSwingGraph(gid, numvertices, swg, numNeighbours, graphSwing);
 
-    // Update traction of Graph.
-    fa2UpdateTractGraph(gid, numvertices, tra, numNeighbours, graphTract);
+  // Update traction of Graph.
+  fa2UpdateTractGraph(gid, numvertices, tra, numNeighbours, graphTract);
 
-    // Update speed of Graph.
-    fa2UpdateSpeedGraph(*graphSwing, *graphTract, graphSpeed);
+  // Update speed of Graph.
+  fa2UpdateSpeedGraph(*graphSwing, *graphTract, graphSpeed);
 
-    // Update speed of vertices.
-    fa2UpdateSpeed(gid, numvertices, speed, swg, forceX, forceY, *graphSpeed);
+  // Update speed of vertices.
+  fa2UpdateSpeed(gid, numvertices, speed, swg, forceX, forceY, *graphSpeed);
 
-    // Update displacement of vertices.
-    fa2UpdateDisplacement(gid, numvertices, speed, forceX, forceY, dispX, dispY);
+  // Update displacement of vertices.
+  fa2UpdateDisplacement(gid, numvertices, speed, forceX, forceY, dispX, dispY);
 
-    // Set current forces as old forces in vertex data.
-    fa2SaveOldForces(gid, numvertices, forceX, forceY, oldForceX, oldForceY);
+  // Set current forces as old forces in vertex data.
+  fa2SaveOldForces(gid, numvertices, forceX, forceY, oldForceX, oldForceY);
 
-    // Update vertex locations based on speed.
-    fa2UpdateLocation(gid, numvertices, vxLocs, vyLocs, dispX, dispY);
+  // Update vertex locations based on speed.
+  fa2UpdateLocation(gid, numvertices, vxLocs, vyLocs, dispX, dispY);
 
-    // set forces to 0.
-    fa2ResetForces(gid, numvertices, forceX, forceY);
-  }
+  // set forces to 0.
+  fa2ResetForces(gid, numvertices, forceX, forceY);
 }
 
 void fa2RunOnGraph(Graph* g, unsigned int iterations)
@@ -433,28 +449,34 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
 
   unsigned int numblocks = ceil(g->numvertices / (float) BLOCK_SIZE);
 
-  // Run fa2 spring embedding kernel.
-  fa2kernel<<<numblocks, BLOCK_SIZE>>>(
-      vxLocs,
-      vyLocs,
-      g->numvertices,
-      edgeSources,
-      edgeTargets,
-      g->numedges,
-      numNeighbours,
-      tra,
-      swg,
-      speed,
-      forceX,
-      forceY,
-      oldForceX,
-      oldForceY,
-      dispX,
-      dispY,
-      graphSwing,
-      graphTract,
-      graphSpeed,
-      iterations);
+  // Compute vertex degrees using current edges.
+  fa2ComputeDegrees<<<numblocks, BLOCK_SIZE>>>(g->numvertices, g->numedges,
+      edgeSources, numNeighbours);
+
+  for (size_t i = 0; i < iterations; i++)
+  {
+    // Run fa2 spring embedding kernel.
+    fa2kernel<<<numblocks, BLOCK_SIZE>>>(
+        vxLocs,
+        vyLocs,
+        g->numvertices,
+        edgeSources,
+        edgeTargets,
+        g->numedges,
+        numNeighbours,
+        tra,
+        swg,
+        speed,
+        forceX,
+        forceY,
+        oldForceX,
+        oldForceY,
+        dispX,
+        dispY,
+        graphSwing,
+        graphTract,
+        graphSpeed);
+  }
 
   // Update graph with new vertex positions.
   cudaMemcpy((void*) g->vertexXLocs, vxLocs, g->numvertices * sizeof(float),
