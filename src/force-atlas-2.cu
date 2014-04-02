@@ -165,40 +165,44 @@ __device__ void fa2UpdateSwingGraph(unsigned int gid, unsigned int numvertices,
 {
   __shared__ float scratch[BLOCK_SIZE * 2];
 
-  // Initialize output to 0.
-  if (gid == 0)
-    *gswing = 0;
 
-  // Setup local data to perform reduction.
-  unsigned int tx = threadIdx.x;
-  unsigned int base = tx + (blockIdx.x * BLOCK_SIZE * 2);
-  unsigned int stride = BLOCK_SIZE;
-
-  if (base < numvertices)
-    scratch[tx] = (deg[base] + 1) * swg[base];
-  else
-    scratch[tx] = 0;
-
-  if (base + stride < numvertices)
-    scratch[tx + stride] = (deg[base + stride] + 1) * swg[base + stride];
-  else
-    scratch[tx + stride] = 0;
-
-  // Do block-local reduction.
-  while (stride > 0)
+  if (!blockIdx.x % 2)
   {
-    __syncthreads();
-    if (tx < stride)
+    // Initialize output to 0.
+    if (gid == 0)
+      *gswing = 0;
+
+    // Setup local data to perform reduction.
+    unsigned int tx = threadIdx.x;
+    unsigned int base = tx + (blockIdx.x * BLOCK_SIZE * 2);
+    unsigned int stride = BLOCK_SIZE;
+
+    if (base < numvertices)
+      scratch[tx] = (deg[base] + 1) * swg[base];
+    else
+      scratch[tx] = 0;
+
+    if (base + stride < numvertices)
+      scratch[tx + stride] = (deg[base + stride] + 1) * swg[base + stride];
+    else
+      scratch[tx + stride] = 0;
+
+    // Do block-local reduction.
+    while (stride > 0)
     {
-      scratch[base] += scratch[base + stride];
+      __syncthreads();
+      if (tx < stride)
+      {
+        scratch[base] += scratch[base + stride];
+      }
+
+      stride >>= 1;
     }
 
-    stride >>= 1;
+    // Do atomic add per block to obtain final value.
+    if (tx == 0)
+      atomicAdd(gswing, scratch[tx]);
   }
-
-  // Do atomic add per block to obtain final value.
-  if (tx == 0)
-    atomicAdd(gswing, scratch[tx]);
 }
 
 // Calculate the current traction of the graph.
@@ -207,40 +211,39 @@ __device__ void fa2UpdateTractGraph(unsigned int gid, unsigned int numvertices,
 {
   __shared__ float scratch[BLOCK_SIZE * 2];
 
-  // Initialize output to 0.
-  if (gid == 0)
-    *gtract = 0;
-
-  // Setup local data to perform reduction.
-  unsigned int tx = threadIdx.x;
-  unsigned int base = tx + (blockIdx.x * BLOCK_SIZE * 2);
-  unsigned int stride = BLOCK_SIZE;
-
-  if (base < numvertices)
-    scratch[tx] = (deg[base] + 1) * tra[base];
-  else
-    scratch[tx] = 0;
-
-  if (base + stride < numvertices)
-    scratch[tx + stride] = (deg[base + stride] + 1) * tra[base + stride];
-  else
-    scratch[tx + stride] = 0;
-
-  // Do block-local reduction.
-  while (stride > 0)
+  if (!blockIdx.x % 2)
   {
-    __syncthreads();
-    if (tx < stride)
+    // Setup local data to perform reduction.
+    unsigned int tx = threadIdx.x;
+    unsigned int base = tx + (blockIdx.x * BLOCK_SIZE * 2);
+    unsigned int stride = BLOCK_SIZE;
+
+    if (base < numvertices)
+      scratch[tx] = (deg[base] + 1) * tra[base];
+    else
+      scratch[tx] = 0;
+
+    if (base + stride < numvertices)
+      scratch[tx + stride] = (deg[base + stride] + 1) * tra[base + stride];
+    else
+      scratch[tx + stride] = 0;
+
+    // Do block-local reduction.
+    while (stride > 0)
     {
-      scratch[base] += scratch[base + stride];
+      __syncthreads();
+      if (tx < stride)
+      {
+        scratch[base] += scratch[base + stride];
+      }
+
+      stride >>= 1;
     }
 
-    stride >>= 1;
+    // Do atomic add per block to obtain final value.
+    if (tx == 0)
+      atomicAdd(gtract, scratch[tx]);
   }
-
-  // Do atomic add per block to obtain final value.
-  if (tx == 0)
-    atomicAdd(gtract, scratch[tx]);
 }
 
 __device__ void fa2UpdateSpeedGraph(float gswing, float gtract, float* gspeed)
@@ -370,15 +373,6 @@ __global__ void fa2kernel(
   // Update traction of vertices.
   fa2UpdateTract(gid, numvertices, forceX, forceY, oldForceX, oldForceY, tra);
 
-  // Update swing of Graph.
-  fa2UpdateSwingGraph(gid, numvertices, swg, numNeighbours, graphSwing);
-
-  // Update traction of Graph.
-  fa2UpdateTractGraph(gid, numvertices, tra, numNeighbours, graphTract);
-
-  // Update speed of Graph.
-  fa2UpdateSpeedGraph(*graphSwing, *graphTract, graphSpeed);
-
   // Update speed of vertices.
   fa2UpdateSpeed(gid, numvertices, speed, swg, forceX, forceY, *graphSpeed);
 
@@ -390,6 +384,18 @@ __global__ void fa2kernel(
 
   // Update vertex locations based on speed.
   fa2UpdateLocation(gid, numvertices, vxLocs, vyLocs, dispX, dispY);
+
+  // Although the node speed is determined by the speed of the graph, we update
+  // these last to avoid the need for an additional global barrier.
+
+  // Update swing of Graph.
+  fa2UpdateSwingGraph(gid, numvertices, swg, numNeighbours, graphSwing);
+
+  // Update traction of Graph.
+  fa2UpdateTractGraph(gid, numvertices, tra, numNeighbours, graphTract);
+
+  // Update speed of Graph.
+  fa2UpdateSpeedGraph(*graphSwing, *graphTract, graphSpeed);
 }
 
 void fa2RunOnGraph(Graph* g, unsigned int iterations)
@@ -439,9 +445,9 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
   cudaMemset(oldForceY, 0, g->numvertices * sizeof(float));
   cudaMemset(dispX, 0, g->numvertices * sizeof(float));
   cudaMemset(dispY, 0, g->numvertices * sizeof(float));
-  cudaMemset(graphSwing, 0, sizeof(float));
-  cudaMemset(graphTract, 0, sizeof(float));
-  cudaMemset(graphSpeed, 0, sizeof(float));
+  cudaMemset(graphSwing, EPSILON, sizeof(float));
+  cudaMemset(graphTract, EPSILON, sizeof(float));
+  cudaMemset(graphSpeed, EPSILON, sizeof(float));
 
   cudaMalloc(&vxLocs, g->numvertices * sizeof(float));
   cudaMalloc(&vyLocs, g->numvertices * sizeof(float));
