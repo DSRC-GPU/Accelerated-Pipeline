@@ -27,7 +27,7 @@ __device__ void fa2Repulsion(unsigned int gid, unsigned int numvertices,
 // Attraction on edges
 __device__ void fa2Attraction(unsigned int gid, unsigned int numvertices,
     float* vxLocs, float* vyLocs, int numedges, unsigned int* edgeSources,
-    unsigned int* edgeTargets, float* forceX, float* forceY, unsigned int* deg);
+    unsigned int* edgeTargets, float* forceX, float* forceY);
 
 __device__ void fa2UpdateSwing(unsigned int gid, unsigned int numvertices,
     float* forceX, float* forceY, float* oldForceX, float* oldForceY,
@@ -102,7 +102,7 @@ __device__ void fa2Repulsion(unsigned int gid, unsigned int numvertices,
 __device__ void fa2Attraction(unsigned int gid, unsigned int numvertices,
     float* vxLocs, float* vyLocs, unsigned int numedges,
     unsigned int* edgeSources, unsigned int* edgeTargets, float* forceX,
-    float* forceY, unsigned int* deg)
+    float* forceY)
 {
   if (gid < numvertices)
   {
@@ -116,9 +116,6 @@ __device__ void fa2Attraction(unsigned int gid, unsigned int numvertices,
       // Edge source is this vertex.
       if (source == gid)
       {
-        // Increase the degree of this node by one.
-        deg[gid]++;
-
         // Compute attraction force.
         float vx2 = vxLocs[target];
         float vy2 = vyLocs[target];
@@ -355,13 +352,16 @@ __global__ void fa2kernel(
 {
   unsigned int gid = threadIdx.x + (blockIdx.x * BLOCK_SIZE);
 
+  // set forces to 0.
+  fa2ResetForces(gid, numvertices, forceX, forceY);
+
   // Gravity force
   fa2Gravity(gid, numvertices, vxLocs, vyLocs, forceX, forceY, numNeighbours);
   // Repulsion between vertices
   fa2Repulsion(gid, numvertices, vxLocs, vyLocs, forceX, forceY, numNeighbours);
   // Attraction on edges
   fa2Attraction(gid, numvertices, vxLocs, vyLocs, numedges, edgeSources,
-      edgeTargets, forceX, forceY, numNeighbours);
+      edgeTargets, forceX, forceY);
 
   // Calculate speed of vertices.
   // Update swing of vertices.
@@ -390,9 +390,6 @@ __global__ void fa2kernel(
 
   // Update vertex locations based on speed.
   fa2UpdateLocation(gid, numvertices, vxLocs, vyLocs, dispX, dispY);
-
-  // set forces to 0.
-  fa2ResetForces(gid, numvertices, forceX, forceY);
 }
 
 void fa2RunOnGraph(Graph* g, unsigned int iterations)
@@ -431,6 +428,20 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
   cudaMalloc(&graphSwing, sizeof(float));
   cudaMalloc(&graphTract, sizeof(float));
   cudaMalloc(&graphSpeed, sizeof(float));
+
+  cudaMemset(numNeighbours, 0, g->numvertices * sizeof(int));
+  cudaMemset(tra, 0, g->numvertices * sizeof(float));
+  cudaMemset(swg, 0, g->numvertices * sizeof(float));
+  cudaMemset(speed, 0, g->numvertices * sizeof(float));
+  cudaMemset(forceX, 0, g->numvertices * sizeof(float));
+  cudaMemset(forceY, 0, g->numvertices * sizeof(float));
+  cudaMemset(oldForceX, 0, g->numvertices * sizeof(float));
+  cudaMemset(oldForceY, 0, g->numvertices * sizeof(float));
+  cudaMemset(dispX, 0, g->numvertices * sizeof(float));
+  cudaMemset(dispY, 0, g->numvertices * sizeof(float));
+  cudaMemset(graphSwing, 0, sizeof(float));
+  cudaMemset(graphTract, 0, sizeof(float));
+  cudaMemset(graphSpeed, 0, sizeof(float));
 
   cudaMalloc(&vxLocs, g->numvertices * sizeof(float));
   cudaMalloc(&vyLocs, g->numvertices * sizeof(float));
