@@ -225,9 +225,9 @@ void fa2RunOnce(Graph* g)
   static float* dispX = NULL;
   static float* dispY = NULL;
 
-  static float graphSwing = 0.0;
-  static float graphTract = 0.0;
-  static float graphSpeed = 0.0;
+  float graphSwing = 0.0;
+  float graphTract = 0.0;
+  float graphSpeed = 0.0;
 
   if (firstRun)
   {
@@ -246,6 +246,19 @@ void fa2RunOnce(Graph* g)
     firstRun = 0;
   }
 
+  // Update swing of Graph.
+  fa2UpdateSwingGraph(g, swg, numNeighbours, &graphSwing);
+
+  // Update traction of Graph.
+  fa2UpdateTractGraph(g, tra, numNeighbours, &graphTract);
+
+  // Update speed of Graph.
+  fa2UpdateSpeedGraph(graphSwing, graphTract, &graphSpeed);
+
+  // Reset forces on vertices to 0.
+  memset(forceX, 0, sizeof(float) * g->numvertices);
+  memset(forceY, 0, sizeof(float) * g->numvertices);
+
   // Gravity force
   fa2Gravity(g, forceX, forceY, numNeighbours);
   // Repulsion between vertices
@@ -260,15 +273,6 @@ void fa2RunOnce(Graph* g)
   // Update traction of vertices.
   fa2UpdateTract(g, forceX, forceY, oldForceX, oldForceY, tra);
 
-  // Update swing of Graph.
-  fa2UpdateSwingGraph(g, swg, numNeighbours, &graphSwing);
-
-  // Update traction of Graph.
-  fa2UpdateTractGraph(g, tra, numNeighbours, &graphTract);
-
-  // Update speed of Graph.
-  fa2UpdateSpeedGraph(graphSwing, graphTract, &graphSpeed);
-
   // Update speed of vertices.
   fa2UpdateSpeed(g, speed, swg, forceX, forceY, graphSpeed);
 
@@ -280,10 +284,6 @@ void fa2RunOnce(Graph* g)
 
   // Update vertex locations based on speed.
   fa2UpdateLocation(g, dispX, dispY);
-
-  // Reset forces on vertices to 0.
-  memset(forceX, 0, sizeof(float) * g->numvertices);
-  memset(forceY, 0, sizeof(float) * g->numvertices);
 }
 
 void fa2RunOnGraph(Graph* g, unsigned int n)
