@@ -27,7 +27,7 @@ OBJECTS_PAR = vector.o force-atlas-2.o
 all: seq
 
 seq: $(OBJECTS) $(OBJECTS_SEQ)
-	$(CC) -o $(TARGETS) $(CFLAGS) $(LDFLAGS) $^
+	$(CC) -o $(TARGETS) $(CFLAGS) $^ $(LDFLAGS) 
 
 par: $(OBJECTS_PAR) $(OBJECTS)
 	$(NVCC) $(CUDA_ARCH) $(OBJECTS_PAR) -dlink -o $(CUDA_LINK)
