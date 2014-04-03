@@ -227,7 +227,7 @@ void fa2RunOnce(Graph* g)
 
   float graphSwing = 0.0;
   float graphTract = 0.0;
-  float graphSpeed = 0.0;
+  static float graphSpeed = 0.0;
 
   if (firstRun)
   {
