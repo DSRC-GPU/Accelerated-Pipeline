@@ -244,9 +244,6 @@ __device__ void fa2UpdateTractGraph(unsigned int gid, unsigned int numvertices,
 
 __device__ void fa2UpdateSpeedGraph(float gswing, float gtract, float* gspeed)
 {
-  // This code is executed by one thread.
-  if (threadIdx.x + blockIdx.x == 0)
-  {
     float oldSpeed = *gspeed;
     *gspeed = gswing > 0 ? TAU * (gtract / gswing) : EPSILON;
     if (*gspeed <= 0)
@@ -254,7 +251,6 @@ __device__ void fa2UpdateSpeedGraph(float gswing, float gtract, float* gspeed)
     // Do not allow more then 50% speed increase.
     if (oldSpeed > FLOAT_EPSILON && *gspeed > 1.5 * oldSpeed)
       *gspeed = 1.5 * oldSpeed;
-  }
 }
 
 __device__ void fa2UpdateSpeed(unsigned int gid, unsigned int numvertices,
@@ -359,16 +355,21 @@ __global__ void fa2kernel(
     float* forceX, float* forceY, float* oldForceX, float* oldForceY,
     float* dispX, float* dispY,
     float* graphSwing,
-    float* graphTract)
+    float* graphTract,
+    float* oldGraphSpeed)
 {
   unsigned int gid = threadIdx.x + (blockIdx.x * BLOCK_SIZE);
-  float graphSpeed = EPSILON;
+  float graphSpeed = *oldGraphSpeed;
 
   // Update speed of Graph.
   fa2UpdateSpeedGraph(*graphSwing, *graphTract, &graphSpeed);
 
-  *graphSwing = 0.0;
-  *graphTract = 0.0;
+  if (gid == 0)
+  {
+    *oldGraphSpeed = graphSpeed;
+    *graphSwing = 0.0;
+    *graphTract = 0.0;
+  }
 
   // set forces to 0.
   fa2ResetForces(gid, numvertices, forceX, forceY);
@@ -416,6 +417,7 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
   float* dispY = NULL;
   float* graphSwing = NULL;
   float* graphTract = NULL;
+  float* graphSpeed = NULL;
 
   float* vxLocs = NULL;
   float* vyLocs = NULL;
@@ -435,6 +437,7 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
   cudaMalloc(&dispY, g->numvertices * sizeof(float));
   cudaMalloc(&graphSwing, sizeof(float));
   cudaMalloc(&graphTract, sizeof(float));
+  cudaMalloc(&graphSpeed, sizeof(float));
 
   cudaMemset(numNeighbours, 0, g->numvertices * sizeof(int));
   cudaMemset(tra, 0, g->numvertices * sizeof(float));
@@ -448,6 +451,7 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
   cudaMemset(dispY, 0, g->numvertices * sizeof(float));
   cudaMemset(graphSwing, 0, sizeof(float));
   cudaMemset(graphTract, 0, sizeof(float));
+  cudaMemset(graphSpeed, 0, sizeof(float));
 
   cudaMalloc(&vxLocs, g->numvertices * sizeof(float));
   cudaMalloc(&vyLocs, g->numvertices * sizeof(float));
@@ -500,7 +504,8 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
         dispX,
         dispY,
         graphSwing,
-        graphTract);
+        graphTract,
+        graphSpeed);
   }
 
   // Update graph with new vertex positions.
