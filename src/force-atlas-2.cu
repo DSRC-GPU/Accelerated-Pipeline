@@ -198,6 +198,7 @@ __device__ void fa2UpdateSwingGraph(unsigned int gid, unsigned int numvertices,
   }
 
   // Do atomic add per block to obtain final value.
+  __syncthreads();
   if (tx == 0)
     atomicAdd(gswing, scratch[tx]);
 }
@@ -236,6 +237,7 @@ __device__ void fa2UpdateTractGraph(unsigned int gid, unsigned int numvertices,
   }
 
   // Do atomic add per block to obtain final value.
+  __syncthreads();
   if (tx == 0)
     atomicAdd(gtract, scratch[tx]);
 }
