@@ -489,5 +489,14 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
       g->numedges * sizeof(unsigned int), cudaMemcpyDeviceToHost);
   cudaMemcpy((void*) g->edgeTargets, edgeTargets,
       g->numedges * sizeof(unsigned int), cudaMemcpyDeviceToHost);
+
+  cudaFree(numNeighbours);
+  cudaFree(tra);
+  cudaFree(swg);
+  cudaFree(oldForceX);
+  cudaFree(oldForceY);
+  cudaFree(graphSwing);
+  cudaFree(graphTract);
+  cudaFree(graphSpeed);
 }
 
