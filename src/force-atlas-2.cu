@@ -48,7 +48,7 @@ __device__ void fa2UpdateDisplacement(unsigned int gid,
     unsigned int numvertices, float* speed, float forceX, float forceY,
     float* dispX, float* dispY);
 __device__ void fa2UpdateLocation(unsigned int gid, unsigned int numvertices,
-    float* vxLocs, float* vyLocs, float* xdisp, float* ydisp);
+    float* vxLocs, float* vyLocs, float xdisp, float ydisp);
 
 __global__ void fa2ComputeDegrees(unsigned int numvertices,
     unsigned int numedges, unsigned int* edgeSources, unsigned int* deg);
@@ -286,19 +286,19 @@ __device__ void fa2UpdateDisplacement(unsigned int gid,
 {
   if (gid < numvertices)
   {
-    dispX[gid] = forceX;
-    dispY[gid] = forceY;
-    vectorMultiply(&dispX[gid], &dispY[gid], speed[gid]);
+    *dispX = forceX;
+    *dispY = forceY;
+    vectorMultiply(dispX, dispY, speed[gid]);
   }
 }
 
 __device__ void fa2UpdateLocation(unsigned int gid, unsigned int numvertices,
-    float* vxLocs, float* vyLocs, float* xdisp, float* ydisp)
+    float* vxLocs, float* vyLocs, float xdisp, float ydisp)
 {
   if (gid < numvertices)
   {
-    vxLocs[gid] += xdisp[gid];
-    vyLocs[gid] += ydisp[gid];
+    vxLocs[gid] += xdisp;
+    vyLocs[gid] += ydisp;
   }
 }
 
@@ -341,7 +341,6 @@ __global__ void fa2kernel(
     unsigned int* numNeighbours,
     float* tra, float* swg, float* speed,
     float* oldForceX, float* oldForceY,
-    float* dispX, float* dispY,
     float* graphSwing,
     float* graphTract,
     float* oldGraphSpeed)
@@ -351,6 +350,9 @@ __global__ void fa2kernel(
 
   float forceX = 0.0;
   float forceY = 0.0;
+
+  float dispX = 0.0;
+  float dispY = 0.0;
 
   // Update speed of Graph.
   fa2UpdateSpeedGraph(*graphSwing, *graphTract, &graphSpeed);
@@ -381,7 +383,7 @@ __global__ void fa2kernel(
   fa2UpdateSpeed(gid, numvertices, speed, swg, forceX, forceY, graphSpeed);
 
   // Update displacement of vertices.
-  fa2UpdateDisplacement(gid, numvertices, speed, forceX, forceY, dispX, dispY);
+  fa2UpdateDisplacement(gid, numvertices, speed, forceX, forceY, &dispX, &dispY);
 
   // Set current forces as old forces in vertex data.
   fa2SaveOldForces(gid, numvertices, forceX, forceY, oldForceX, oldForceY);
@@ -399,8 +401,6 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
   float* speed = NULL;
   float* oldForceX = NULL;
   float* oldForceY = NULL;
-  float* dispX = NULL;
-  float* dispY = NULL;
   float* graphSwing = NULL;
   float* graphTract = NULL;
   float* graphSpeed = NULL;
@@ -417,8 +417,6 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
   cudaMalloc(&speed, g->numvertices * sizeof(float));
   cudaMalloc(&oldForceX, g->numvertices * sizeof(float));
   cudaMalloc(&oldForceY, g->numvertices * sizeof(float));
-  cudaMalloc(&dispX, g->numvertices * sizeof(float));
-  cudaMalloc(&dispY, g->numvertices * sizeof(float));
   cudaMalloc(&graphSwing, sizeof(float));
   cudaMalloc(&graphTract, sizeof(float));
   cudaMalloc(&graphSpeed, sizeof(float));
@@ -429,8 +427,6 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
   cudaMemset(speed, 0, g->numvertices * sizeof(float));
   cudaMemset(oldForceX, 0, g->numvertices * sizeof(float));
   cudaMemset(oldForceY, 0, g->numvertices * sizeof(float));
-  cudaMemset(dispX, 0, g->numvertices * sizeof(float));
-  cudaMemset(dispY, 0, g->numvertices * sizeof(float));
   cudaMemset(graphSwing, 0, sizeof(float));
   cudaMemset(graphTract, 0, sizeof(float));
   cudaMemset(graphSpeed, 0, sizeof(float));
@@ -481,8 +477,6 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
         speed,
         oldForceX,
         oldForceY,
-        dispX,
-        dispY,
         graphSwing,
         graphTract,
         graphSpeed);
