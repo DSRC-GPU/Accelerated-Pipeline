@@ -85,13 +85,16 @@ void gexfParseEdges(xmlNode* gexf, unsigned int* edgeTargets,
   if (!xmledges) return;
 
   size_t i = 0;
-  xmlNode* node = xmledges->children;
+  xmlNode* node = xmlwGetChild(xmledges, "edge");
   while (node)
   {
-    gexfParseEdge(node, &edgeSources[i], &edgeTargets[i]);
-    i++;
-    gexfParseEdge(node, &edgeTargets[i], &edgeSources[i]);
-    i++;
+    if (xmlGetProp(node, (const xmlChar*) "id"))
+    {
+      gexfParseEdge(node, &edgeSources[i], &edgeTargets[i]);
+      i++;
+      gexfParseEdge(node, &edgeTargets[i], &edgeSources[i]);
+      i++;
+    }
 
     node = node->next;
   }

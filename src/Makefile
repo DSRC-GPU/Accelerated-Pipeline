@@ -1,7 +1,7 @@
 
 CC = g++
 CPPFLAGS = -I/usr/include/libxml2
-CFLAGS = -DDEBUG -Wall -Wextra -pedantic
+CFLAGS = -DDEBUG -Wall -Wextra -pedantic -g
 LDFLAGS = -lm -lxml2 -lpthread
 
 NVCC = nvcc
