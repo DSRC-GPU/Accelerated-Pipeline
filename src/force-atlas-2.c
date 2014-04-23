@@ -15,33 +15,34 @@
 #define FLOAT_EPSILON 0.0000001
 
 // Calculate the number of neighbours for every node.
-void calcNumNeighbours(Graph*, int*);
+void calcNumNeighbours(Graph*, unsigned int*);
 // Gravity force
-void fa2Gravity(Graph*, float*, float*, int*);
+void fa2Gravity(Graph*, float*, float*, unsigned int*);
 // Repulsion between vertices
-void fa2Repulsion(Graph*, float*, float*, int*);
+void fa2Repulsion(Graph*, float*, float*, unsigned int*);
 // Attraction on edges
 void fa2Attraction(Graph*, float*, float*);
 
 void fa2UpdateSwing(Graph*, float*, float*, float*, float*, float*);
 void fa2UpdateTract(Graph*, float*, float*, float*, float*, float*);
-void fa2UpdateSwingGraph(Graph*, float*, int*, float*);
-void fa2UpdateTractGraph(Graph*, float*, int*, float*);
+void fa2UpdateSwingGraph(Graph*, float*, unsigned int*, float*);
+void fa2UpdateTractGraph(Graph*, float*, unsigned int*, float*);
 void fa2UpdateSpeedGraph(float, float, float*);
 void fa2UpdateSpeed(Graph*, float*, float*, float*, float*, float);
 void fa2UpdateDisplacement(Graph*, float*, float*, float*, float*, float*);
 void fa2SaveOldForces(Graph*, float*, float*, float*, float*);
 void fa2UpdateLocation(Graph*, float*, float*);
 
-void calcNumNeighbours(Graph* g, int* deg)
+void calcNumNeighbours(Graph* g, unsigned int* deg)
 {
   for (size_t i = 0; i < g->numedges; i++)
   {
-    deg[g->edgeSources[i]]++; 
+    unsigned int node = g->edgeSources[i];
+    deg[node]++; 
   }
 }
 
-void fa2Gravity(Graph* g, float* forceX, float* forceY, int* deg)
+void fa2Gravity(Graph* g, float* forceX, float* forceY, unsigned int* deg)
 {
   if (!g) return;
   for (size_t i = 0; i < g->numvertices; i++)
@@ -55,7 +56,7 @@ void fa2Gravity(Graph* g, float* forceX, float* forceY, int* deg)
   }
 }
 
-void fa2Repulsion(Graph* g, float* forceX, float* forceY, int* deg)
+void fa2Repulsion(Graph* g, float* forceX, float* forceY, unsigned int* deg)
 {
   if (!g) return;
   for (size_t i = 0; i < g->numvertices; i++)
@@ -132,7 +133,7 @@ void fa2UpdateTract(Graph* g, float* forceX, float* forceY,
 }
 
 // Calculate the current swing of the graph.
-void fa2UpdateSwingGraph(Graph* g, float* swg, int* deg, float* gswing)
+void fa2UpdateSwingGraph(Graph* g, float* swg, unsigned int* deg, float* gswing)
 {
   *gswing = 0;
   for (size_t i = 0; i < g->numvertices; i++)
@@ -142,7 +143,7 @@ void fa2UpdateSwingGraph(Graph* g, float* swg, int* deg, float* gswing)
 }
 
 // Calculate the current traction of the graph.
-void fa2UpdateTractGraph(Graph* g, float* tra, int* deg, float* gtract)
+void fa2UpdateTractGraph(Graph* g, float* tra, unsigned int* deg, float* gtract)
 {
   *gtract = 0;
   for (size_t i = 0; i < g->numvertices; i++)
@@ -214,7 +215,7 @@ void fa2UpdateLocation(Graph* g, float* xdisp, float* ydisp)
 void fa2RunOnce(Graph* g)
 {
   static int firstRun = 1;
-  static int* numNeighbours = NULL;
+  static unsigned int* numNeighbours = NULL;
   static float* tra = NULL;
   static float* swg = NULL;
   static float* speed = NULL;
@@ -231,7 +232,7 @@ void fa2RunOnce(Graph* g)
 
   if (firstRun)
   {
-    numNeighbours = (int*) calloc(g->numvertices, sizeof(int));
+    numNeighbours = (unsigned int*) calloc(g->numvertices, sizeof(unsigned int));
     calcNumNeighbours(g, numNeighbours);
     tra = (float*) calloc(g->numvertices, sizeof(float));
     swg = (float*) calloc(g->numvertices, sizeof(float));
