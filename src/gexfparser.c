@@ -117,7 +117,7 @@ void gexfParseFile(Graph* g, const char* in)
   xmlNode *root_element = NULL;
 
   /*parse the file and get the DOM */
-  doc = xmlReadFile(in, NULL, 0);
+  doc = xmlReadFile(in, NULL, 256);
 
   if (doc == NULL)
   {
