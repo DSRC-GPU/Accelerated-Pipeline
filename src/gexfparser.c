@@ -4,6 +4,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #define NODE_START_X 100
 #define NODE_START_Y 100
@@ -42,11 +43,14 @@ unsigned int xmlwGetNumEdges(xmlNode* gexf)
   return atoi((const char*) xmlGetProp(edges, (const xmlChar*) "count"));
 }
 
-void gexfParseVertex(xmlNode* n, float* vertexXLoc, float* vertexYLoc)
+void gexfParseVertex(xmlNode* n, double* vertexXLoc, double* vertexYLoc, int *vertexIds)
 {
   if (!n || !vertexXLoc || !vertexYLoc) return;
   *vertexXLoc = NODE_START_X;
   *vertexYLoc = NODE_START_Y;
+  const char* id = (const char*) xmlGetProp(n, (const xmlChar*) "id");
+  assert(id != NULL);
+  *vertexIds = atoi(id);
 }
 
 void gexfParseEdge(xmlNode* n, unsigned int* edgeSource,
@@ -57,7 +61,7 @@ void gexfParseEdge(xmlNode* n, unsigned int* edgeSource,
   *edgeTarget = atoi((const char*) xmlGetProp(n, (const xmlChar*) "target"));
 }
 
-void gexfParseVertices(xmlNode* gexf, float* vertexXLocs, float* vertexYLocs)
+void gexfParseVertices(xmlNode* gexf, double* vertexXLocs, double* vertexYLocs, int *vertexIds)
 {
   if (!gexf || !vertexXLocs || !vertexYLocs) return;
   xmlNode* graph = xmlwGetChild(gexf, "graph");
@@ -69,7 +73,7 @@ void gexfParseVertices(xmlNode* gexf, float* vertexXLocs, float* vertexYLocs)
   xmlNode* node = nodes->children;
   while (node)
   {
-    gexfParseVertex(node, &vertexXLocs[i], &vertexYLocs[i]);
+    gexfParseVertex(node, &vertexXLocs[i], &vertexYLocs[i], &vertexIds[i]);
     i++;
     node = node->next;
   }
@@ -135,17 +139,19 @@ void gexfParseFile(Graph* g, const char* in)
   g->numvertices = numNodes;
   g->numedges = numEdges;
 
-  float* vertexXLoc = (float*) calloc(numNodes, sizeof(float));
-  float* vertexYLoc = (float*) calloc(numNodes, sizeof(float));
+  double* vertexXLoc = (double*) calloc(numNodes, sizeof(double));
+  double* vertexYLoc = (double*) calloc(numNodes, sizeof(double));
   unsigned int* edgeStart = (unsigned int*) calloc(numEdges, sizeof(unsigned int));
   unsigned int* edgeEnd = (unsigned int*) calloc(numEdges, sizeof(unsigned int));
+  g->vertexIds = (int*) calloc(numNodes, sizeof(int));
+  assert(g->vertexIds != NULL);
 
   g->vertexXLocs = vertexXLoc;
   g->vertexYLocs = vertexYLoc;
   g->edgeSources = edgeStart;
   g->edgeTargets = edgeEnd;
 
-  gexfParseVertices(root_element, vertexXLoc, vertexYLoc);
+  gexfParseVertices(root_element, vertexXLoc, vertexYLoc, g->vertexIds);
   gexfParseEdges(root_element, edgeStart, edgeEnd);
 
   /*free the document */

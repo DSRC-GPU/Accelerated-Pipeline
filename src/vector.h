@@ -10,13 +10,13 @@
 
 #include "graph.h"
 
-DEVICE_FUNC void vectorAdd(float*, float*, float, float);
-DEVICE_FUNC void vectorSubtract(float*, float*, float, float);
-DEVICE_FUNC void vectorNormalize(float*, float*);
-DEVICE_FUNC void vectorInverse(float*, float*);
-DEVICE_FUNC void vectorMultiply(float*, float*, float);
-DEVICE_FUNC void vectorCheckValid(float*, float*, char*);
-DEVICE_FUNC float vectorGetLength(float, float);
+DEVICE_FUNC void vectorAdd(double*, double*, double, double);
+DEVICE_FUNC void vectorSubtract(double*, double*, double, double);
+DEVICE_FUNC void vectorNormalize(double*, double*);
+DEVICE_FUNC void vectorInverse(double*, double*);
+DEVICE_FUNC void vectorMultiply(double*, double*, double);
+DEVICE_FUNC void vectorCheckValid(double*, double*, char*);
+DEVICE_FUNC double vectorGetLength(double, double);
 
 #endif
 

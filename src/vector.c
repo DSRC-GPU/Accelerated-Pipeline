@@ -7,26 +7,26 @@
 
 #define FLOAT_EPSILON 0.0000001
 
-void vectorAdd(float* vxptr, float* vyptr, float vx, float vy)
+void vectorAdd(double* vxptr, double* vyptr, double vx, double vy)
 {
   *vxptr += vx;
   *vyptr += vy;
 }
 
-void vectorSubtract(float* vxptr, float* vyptr, float vx, float vy)
+void vectorSubtract(double* vxptr, double* vyptr, double vx, double vy)
 {
   *vxptr -= vx;
   *vyptr -= vy;
 }
 
-void vectorNormalize(float* vxptr, float* vyptr)
+void vectorNormalize(double* vxptr, double* vyptr)
 {
   if (!vxptr || !vyptr || isnan(*vxptr) || isnan(*vyptr))
   {
     printf("Cannot normalize invalid vector.\n");
     exit(EXIT_FAILURE);
   }
-  float c = vectorGetLength(*vxptr, *vyptr);
+  double c = vectorGetLength(*vxptr, *vyptr);
   if (c < FLOAT_EPSILON)
   {
     *vxptr = 0;
@@ -39,18 +39,18 @@ void vectorNormalize(float* vxptr, float* vyptr)
   }
 }
 
-void vectorInverse(float* vxptr, float* vyptr)
+void vectorInverse(double* vxptr, double* vyptr)
 {
   vectorMultiply(vxptr, vyptr, -1);
 }
 
-void vectorMultiply(float* vxptr, float* vyptr, float f)
+void vectorMultiply(double* vxptr, double* vyptr, double f)
 {
   *vxptr *= f;
   *vyptr *= f;
 }
 
-void vectorCheckValid(float* vxptr, float* vyptr, char* text)
+void vectorCheckValid(double* vxptr, double* vyptr, char* text)
 {
   if (!vxptr || !vyptr || isnan(*vxptr) || isnan(*vyptr))
   {
@@ -59,14 +59,14 @@ void vectorCheckValid(float* vxptr, float* vyptr, char* text)
   }
 }
 
-float vectorGetLength(float vx, float vy)
+double vectorGetLength(double vx, double vy)
 {
   if (isnan(vx) || isnan(vy))
   {
     printf("Cannot get length of vector.\n");
     exit(EXIT_FAILURE);
   }
-  float res = sqrt(vx * vx + vy * vy);
+  double res = sqrt(vx * vx + vy * vy);
   return res;
 }
 

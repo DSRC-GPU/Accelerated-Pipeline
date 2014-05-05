@@ -48,28 +48,17 @@ int main(int argc, char* argv[])
   }
 
   // Feedback to user.
-  printf("Using input file %s.\n", inputFile);
-  if (runForever)
-    printf("Running simulation indefinately.\n");
-  else
-    printf("Running simulation for %d ticks.\n", numTicks);
-
-  // Graph parsing.
-  printf("Parsing graph...");
   Graph* g = (Graph*) calloc(1, sizeof(Graph));
   gexfParseFile(g, inputFile);
-  printf(" done!\n");
-
-  printf("Graph nodes: %d, Graph edges: %d.\n", g->numvertices, g->numedges);
 
   // Printing
-  printGraph(g);
+  //printGraph(g);
 
   // Computing.
   fa2RunOnGraph(g, numTicks);
 
   // Printing
-  printGraph(g);
+  //printGraph(g);
 
   free(g);
 }

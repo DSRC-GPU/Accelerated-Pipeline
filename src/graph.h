@@ -6,8 +6,9 @@ typedef struct Graph
 {
   // The number of edges and vertices in the graph.
   unsigned int numedges, numvertices;
-  float* vertexXLocs;
-  float* vertexYLocs;
+  int*  vertexIds;
+  double* vertexXLocs;
+  double* vertexYLocs;
   unsigned int* edgeSources;
   unsigned int* edgeTargets;
 } Graph;
