@@ -87,15 +87,16 @@ __device__ void fa2Repulsion(unsigned int gid, unsigned int numvertices,
 
       vectorSubtract(&vx1, &vy1, vx2, vy2);
       float dist = vectorGetLength(vx1, vy1);
-      if (dist < FLOAT_EPSILON)
-        dist = EPSILON;
 
-      vectorNormalize(&vx1, &vy1);
-      vectorMultiply(&vx1, &vy1, K_R * (((deg[gid] + 1) * (deg[j] + 1))
-            / dist));
-      vectorMultiply(&vx1, &vy1, 0.5);
+      if (dist > 0)
+      {
+        vectorNormalize(&vx1, &vy1);
+        vectorMultiply(&vx1, &vy1, K_R * (((deg[gid] + 1) * (deg[j] + 1))
+              / dist));
+        vectorMultiply(&vx1, &vy1, 0.5);
 
-      vectorAdd(forceX, forceY, vx1, vy1);
+        vectorAdd(forceX, forceY, vx1, vy1);
+      }
     }
   }
 }
@@ -249,7 +250,7 @@ __device__ void fa2UpdateSpeedGraph(float gswing, float gtract, float* gspeed)
     if (*gspeed <= 0)
       *gspeed = EPSILON;
     // Do not allow more then 50% speed increase.
-    if (oldSpeed > FLOAT_EPSILON && *gspeed > 1.5 * oldSpeed)
+    if (oldSpeed > 0 && *gspeed > 1.5 * oldSpeed)
       *gspeed = 1.5 * oldSpeed;
 }
 

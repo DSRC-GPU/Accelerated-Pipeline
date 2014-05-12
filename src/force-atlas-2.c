@@ -71,15 +71,16 @@ void fa2Repulsion(Graph* g, double* forceX, double* forceY, unsigned int* deg)
 
       vectorSubtract(&vx1, &vy1, vx2, vy2);
       double dist = vectorGetLength(vx1, vy1);
-      if (dist < FLOAT_EPSILON)
-        dist = EPSILON;
 
-      vectorNormalize(&vx1, &vy1);
-      vectorMultiply(&vx1, &vy1, K_R * (((deg[i] + 1) * (deg[j] + 1))
-              / dist));
-      vectorMultiply(&vx1, &vy1, 0.5);
+      if (dist > 0)
+      {
+        vectorNormalize(&vx1, &vy1);
+        vectorMultiply(&vx1, &vy1, K_R * (((deg[i] + 1) * (deg[j] + 1))
+                / dist));
+        vectorMultiply(&vx1, &vy1, 0.5);
 
-      vectorAdd(&forceX[i], &forceY[i], vx1, vy1);
+        vectorAdd(&forceX[i], &forceY[i], vx1, vy1);
+      }
     }
   }
 }
@@ -159,7 +160,7 @@ void fa2UpdateSpeedGraph(double gswing, double gtract, double* gspeed)
   if (*gspeed <= 0)
     *gspeed = EPSILON;
   // Do not allow more then 50% speed increase.
-  if (oldSpeed > FLOAT_EPSILON && *gspeed > 1.5 * oldSpeed)
+  if (oldSpeed > 0 && *gspeed > 1.5 * oldSpeed)
     *gspeed = 1.5 * oldSpeed;
 }
 
