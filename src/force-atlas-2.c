@@ -2,15 +2,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <float.h>
 #include "force-atlas-2.h"
 #include "math.h"
 #include "vector.h"
 
 #define K_R 1.0
-#define K_S 0.1
-#define K_G 5
+#define K_S 1.0
+#define K_G 1.0
 #define K_SMAX 10.0
-#define TAU 1.0
+#define TAU 0.01
 #define EPSILON 0.1
 #define FLOAT_EPSILON 0.0000001
 
@@ -49,10 +50,13 @@ void fa2Gravity(Graph* g, double* forceX, double* forceY, unsigned int* deg)
   {
     double vx = g->vertexXLocs[i];
     double vy = g->vertexYLocs[i];
-    vectorNormalize(&vx, &vy);
+    double vlen = vectorGetLength(vx, vy);
+    printf("grav force: %f,%f.\n", vx, vy);
+    printf("vlen: %f.\n", vlen);
     vectorInverse(&vx, &vy);
-    vectorMultiply(&vx, &vy, K_G * (deg[i] + 1));
+    vectorMultiply(&vx, &vy, K_G * (deg[i] + 1) / vlen);
     vectorAdd(&forceX[i], &forceY[i], vx, vy);
+    printf("grav force: %f,%f.\n", vx, vy);
   }
 }
 
@@ -77,7 +81,7 @@ void fa2Repulsion(Graph* g, double* forceX, double* forceY, unsigned int* deg)
         vectorNormalize(&vx1, &vy1);
         vectorMultiply(&vx1, &vy1, K_R * (((deg[i] + 1) * (deg[j] + 1))
                 / dist));
-        vectorMultiply(&vx1, &vy1, 0.5);
+        // vectorMultiply(&vx1, &vy1, 0.5);
 
         vectorAdd(&forceX[i], &forceY[i], vx1, vy1);
       }
@@ -99,7 +103,7 @@ void fa2Attraction(Graph* g, double* forceX, double* forceY)
     double vy2 = g->vertexYLocs[v2Index];
 
     vectorSubtract(&vx2, &vy2, vx1, vy1);
-    vectorMultiply(&vx2, &vy2, 0.5);
+    // vectorMultiply(&vx2, &vy2, 0.5);
     vectorAdd(&forceX[v1Index], &forceY[v1Index], vx2, vy2);
   }
 }
@@ -110,9 +114,10 @@ void fa2UpdateSwing(Graph* g, double* forceX, double* forceY,
 {
   for (size_t i = 0; i < g->numvertices; i++)
   {
-    double fx = forceX[i];
-    double fy = forceY[i];
-    vectorSubtract(&fx, &fy, oldForceX[i], oldForceY[i]);
+    double fx = oldForceX[i];
+    double fy = oldForceY[i];
+    printf("old forces x:y => %f:%f.\n", fx, fy);
+    vectorSubtract(&fx, &fy, forceX[i], forceY[i]);
     double vlen = vectorGetLength(fx, fy);
     swg[i] = vlen;
   }
@@ -141,6 +146,7 @@ void fa2UpdateSwingGraph(Graph* g, double* swg, unsigned int* deg, double* gswin
   {
     *gswing += (deg[i] + 1) * swg[i];
   }
+  printf("Swing: %f.\n", *gswing);
 }
 
 // Calculate the current traction of the graph.
@@ -156,12 +162,18 @@ void fa2UpdateTractGraph(Graph* g, double* tra, unsigned int* deg, double* gtrac
 void fa2UpdateSpeedGraph(double gswing, double gtract, double* gspeed)
 {
   double oldSpeed = *gspeed;
-  *gspeed = gswing > 0 ? TAU * (gtract / gswing) : EPSILON;
-  if (*gspeed <= 0)
-    *gspeed = EPSILON;
+
+  if (gswing == 0)
+    gswing = FLOAT_EPSILON;
+
+  *gspeed = TAU * (gtract / gswing);
+
+  //if (*gspeed <= 0)
+  //  *gspeed = EPSILON;
   // Do not allow more then 50% speed increase.
   if (oldSpeed > 0 && *gspeed > 1.5 * oldSpeed)
     *gspeed = 1.5 * oldSpeed;
+  printf("GSpeed: %f.\n", *gspeed);
 }
 
 void fa2UpdateSpeed(Graph* g, double* speed, double* swg, double* forceX,
@@ -177,8 +189,8 @@ void fa2UpdateSpeed(Graph* g, double* speed, double* swg, double* forceX,
       vForceLen = EPSILON;
 
     speed[i] = K_S * gs / (1 + (gs * sqrt(vSwg)));
-    speed[i] = fmin(speed[i],
-        K_SMAX / vForceLen);
+    //speed[i] = fmin(speed[i],
+    //    K_SMAX / vForceLen);
   }
 }
 
@@ -250,6 +262,8 @@ void fa2RunOnce(Graph* g)
 
   // Update swing of Graph.
   fa2UpdateSwingGraph(g, swg, numNeighbours, &graphSwing);
+
+  printf("swing: %f.\n", graphSwing);
 
   // Update traction of Graph.
   fa2UpdateTractGraph(g, tra, numNeighbours, &graphTract);

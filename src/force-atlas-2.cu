@@ -2,15 +2,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <float.h>
 #include "force-atlas-2.h"
 #include "math.h"
 #include "vector.h"
 
 #define K_R 1.0
-#define K_S 0.1
-#define K_G 5
+#define K_S 1.0
+#define K_G 1.0
 #define K_SMAX 10.0
-#define TAU 1.0
+#define TAU 0.01
 #define EPSILON 0.1
 #define FLOAT_EPSILON 0.0000001
 
@@ -64,9 +65,9 @@ __device__ void fa2Gravity(unsigned int gid, unsigned int numvertices,
   {
     float vx = vxLocs[gid];
     float vy = vyLocs[gid];
-    vectorNormalize(&vx, &vy);
+    float vlen = vectorGetLength(vx, vy);
     vectorInverse(&vx, &vy);
-    vectorMultiply(&vx, &vy, K_G * (deg[gid] + 1));
+    vectorMultiply(&vx, &vy, K_G * (deg[gid] + 1) / vlen);
     vectorAdd(forceX, forceY, vx, vy);
   }
 }
@@ -93,7 +94,7 @@ __device__ void fa2Repulsion(unsigned int gid, unsigned int numvertices,
         vectorNormalize(&vx1, &vy1);
         vectorMultiply(&vx1, &vy1, K_R * (((deg[gid] + 1) * (deg[j] + 1))
               / dist));
-        vectorMultiply(&vx1, &vy1, 0.5);
+        // vectorMultiply(&vx1, &vy1, 0.5);
 
         vectorAdd(forceX, forceY, vx1, vy1);
       }
@@ -123,7 +124,7 @@ __device__ void fa2Attraction(unsigned int gid, unsigned int numvertices,
         float vy2 = vyLocs[target];
 
         vectorSubtract(&vx2, &vy2, vx1, vy1);
-        vectorMultiply(&vx2, &vy2, 0.5);
+        // vectorMultiply(&vx2, &vy2, 0.5);
         vectorAdd(forceX, forceY, vx2, vy2);
       }
     }
@@ -153,9 +154,9 @@ __device__ void fa2UpdateTract(unsigned int gid, unsigned int numvertices,
 {
   if (gid < numvertices)
   {
-    float fx = forceX;
-    float fy = forceY;
-    vectorAdd(&fx, &fy, oldForceX[gid], oldForceY[gid]);
+    float fx = oldForceX;
+    float fy = oldForceY;
+    vectorAdd(&fx, &fy, forceX[gid], forceY[gid]);
     float vlen = vectorGetLength(fx, fy);
     tra[gid] = vlen / 2;
   }
@@ -245,13 +246,18 @@ __device__ void fa2UpdateTractGraph(unsigned int gid, unsigned int numvertices,
 
 __device__ void fa2UpdateSpeedGraph(float gswing, float gtract, float* gspeed)
 {
-    float oldSpeed = *gspeed;
-    *gspeed = gswing > 0 ? TAU * (gtract / gswing) : EPSILON;
-    if (*gspeed <= 0)
-      *gspeed = EPSILON;
-    // Do not allow more then 50% speed increase.
-    if (oldSpeed > 0 && *gspeed > 1.5 * oldSpeed)
-      *gspeed = 1.5 * oldSpeed;
+  float oldSpeed = *gspeed;
+
+  if (gswing == 0)
+    gswing = FLOAT_EPSILON;
+
+  *gspeed = TAU * (gtract / gswing);
+
+  //if (*gspeed <= 0)
+  //  *gspeed = EPSILON;
+  // Do not allow more then 50% speed increase.
+  if (oldSpeed > 0 && *gspeed > 1.5 * oldSpeed)
+    *gspeed = 1.5 * oldSpeed;
 }
 
 __device__ void fa2UpdateSpeed(unsigned int gid, unsigned int numvertices,
@@ -267,8 +273,8 @@ __device__ void fa2UpdateSpeed(unsigned int gid, unsigned int numvertices,
       vForceLen = EPSILON;
 
     *speed = K_S * gs / (1 + (gs * sqrt(vSwg)));
-    *speed = fmin(*speed, (float)
-        K_SMAX / vForceLen);
+    //*speed = fmin(*speed, (float)
+    //    K_SMAX / vForceLen);
   }
 }
 
