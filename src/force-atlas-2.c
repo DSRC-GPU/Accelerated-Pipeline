@@ -51,12 +51,9 @@ void fa2Gravity(Graph* g, double* forceX, double* forceY, unsigned int* deg)
     double vx = g->vertexXLocs[i];
     double vy = g->vertexYLocs[i];
     double vlen = vectorGetLength(vx, vy);
-    printf("grav force: %f,%f.\n", vx, vy);
-    printf("vlen: %f.\n", vlen);
     vectorInverse(&vx, &vy);
     vectorMultiply(&vx, &vy, K_G * (deg[i] + 1) / vlen);
     vectorAdd(&forceX[i], &forceY[i], vx, vy);
-    printf("grav force: %f,%f.\n", vx, vy);
   }
 }
 
@@ -116,7 +113,6 @@ void fa2UpdateSwing(Graph* g, double* forceX, double* forceY,
   {
     double fx = oldForceX[i];
     double fy = oldForceY[i];
-    printf("old forces x:y => %f:%f.\n", fx, fy);
     vectorSubtract(&fx, &fy, forceX[i], forceY[i]);
     double vlen = vectorGetLength(fx, fy);
     swg[i] = vlen;
@@ -146,7 +142,6 @@ void fa2UpdateSwingGraph(Graph* g, double* swg, unsigned int* deg, double* gswin
   {
     *gswing += (deg[i] + 1) * swg[i];
   }
-  printf("Swing: %f.\n", *gswing);
 }
 
 // Calculate the current traction of the graph.
@@ -173,7 +168,6 @@ void fa2UpdateSpeedGraph(double gswing, double gtract, double* gspeed)
   // Do not allow more then 50% speed increase.
   if (oldSpeed > 0 && *gspeed > 1.5 * oldSpeed)
     *gspeed = 1.5 * oldSpeed;
-  printf("GSpeed: %f.\n", *gspeed);
 }
 
 void fa2UpdateSpeed(Graph* g, double* speed, double* swg, double* forceX,
@@ -262,8 +256,6 @@ void fa2RunOnce(Graph* g)
 
   // Update swing of Graph.
   fa2UpdateSwingGraph(g, swg, numNeighbours, &graphSwing);
-
-  printf("swing: %f.\n", graphSwing);
 
   // Update traction of Graph.
   fa2UpdateTractGraph(g, tra, numNeighbours, &graphTract);
