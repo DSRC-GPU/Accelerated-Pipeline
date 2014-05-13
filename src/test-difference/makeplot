@@ -1,5 +1,10 @@
 #!/bin/sh
 
+if [ $# -ne 3 ]; then
+  echo "Usage: $0 [gephi toolkit data file] [C data file] [number of nodes]"
+  exit 1
+fi
+
 FILENAME=test.data
 TMPCDATA=fa2c.data
 
