@@ -1,7 +1,13 @@
-
+/*!
+  \file graph.h
+  A simple graph implementation.
+ */
 #ifndef GRAPH_H
 #define GRAPH_H
 
+/*!
+  Structure that represents a graph.
+ */
 typedef struct Graph
 {
   // The number of edges and vertices in the graph.
@@ -13,9 +19,11 @@ typedef struct Graph
   unsigned int* edgeTargets;
 } Graph;
 
-
-// The printGraph function prints the details of the graph to stdout.
-void printGraph(Graph*);
+/*!
+  Print the details of the graph to stdout.
+  \param[in] g The graph to print.
+ */
+void printGraph(Graph* g);
 
 #endif
 
