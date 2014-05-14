@@ -7,14 +7,6 @@
 #include "math.h"
 #include "vector.h"
 
-#define K_R 1.0
-#define K_S 1.0
-#define K_G 1.0
-#define K_SMAX 10.0
-#define TAU 0.01
-#define EPSILON 0.1
-#define FLOAT_EPSILON 0.0000001
-
 #define BLOCK_SIZE 64
 
 // Gravity force

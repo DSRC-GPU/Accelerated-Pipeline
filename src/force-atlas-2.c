@@ -1,3 +1,7 @@
+/*!
+  \file force-atlas-2.c
+  Sequential implementation for the Force Atlas 2 spring embedding algorithm.
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,16 +11,13 @@
 #include "math.h"
 #include "vector.h"
 
-#define K_R 1.0
-#define K_S 1.0
-#define K_G 1.0
-#define K_SMAX 10.0
-#define TAU 0.01
-#define EPSILON 0.1
-#define FLOAT_EPSILON 0.0000001
-
-// Calculate the number of neighbours for every node.
-void calcNumNeighbours(Graph*, unsigned int*);
+/*!
+  Calculates the number of neighbours for every node.
+  \param[in] g The input graph.
+  \param[out] numNeighbours An array containing the out-degree for each node in
+  the given graph.
+ */
+void calcNumNeighbours(Graph*i g, unsigned int* numNeighbours);
 // Gravity force
 void fa2Gravity(Graph*, float*, float*, unsigned int*);
 // Repulsion between vertices
@@ -77,7 +78,7 @@ void fa2Repulsion(Graph* g, float* forceX, float* forceY, unsigned int* deg)
       {
         vectorNormalize(&vx1, &vy1);
         vectorMultiply(&vx1, &vy1, K_R * (((deg[i] + 1) * (deg[j] + 1))
-                / dist));
+              / dist));
         // vectorMultiply(&vx1, &vy1, 0.5);
 
         vectorAdd(&forceX[i], &forceY[i], vx1, vy1);
