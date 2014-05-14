@@ -20,7 +20,7 @@
   \param vx2 The x value of vector 2.
   \param vy2 The y value of vector 2.
  */
-DEVICE_FUNC void vectorAdd(double* vx1, double* vy1, double vx2, double vy2);
+DEVICE_FUNC void vectorAdd(float* vx1, float* vy1, float vx2, float vy2);
 
 /*! 
   Performs v1 - v2, and stores the result in v1.
@@ -29,21 +29,21 @@ DEVICE_FUNC void vectorAdd(double* vx1, double* vy1, double vx2, double vy2);
   \param vx2 The x value of vector 2.
   \param vy2 The y value of vector 2.
  */
-DEVICE_FUNC void vectorSubtract(double* vx1, double* vy1, double vx2, double vy2);
+DEVICE_FUNC void vectorSubtract(float* vx1, float* vy1, float vx2, float vy2);
 
 /*!
   Reduces the length of the given vector to 1.
   \param vx The x value of the vector.
   \param vy The y value of the vector.
  */
-DEVICE_FUNC void vectorNormalize(double* vx, double* vy);
+DEVICE_FUNC void vectorNormalize(float* vx, float* vy);
 
 /*!
   Convenience method that multiplies the given vector with -1.
   \param vx The x value of the vector.
   \param vy The y value of the vector.
  */
-DEVICE_FUNC void vectorInverse(double* vx, double* vy);
+DEVICE_FUNC void vectorInverse(float* vx, float* vy);
 
 /*!
   Multiplies a vector with a scalar and saves the result in the given vector.
@@ -51,7 +51,7 @@ DEVICE_FUNC void vectorInverse(double* vx, double* vy);
   \param vy The y value of the vector.
   \param s The scalar with which to multiple the vector.
  */
-DEVICE_FUNC void vectorMultiply(double* vx, double* vy, double s);
+DEVICE_FUNC void vectorMultiply(float* vx, float* vy, float s);
 
 /*!
   Checks if the vector x and y values are valid numbers (not NaN, not null). If
@@ -60,14 +60,14 @@ DEVICE_FUNC void vectorMultiply(double* vx, double* vy, double s);
   \param vy The y value of the vector.
   \param s The string to print when the vector is invalid.
  */
-DEVICE_FUNC void vectorCheckValid(double* vx, double* vy, char* s);
+DEVICE_FUNC void vectorCheckValid(float* vx, float* vy, char* s);
 
 /*!
   Returns the length of the vector.
   \param vx The x value of the vector.
   \param vy The y value of the vector.
  */
-DEVICE_FUNC double vectorGetLength(double vx, double vy);
+DEVICE_FUNC float vectorGetLength(float vx, float vy);
 
 #endif
 

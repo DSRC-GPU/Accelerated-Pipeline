@@ -18,21 +18,21 @@
 // Calculate the number of neighbours for every node.
 void calcNumNeighbours(Graph*, unsigned int*);
 // Gravity force
-void fa2Gravity(Graph*, double*, double*, unsigned int*);
+void fa2Gravity(Graph*, float*, float*, unsigned int*);
 // Repulsion between vertices
-void fa2Repulsion(Graph*, double*, double*, unsigned int*);
+void fa2Repulsion(Graph*, float*, float*, unsigned int*);
 // Attraction on edges
-void fa2Attraction(Graph*, double*, double*);
+void fa2Attraction(Graph*, float*, float*);
 
-void fa2UpdateSwing(Graph*, double*, double*, double*, double*, double*);
-void fa2UpdateTract(Graph*, double*, double*, double*, double*, double*);
-void fa2UpdateSwingGraph(Graph*, double*, unsigned int*, double*);
-void fa2UpdateTractGraph(Graph*, double*, unsigned int*, double*);
-void fa2UpdateSpeedGraph(double, double, double*);
-void fa2UpdateSpeed(Graph*, double*, double*, double*, double*, double);
-void fa2UpdateDisplacement(Graph*, double*, double*, double*, double*, double*);
-void fa2SaveOldForces(Graph*, double*, double*, double*, double*);
-void fa2UpdateLocation(Graph*, double*, double*);
+void fa2UpdateSwing(Graph*, float*, float*, float*, float*, float*);
+void fa2UpdateTract(Graph*, float*, float*, float*, float*, float*);
+void fa2UpdateSwingGraph(Graph*, float*, unsigned int*, float*);
+void fa2UpdateTractGraph(Graph*, float*, unsigned int*, float*);
+void fa2UpdateSpeedGraph(float, float, float*);
+void fa2UpdateSpeed(Graph*, float*, float*, float*, float*, float);
+void fa2UpdateDisplacement(Graph*, float*, float*, float*, float*, float*);
+void fa2SaveOldForces(Graph*, float*, float*, float*, float*);
+void fa2UpdateLocation(Graph*, float*, float*);
 
 void calcNumNeighbours(Graph* g, unsigned int* deg)
 {
@@ -43,21 +43,21 @@ void calcNumNeighbours(Graph* g, unsigned int* deg)
   }
 }
 
-void fa2Gravity(Graph* g, double* forceX, double* forceY, unsigned int* deg)
+void fa2Gravity(Graph* g, float* forceX, float* forceY, unsigned int* deg)
 {
   if (!g) return;
   for (size_t i = 0; i < g->numvertices; i++)
   {
-    double vx = g->vertexXLocs[i];
-    double vy = g->vertexYLocs[i];
-    double vlen = vectorGetLength(vx, vy);
+    float vx = g->vertexXLocs[i];
+    float vy = g->vertexYLocs[i];
+    float vlen = vectorGetLength(vx, vy);
     vectorInverse(&vx, &vy);
     vectorMultiply(&vx, &vy, K_G * (deg[i] + 1) / vlen);
     vectorAdd(&forceX[i], &forceY[i], vx, vy);
   }
 }
 
-void fa2Repulsion(Graph* g, double* forceX, double* forceY, unsigned int* deg)
+void fa2Repulsion(Graph* g, float* forceX, float* forceY, unsigned int* deg)
 {
   if (!g) return;
   for (size_t i = 0; i < g->numvertices; i++)
@@ -65,13 +65,13 @@ void fa2Repulsion(Graph* g, double* forceX, double* forceY, unsigned int* deg)
     for (size_t j = 0; j < g->numvertices; j++)
     {
       if (i == j) continue;
-      double vx1 = g->vertexXLocs[i];
-      double vy1 = g->vertexYLocs[i];
-      double vx2 = g->vertexXLocs[j];
-      double vy2 = g->vertexYLocs[j];
+      float vx1 = g->vertexXLocs[i];
+      float vy1 = g->vertexYLocs[i];
+      float vx2 = g->vertexXLocs[j];
+      float vy2 = g->vertexYLocs[j];
 
       vectorSubtract(&vx1, &vy1, vx2, vy2);
-      double dist = vectorGetLength(vx1, vy1);
+      float dist = vectorGetLength(vx1, vy1);
 
       if (dist > 0)
       {
@@ -86,7 +86,7 @@ void fa2Repulsion(Graph* g, double* forceX, double* forceY, unsigned int* deg)
   }
 }
 
-void fa2Attraction(Graph* g, double* forceX, double* forceY)
+void fa2Attraction(Graph* g, float* forceX, float* forceY)
 {
   if (!g) return;
   for (size_t i = 0; i < g->numedges; i++)
@@ -94,10 +94,10 @@ void fa2Attraction(Graph* g, double* forceX, double* forceY)
     int v1Index = g->edgeSources[i];
     int v2Index = g->edgeTargets[i];
 
-    double vx1 = g->vertexXLocs[v1Index];
-    double vy1 = g->vertexYLocs[v1Index];
-    double vx2 = g->vertexXLocs[v2Index];
-    double vy2 = g->vertexYLocs[v2Index];
+    float vx1 = g->vertexXLocs[v1Index];
+    float vy1 = g->vertexYLocs[v1Index];
+    float vx2 = g->vertexXLocs[v2Index];
+    float vy2 = g->vertexYLocs[v2Index];
 
     vectorSubtract(&vx2, &vy2, vx1, vy1);
     // vectorMultiply(&vx2, &vy2, 0.5);
@@ -106,36 +106,36 @@ void fa2Attraction(Graph* g, double* forceX, double* forceY)
 }
 
 // Updates the swing for each vertex, as described in the Force Atlas 2 paper.
-void fa2UpdateSwing(Graph* g, double* forceX, double* forceY,
-    double* oldForceX, double* oldForceY, double* swg)
+void fa2UpdateSwing(Graph* g, float* forceX, float* forceY,
+    float* oldForceX, float* oldForceY, float* swg)
 {
   for (size_t i = 0; i < g->numvertices; i++)
   {
-    double fx = oldForceX[i];
-    double fy = oldForceY[i];
+    float fx = oldForceX[i];
+    float fy = oldForceY[i];
     vectorSubtract(&fx, &fy, forceX[i], forceY[i]);
-    double vlen = vectorGetLength(fx, fy);
+    float vlen = vectorGetLength(fx, fy);
     swg[i] = vlen;
   }
 }
 
 // Updates the traction for each vertex, as described in the Force Atlas 2
 // paper.
-void fa2UpdateTract(Graph* g, double* forceX, double* forceY,
-    double* oldForceX, double* oldForceY, double* tra)
+void fa2UpdateTract(Graph* g, float* forceX, float* forceY,
+    float* oldForceX, float* oldForceY, float* tra)
 {
   for (size_t i = 0; i < g->numvertices; i++)
   {
-    double fx = forceX[i];
-    double fy = forceY[i];
+    float fx = forceX[i];
+    float fy = forceY[i];
     vectorAdd(&fx, &fy, oldForceX[i], oldForceY[i]);
-    double vlen = vectorGetLength(fx, fy);
+    float vlen = vectorGetLength(fx, fy);
     tra[i] = vlen / 2;
   }
 }
 
 // Calculate the current swing of the graph.
-void fa2UpdateSwingGraph(Graph* g, double* swg, unsigned int* deg, double* gswing)
+void fa2UpdateSwingGraph(Graph* g, float* swg, unsigned int* deg, float* gswing)
 {
   *gswing = 0;
   for (size_t i = 0; i < g->numvertices; i++)
@@ -145,7 +145,7 @@ void fa2UpdateSwingGraph(Graph* g, double* swg, unsigned int* deg, double* gswin
 }
 
 // Calculate the current traction of the graph.
-void fa2UpdateTractGraph(Graph* g, double* tra, unsigned int* deg, double* gtract)
+void fa2UpdateTractGraph(Graph* g, float* tra, unsigned int* deg, float* gtract)
 {
   *gtract = 0;
   for (size_t i = 0; i < g->numvertices; i++)
@@ -154,9 +154,9 @@ void fa2UpdateTractGraph(Graph* g, double* tra, unsigned int* deg, double* gtrac
   }
 }
 
-void fa2UpdateSpeedGraph(double gswing, double gtract, double* gspeed)
+void fa2UpdateSpeedGraph(float gswing, float gtract, float* gspeed)
 {
-  double oldSpeed = *gspeed;
+  float oldSpeed = *gspeed;
 
   if (gswing == 0)
     gswing = FLOAT_EPSILON;
@@ -170,15 +170,15 @@ void fa2UpdateSpeedGraph(double gswing, double gtract, double* gspeed)
     *gspeed = 1.5 * oldSpeed;
 }
 
-void fa2UpdateSpeed(Graph* g, double* speed, double* swg, double* forceX,
-    double* forceY, double gs)
+void fa2UpdateSpeed(Graph* g, float* speed, float* swg, float* forceX,
+    float* forceY, float gs)
 {
   for (size_t i = 0; i < g->numvertices; i++)
   {
-    double vSwg = swg[i];
+    float vSwg = swg[i];
     if (vSwg <= 0)
       vSwg = EPSILON;
-    double vForceLen = vectorGetLength(forceX[i], forceY[i]);
+    float vForceLen = vectorGetLength(forceX[i], forceY[i]);
     if (vForceLen <= 0)
       vForceLen = EPSILON;
 
@@ -189,8 +189,8 @@ void fa2UpdateSpeed(Graph* g, double* speed, double* swg, double* forceX,
 }
 
 // Save current forces as the previous forces for the next tick.
-void fa2SaveOldForces(Graph* g, double* forceX, double* forceY,
-    double* oldForceX, double* oldForceY)
+void fa2SaveOldForces(Graph* g, float* forceX, float* forceY,
+    float* oldForceX, float* oldForceY)
 {
   for (size_t i = 0; i < g->numvertices; i++)
   {
@@ -199,8 +199,8 @@ void fa2SaveOldForces(Graph* g, double* forceX, double* forceY,
   }
 }
 
-void fa2UpdateDisplacement(Graph* g, double* speed, double* forceX,
-    double* forceY, double* dispX, double* dispY)
+void fa2UpdateDisplacement(Graph* g, float* speed, float* forceX,
+    float* forceY, float* dispX, float* dispY)
 {
   for (size_t i = 0; i < g->numvertices; i++)
   {
@@ -210,7 +210,7 @@ void fa2UpdateDisplacement(Graph* g, double* speed, double* forceX,
   }
 }
 
-void fa2UpdateLocation(Graph* g, double* xdisp, double* ydisp)
+void fa2UpdateLocation(Graph* g, float* xdisp, float* ydisp)
 {
   for (size_t i = 0; i < g->numvertices; i++)
   {
@@ -223,33 +223,33 @@ void fa2RunOnce(Graph* g)
 {
   static int firstRun = 1;
   static unsigned int* numNeighbours = NULL;
-  static double* tra = NULL;
-  static double* swg = NULL;
-  static double* speed = NULL;
-  static double* forceX = NULL;
-  static double* forceY = NULL;
-  static double* oldForceX = NULL;
-  static double* oldForceY = NULL;
-  static double* dispX = NULL;
-  static double* dispY = NULL;
+  static float* tra = NULL;
+  static float* swg = NULL;
+  static float* speed = NULL;
+  static float* forceX = NULL;
+  static float* forceY = NULL;
+  static float* oldForceX = NULL;
+  static float* oldForceY = NULL;
+  static float* dispX = NULL;
+  static float* dispY = NULL;
 
-  double graphSwing = 0.0;
-  double graphTract = 0.0;
-  static double graphSpeed = 0.0;
+  float graphSwing = 0.0;
+  float graphTract = 0.0;
+  static float graphSpeed = 0.0;
 
   if (firstRun)
   {
     numNeighbours = (unsigned int*) calloc(g->numvertices, sizeof(unsigned int));
     calcNumNeighbours(g, numNeighbours);
-    tra = (double*) calloc(g->numvertices, sizeof(double));
-    swg = (double*) calloc(g->numvertices, sizeof(double));
-    speed = (double*) calloc(g->numvertices, sizeof(double));
-    forceX = (double*) calloc(g->numvertices, sizeof(double));
-    forceY = (double*) calloc(g->numvertices, sizeof(double));
-    oldForceX = (double*) calloc(g->numvertices, sizeof(double));
-    oldForceY = (double*) calloc(g->numvertices, sizeof(double));
-    dispX = (double*) calloc(g->numvertices, sizeof(double));
-    dispY = (double*) calloc(g->numvertices, sizeof(double));
+    tra = (float*) calloc(g->numvertices, sizeof(float));
+    swg = (float*) calloc(g->numvertices, sizeof(float));
+    speed = (float*) calloc(g->numvertices, sizeof(float));
+    forceX = (float*) calloc(g->numvertices, sizeof(float));
+    forceY = (float*) calloc(g->numvertices, sizeof(float));
+    oldForceX = (float*) calloc(g->numvertices, sizeof(float));
+    oldForceY = (float*) calloc(g->numvertices, sizeof(float));
+    dispX = (float*) calloc(g->numvertices, sizeof(float));
+    dispY = (float*) calloc(g->numvertices, sizeof(float));
 
     firstRun = 0;
   }
@@ -264,8 +264,8 @@ void fa2RunOnce(Graph* g)
   fa2UpdateSpeedGraph(graphSwing, graphTract, &graphSpeed);
 
   // Reset forces on vertices to 0.
-  memset(forceX, 0, sizeof(double) * g->numvertices);
-  memset(forceY, 0, sizeof(double) * g->numvertices);
+  memset(forceX, 0, sizeof(float) * g->numvertices);
+  memset(forceY, 0, sizeof(float) * g->numvertices);
 
   // Gravity force
   fa2Gravity(g, forceX, forceY, numNeighbours);

@@ -154,9 +154,9 @@ __device__ void fa2UpdateTract(unsigned int gid, unsigned int numvertices,
 {
   if (gid < numvertices)
   {
-    float fx = oldForceX;
-    float fy = oldForceY;
-    vectorAdd(&fx, &fy, forceX[gid], forceY[gid]);
+    float fx = oldForceX[gid];
+    float fy = oldForceY[gid];
+    vectorAdd(&fx, &fy, forceX, forceY);
     float vlen = vectorGetLength(fx, fy);
     tra[gid] = vlen / 2;
   }
