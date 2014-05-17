@@ -7,6 +7,7 @@
 #include "force-atlas-2.h"
 #include "gexfparser.h"
 #include "graph.h"
+#include "timer.h"
 #include "vector.h"
 
 int main(int argc, char* argv[])
@@ -55,10 +56,15 @@ int main(int argc, char* argv[])
   //printGraph(g);
 
   // Computing.
+  Timer timer;
+  startTimer(&timer);
   fa2RunOnGraph(g, numTicks);
+  stopTimer(&timer);
+  printf("time: total.\n");
+  printTimer(&timer);
 
   // Printing
-  //printGraph(g);
+  printGraph(g);
 
   free(g);
 }

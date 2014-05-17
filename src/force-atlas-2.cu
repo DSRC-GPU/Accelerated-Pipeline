@@ -5,6 +5,7 @@
 #include <float.h>
 #include "force-atlas-2.h"
 #include "math.h"
+#include "timer.h"
 #include "vector.h"
 
 #define BLOCK_SIZE 64
@@ -130,9 +131,9 @@ __device__ void fa2UpdateSwing(unsigned int gid, unsigned int numvertices,
 {
   if (gid < numvertices)
   {
-    float fx = forceX;
-    float fy = forceY;
-    vectorSubtract(&fx, &fy, oldForceX[gid], oldForceY[gid]);
+    float fx = oldForceX[gid];
+    float fy = oldForceY[gid];
+    vectorSubtract(&fx, &fy, forceX, forceY);
     float vlen = vectorGetLength(fx, fy);
     swg[gid] = vlen;
   }
@@ -392,6 +393,8 @@ __global__ void fa2kernel(
   fa2SaveOldForces(gid, numvertices, forceX, forceY, oldForceX, oldForceY);
 
   // Update vertex locations based on speed.
+  // TODO Add a barrier here to make sure no vertex location is update before
+  // all vertices have calculated their repulsion and attraction forces.
   fa2UpdateLocation(gid, numvertices, vxLocs, vyLocs, dispX, dispY);
 }
 
@@ -411,6 +414,10 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
   float* vyLocs = NULL;
   unsigned int* edgeSources = NULL;
   unsigned int* edgeTargets = NULL;
+
+  Timer timerMem1, timerMem2;
+  cudaEvent_t start, stop;
+  float time;
 
   // Allocate data for vertices, edges, and fa2 data.
   cudaMalloc(&numNeighbours, g->numvertices * sizeof(int));
@@ -436,6 +443,8 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
   cudaMalloc(&edgeSources, g->numedges * sizeof(unsigned int));
   cudaMalloc(&edgeTargets, g->numedges * sizeof(unsigned int));
 
+  startTimer(&timerMem1);
+
   // Copy vertices and edges to device.
   cudaMemcpy((void*) vxLocs, g->vertexXLocs, g->numvertices * sizeof(float),
       cudaMemcpyHostToDevice);
@@ -445,6 +454,8 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
       g->numedges * sizeof(unsigned int), cudaMemcpyHostToDevice);
   cudaMemcpy((void*) edgeTargets, g->edgeTargets,
       g->numedges * sizeof(unsigned int), cudaMemcpyHostToDevice);
+
+  stopTimer(&timerMem1);
 
   unsigned int numblocks = ceil(g->numvertices / (float) BLOCK_SIZE);
   unsigned int numblocks_reduction = ceil(numblocks / 2.0);
@@ -457,11 +468,26 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
   {
     // Run fa2 spring embedding kernel.
 
+    cudaEventCreate(&start);
+    cudaEventRecord(start, 0);
+
     // Run reductions on vertex swing and traction.
     fa2GraphSwingTract<<<numblocks_reduction, BLOCK_SIZE>>>(
         g->numvertices,
         swg, tra, numNeighbours,
         graphSwing, graphTract);
+
+    cudaEventCreate(&stop);
+    cudaEventRecord(stop, 0);
+    cudaEventSynchronize(stop);
+    cudaEventElapsedTime(&time, start, stop);
+    cudaEventDestroy(start);
+    cudaEventDestroy(stop);
+    printf("time: graph swing and traction.\n");
+    printf("(ms)  %f.\n", time);
+
+    cudaEventCreate(&start);
+    cudaEventRecord(start, 0);
 
     // Compute graph speed, vertex forces, speed and displacement.
     fa2kernel<<<numblocks, BLOCK_SIZE>>>(
@@ -479,7 +505,18 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
         graphSwing,
         graphTract,
         graphSpeed);
+
+    cudaEventCreate(&stop);
+    cudaEventRecord(stop, 0);
+    cudaEventSynchronize(stop);
+    cudaEventElapsedTime(&time, start, stop);
+    cudaEventDestroy(start);
+    cudaEventDestroy(stop);
+    printf("time: all forces and moving vertices.\n");
+    printf("(ms)  %f.\n", time);
   }
+
+  startTimer(&timerMem2);
 
   // Update graph with new vertex positions.
   cudaMemcpy((void*) g->vertexXLocs, vxLocs, g->numvertices * sizeof(float),
@@ -490,6 +527,12 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
       g->numedges * sizeof(unsigned int), cudaMemcpyDeviceToHost);
   cudaMemcpy((void*) g->edgeTargets, edgeTargets,
       g->numedges * sizeof(unsigned int), cudaMemcpyDeviceToHost);
+
+  stopTimer(&timerMem2);
+  printf("time: copying data host to device.\n");
+  printTimer(&timerMem1);
+  printf("time: copying data device to host.\n");
+  printTimer(&timerMem2);
 
   cudaFree(numNeighbours);
   cudaFree(tra);

@@ -9,6 +9,7 @@
 #include <float.h>
 #include "force-atlas-2.h"
 #include "math.h"
+#include "timer.h"
 #include "vector.h"
 
 /*!
@@ -17,7 +18,7 @@
   \param[out] numNeighbours An array containing the out-degree for each node in
   the given graph.
  */
-void calcNumNeighbours(Graph*i g, unsigned int* numNeighbours);
+void calcNumNeighbours(Graph* g, unsigned int* numNeighbours);
 // Gravity force
 void fa2Gravity(Graph*, float*, float*, unsigned int*);
 // Repulsion between vertices
@@ -127,9 +128,9 @@ void fa2UpdateTract(Graph* g, float* forceX, float* forceY,
 {
   for (size_t i = 0; i < g->numvertices; i++)
   {
-    float fx = forceX[i];
-    float fy = forceY[i];
-    vectorAdd(&fx, &fy, oldForceX[i], oldForceY[i]);
+    float fx = oldForceX[i];
+    float fy = oldForceY[i];
+    vectorAdd(&fx, &fy, forceX[i], forceY[i]);
     float vlen = vectorGetLength(fx, fy);
     tra[i] = vlen / 2;
   }
@@ -234,6 +235,8 @@ void fa2RunOnce(Graph* g)
   static float* dispX = NULL;
   static float* dispY = NULL;
 
+  static Timer timer;
+
   float graphSwing = 0.0;
   float graphTract = 0.0;
   static float graphSpeed = 0.0;
@@ -268,12 +271,25 @@ void fa2RunOnce(Graph* g)
   memset(forceX, 0, sizeof(float) * g->numvertices);
   memset(forceY, 0, sizeof(float) * g->numvertices);
 
+
   // Gravity force
+  startTimer(&timer);
   fa2Gravity(g, forceX, forceY, numNeighbours);
+  stopTimer(&timer);
+  printf("time: gravity.\n");
+  printTimer(&timer);
   // Repulsion between vertices
+  startTimer(&timer);
   fa2Repulsion(g, forceX, forceY, numNeighbours);
+  stopTimer(&timer);
+  printf("time: repulsion.\n");
+  printTimer(&timer);
   // Attraction on edges
+  startTimer(&timer);
   fa2Attraction(g, forceX, forceY);
+  stopTimer(&timer);
+  printf("time: attraction.\n");
+  printTimer(&timer);
 
   // Calculate speed of vertices.
   // Update swing of vertices.
@@ -292,7 +308,12 @@ void fa2RunOnce(Graph* g)
   fa2SaveOldForces(g, forceX, forceY, oldForceX, oldForceY);
 
   // Update vertex locations based on speed.
+  startTimer(&timer);
   fa2UpdateLocation(g, dispX, dispY);
+
+  stopTimer(&timer);
+  printf("time: moving vertices.\n");
+  printTimer(&timer);
 }
 
 void fa2RunOnGraph(Graph* g, unsigned int n)
@@ -300,7 +321,7 @@ void fa2RunOnGraph(Graph* g, unsigned int n)
   for (size_t i = 0; i < n; i++)
   {
     fa2RunOnce(g);
-    printGraph(g);
+    // printGraph(g);
     printf("\n");
   }
 }

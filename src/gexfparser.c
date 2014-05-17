@@ -1,6 +1,7 @@
 
 #include "gexfparser.h"
 #include "libxml/parser.h"
+#include "timer.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -106,6 +107,10 @@ void gexfParseEdges(xmlNode* gexf, unsigned int* edgeTargets,
 
 void gexfParseFile(Graph* g, const char* in)
 {
+  Timer timer;
+
+  startTimer(&timer);
+
   if (!g)
   {
     printf("Invalid Graph pointer. Exit.\n");
@@ -162,4 +167,8 @@ void gexfParseFile(Graph* g, const char* in)
    *have been allocated by the parser.
    */
   xmlCleanupParser();
+
+  stopTimer(&timer);
+  printf("time: gexf parsing.\n");
+  printTimer(&timer);
 }
