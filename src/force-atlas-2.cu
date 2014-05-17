@@ -1,3 +1,7 @@
+/*!
+  \file force-atlas-2.cu
+  A parallel implementation of the Force Atlas 2 spring embedding algorithm.
+ */
 
 #include <stdio.h>
 #include <stdlib.h>

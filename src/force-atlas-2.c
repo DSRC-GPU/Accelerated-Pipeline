@@ -18,8 +18,15 @@
   the given graph.
  */
 void calcNumNeighbours(Graph*i g, unsigned int* numNeighbours);
-// Gravity force
-void fa2Gravity(Graph*, float*, float*, unsigned int*);
+
+/*!
+  Updates the current force on each vertex with the current gravity.
+  \param g The graph on which to apply the update.
+  \param forceX Array holding the x-direction forces on each vertex.
+  \param forceY Array holding the y-direction forces on each vertex.
+  \param deg Array holding the out-degree for each vertex.
+ */
+void fa2Gravity(Graph* g, float* forceX, float* forceY, unsigned int* deg);
 // Repulsion between vertices
 void fa2Repulsion(Graph*, float*, float*, unsigned int*);
 // Attraction on edges
