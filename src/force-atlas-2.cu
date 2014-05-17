@@ -477,7 +477,8 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
     //cudaEventCreate(&start);
     //cudaEventRecord(start, 0);
 
-    *graphSwing = *graphTract = 0; 
+    cudaMemset(graphSwing, 0, sizeof(float));
+    cudaMemset(graphTract, 0, sizeof(float));
 
     // Run reductions on vertex swing and traction.
     fa2GraphSwingTract<<<numblocks_reduction, BLOCK_SIZE>>>(
