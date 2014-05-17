@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
   printTimer(&timer);
 
   // Printing
-  printGraph(g);
+  //printGraph(g);
 
   free(g);
 }

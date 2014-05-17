@@ -291,8 +291,6 @@ __device__ void fa2UpdateDisplacement(unsigned int gid,
     *dispX = forceX;
     *dispY = forceY;
     vectorMultiply(dispX, dispY, speed);
-    // FIXME remove this print
-    printf("speed:  %f.\nforces:  %f,%f.\n", speed, forceX, forceY);
   }
 }
 
@@ -422,8 +420,8 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
   unsigned int* edgeTargets = NULL;
 
   Timer timerMem1, timerMem2;
-  //cudaEvent_t start, stop;
-  //float time;
+  cudaEvent_t start, stop;
+  float time;
 
   // Allocate data for vertices, edges, and fa2 data.
   cudaMalloc(&numNeighbours, g->numvertices * sizeof(int));
@@ -474,8 +472,8 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
   {
     // Run fa2 spring embedding kernel.
 
-    //cudaEventCreate(&start);
-    //cudaEventRecord(start, 0);
+    cudaEventCreate(&start);
+    cudaEventRecord(start, 0);
 
     cudaMemset(graphSwing, 0, sizeof(float));
     cudaMemset(graphTract, 0, sizeof(float));
@@ -493,21 +491,17 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
       exit(EXIT_FAILURE);
     }
 
-    //cudaEventCreate(&stop);
-    //cudaEventRecord(stop, 0);
-    //cudaEventSynchronize(stop);
-    //cudaEventElapsedTime(&time, start, stop);
-    //cudaEventDestroy(start);
-    //cudaEventDestroy(stop);
+    cudaEventCreate(&stop);
+    cudaEventRecord(stop, 0);
+    cudaEventSynchronize(stop);
+    cudaEventElapsedTime(&time, start, stop);
+    cudaEventDestroy(start);
+    cudaEventDestroy(stop);
     printf("time: graph swing and traction.\n");
     printf("(ms)  %f.\n", time);
 
-    //cudaEventCreate(&start);
-    //cudaEventRecord(start, 0);
-
-    printf("Launching %i blocks of size %i. Which is %i threads.\n", numblocks,
-      BLOCK_SIZE, numblocks * BLOCK_SIZE);
-    printf("We have %i vertices and %i edges.\n", g->numvertices, g->numedges);
+    cudaEventCreate(&start);
+    cudaEventRecord(start, 0);
 
     // Compute graph speed, vertex forces, speed and displacement.
     fa2kernel<<<numblocks, BLOCK_SIZE>>>(
@@ -532,17 +526,18 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
       exit(EXIT_FAILURE);
     }
 
-    //cudaEventCreate(&stop);
-    //cudaEventRecord(stop, 0);
-    //cudaEventSynchronize(stop);
-    //cudaEventElapsedTime(&time, start, stop);
-    //cudaEventDestroy(start);
-    //cudaEventDestroy(stop);
+    cudaEventCreate(&stop);
+    cudaEventRecord(stop, 0);
+    cudaEventSynchronize(stop);
+    cudaEventElapsedTime(&time, start, stop);
+    cudaEventDestroy(start);
+    cudaEventDestroy(stop);
     printf("time: all forces and moving vertices.\n");
     printf("(ms)  %f.\n", time);
   }
 
-  startTimer(&timerMem2);
+  cudaEventCreate(&start);
+  cudaEventRecord(start, 0);
 
   // Update graph with new vertex positions.
   cudaMemcpy((void*) g->vertexXLocs, vxLocs, g->numvertices * sizeof(float),
@@ -554,11 +549,14 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
   cudaMemcpy((void*) g->edgeTargets, edgeTargets,
       g->numedges * sizeof(unsigned int), cudaMemcpyDeviceToHost);
 
-  stopTimer(&timerMem2);
-  printf("time: copying data host to device.\n");
-  printTimer(&timerMem1);
-  printf("time: copying data device to host.\n");
-  printTimer(&timerMem2);
+  cudaEventCreate(&stop);
+  cudaEventRecord(stop, 0);
+  cudaEventSynchronize(stop);
+  cudaEventElapsedTime(&time, start, stop);
+  cudaEventDestroy(start);
+  cudaEventDestroy(stop);
+  printf("time: copying data from device to host.\n");
+  printf("(ms)  %f.\n", time);
 
   cudaFree(numNeighbours);
   cudaFree(tra);
