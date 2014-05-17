@@ -14,7 +14,7 @@ CUDA_LIBS	= $(LIBS) -L"$(CUDA_INSTALL_PATH)/lib64"
 
 TARGETS = springembedr
 
-OBJECTS = main.c.o graph.c.o gexfparser.c.o
+OBJECTS = main.c.o graph.c.o gexfparser.c.o timer.c.o
 OBJECTS_SEQ = vector.c.o force-atlas-2.c.o
 OBJECTS_PAR = vector.o force-atlas-2.o
 
