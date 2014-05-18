@@ -1,6 +1,6 @@
 /*!
-  \file force-atlas-2.c
-  Sequential implementation for the Force Atlas 2 spring embedding algorithm.
+ * \file force-atlas-2.c
+ * Sequential implementation for the Force Atlas 2 spring embedding algorithm.
  */
 
 #include <stdio.h>
@@ -13,29 +13,71 @@
 #include "vector.h"
 
 /*!
-  Calculates the number of neighbours for every node.
-  \param[in] g The input graph.
-  \param[out] numNeighbours An array containing the out-degree for each node in
-  the given graph.
+ * Calculates the number of neighbours for every node.
+ * \param[in] g The input graph.
+ * \param[out] numNeighbours An array containing the out-degree for each node in
+ * the given graph.
  */
 void calcNumNeighbours(Graph* g, unsigned int* numNeighbours);
 
 /*!
-  Updates the current force on each vertex with the current gravity.
-  \param g The graph on which to apply the update.
-  \param forceX Array holding the x-direction forces on each vertex.
-  \param forceY Array holding the y-direction forces on each vertex.
-  \param deg Array holding the out-degree for each vertex.
+ * Updates the current force on each vertex with the current gravity.
+ * \param g The graph on which to apply the update.
+ * \param forceX Array holding the x-direction forces on each vertex.
+ * \param forceY Array holding the y-direction forces on each vertex.
+ * \param deg Array holding the out-degree for each vertex.
  */
 void fa2Gravity(Graph* g, float* forceX, float* forceY, unsigned int* deg);
 
-// Repulsion between vertices
-void fa2Repulsion(Graph*, float*, float*, unsigned int*);
-// Attraction on edges
-void fa2Attraction(Graph*, float*, float*);
+/*!
+ * Applies repulsion forces on each vertex.
+ * \param g The graph that contains the vertices on which to apply the repulsion
+ * forces.
+ * \param forceX Array holding the x-direction forces on each vertex.
+ * \param forceY Array holding the y-direction forces on each vertex.
+ * \param deg Array holding the out-degree of each vertex.
+ */
+void fa2Repulsion(Graph* g, float* forceX, float* forceY, unsigned int* deg);
 
-void fa2UpdateSwing(Graph*, float*, float*, float*, float*, float*);
-void fa2UpdateTract(Graph*, float*, float*, float*, float*, float*);
+/*!
+ * Applies attraction forces on all pairs of vertices that are connected by an
+ * edge.
+ * \param g The graph which holds the vertices and edges on which to apply the
+ * attraction forces.
+ * \param forceX Array holding the x-direction forces on each vertex.
+ * \param forceY Array holding the y-direction forces on each vertex.
+ */
+void fa2Attraction(Graph* g, float* forceX, float* forceY);
+
+/*!
+ * Updates the swing value of each vertex in the Graph.
+ * \param[in] g The graph to update.
+ * \param[in] forceX Array holding the x-direction forces on each vertex.
+ * \param[in] forceY Array holding the y-direction forces on each vertex.
+ * \param[in] oldForceX Array holding the x-direction forces on each vertex for the
+ * previous iteration.
+ * \param[in] oldForceY Array holding the y-direction forces on each vertex for the
+ * previous iteration.
+ * \param[out] swg An array holding the calculated swing values for each vertex.
+ */
+void fa2UpdateSwing(Graph* g, float* forceX, float* forceY, float* oldForceX,
+    float* oldForceY, float* swg);
+
+/*!
+ * Updates the traction value of each vertex in the Graph.
+ * \param[in] g The graph to update.
+ * \param[in] forceX Array holding the x-direction forces on each vertex.
+ * \param[in] forceY Array holding the y-direction forces on each vertex.
+ * \param[in] oldForceX Array holding the x-direction forces on each vertex for the
+ * previous iteration.
+ * \param[in] oldForceY Array holding the y-direction forces on each vertex for the
+ * previous iteration.
+ * \param[out] tra An array holding the calculated traction values for each
+ * vertex.
+ */
+void fa2UpdateTract(Graph* g, float* forceX, float* forceY, float* oldForceX,
+    float* oldForceY, float* tra);
+
 void fa2UpdateSwingGraph(Graph*, float*, unsigned int*, float*);
 void fa2UpdateTractGraph(Graph*, float*, unsigned int*, float*);
 void fa2UpdateSpeedGraph(float, float, float*);
