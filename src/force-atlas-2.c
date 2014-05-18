@@ -326,11 +326,14 @@ void fa2RunOnce(Graph* g)
 
 void fa2RunOnGraph(Graph* g, unsigned int n)
 {
+  Timer timer;
   for (size_t i = 0; i < n; i++)
   {
+    startTimer(&timer);
     fa2RunOnce(g);
-    // printGraph(g);
-    printf("\n");
+    stopTimer(&timer);
+    printf("time: iteration.\n");
+    printTimer(&timer);
   }
 }
 

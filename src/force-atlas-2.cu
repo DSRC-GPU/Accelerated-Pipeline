@@ -419,7 +419,7 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
   unsigned int* edgeSources = NULL;
   unsigned int* edgeTargets = NULL;
 
-  CudaTimer timerMem1, timerMem2, timer;
+  CudaTimer timerMem1, timerMem2, timerIteration, timer;
 
   // AllocaCe data for vertices, edges, and fa2 data.
   cudaMalloc(&numNeighbours, g->numvertices * sizeof(int));
@@ -469,6 +469,7 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
   for (size_t i = 0; i < iterations; i++)
   {
     // Run fa2 spring embedding kernel.
+    startCudaTimer(&timerIteration);
 
     cudaMemset(graphSwing, 0, sizeof(float));
     cudaMemset(graphTract, 0, sizeof(float));
@@ -518,6 +519,11 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
       printf("Error in kernel 2.\n%s\n", cudaGetErrorString(code));
       exit(EXIT_FAILURE);
     }
+
+    stopCudaTimer(&timerIteration);
+    printf("time: iteration.\n");
+    printCudaTimer(&timerIteration);
+    resetCudaTimer(&timerIteration);
   }
 
   startCudaTimer(&timerMem2);
