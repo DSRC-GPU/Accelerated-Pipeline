@@ -169,6 +169,6 @@ void gexfParseFile(Graph* g, const char* in)
   xmlCleanupParser();
 
   stopTimer(&timer);
-  printf("time: gexf parsing.\n");
-  printTimer(&timer);
+  //printf("time: gexf parsing.\n");
+  //printTimer(&timer);
 }

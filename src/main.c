@@ -60,11 +60,11 @@ int main(int argc, char* argv[])
   startTimer(&timer);
   fa2RunOnGraph(g, numTicks);
   stopTimer(&timer);
-  printf("time: total.\n");
-  printTimer(&timer);
+  //printf("time: total.\n");
+  //printTimer(&timer);
 
   // Printing
-  //printGraph(g);
+  printGraph(g);
 
   free(g);
 }

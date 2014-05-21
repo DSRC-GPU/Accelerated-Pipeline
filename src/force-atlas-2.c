@@ -308,6 +308,36 @@ void fa2RunOnce(Graph* g)
     firstRun = 0;
   }
 
+  // Reset forces on vertices to 0.
+  memset(forceX, 0, sizeof(float) * g->numvertices);
+  memset(forceY, 0, sizeof(float) * g->numvertices);
+
+  // Gravity force
+  startTimer(&timer);
+  fa2Gravity(g, forceX, forceY, numNeighbours);
+  stopTimer(&timer);
+  //printf("time: gravity.\n");
+  //printTimer(&timer);
+  // Repulsion between vertices
+  startTimer(&timer);
+  fa2Repulsion(g, forceX, forceY, numNeighbours);
+  stopTimer(&timer);
+  //printf("time: repulsion.\n");
+  //printTimer(&timer);
+  // Attraction on edges
+  startTimer(&timer);
+  fa2Attraction(g, forceX, forceY);
+  stopTimer(&timer);
+  //printf("time: attraction.\n");
+  //printTimer(&timer);
+
+  // Calculate speed of vertices.
+  // Update swing of vertices.
+  fa2UpdateSwing(g, forceX, forceY, oldForceX, oldForceY, swg);
+
+  // Update traction of vertices.
+  fa2UpdateTract(g, forceX, forceY, oldForceX, oldForceY, tra);
+
   // Update swing of Graph.
   fa2UpdateSwingGraph(g, swg, numNeighbours, &graphSwing);
 
@@ -317,53 +347,22 @@ void fa2RunOnce(Graph* g)
   // Update speed of Graph.
   fa2UpdateSpeedGraph(graphSwing, graphTract, &graphSpeed);
 
-  // Reset forces on vertices to 0.
-  memset(forceX, 0, sizeof(float) * g->numvertices);
-  memset(forceY, 0, sizeof(float) * g->numvertices);
-
-
-  // Gravity force
-  startTimer(&timer);
-  fa2Gravity(g, forceX, forceY, numNeighbours);
-  stopTimer(&timer);
-  printf("time: gravity.\n");
-  printTimer(&timer);
-  // Repulsion between vertices
-  startTimer(&timer);
-  fa2Repulsion(g, forceX, forceY, numNeighbours);
-  stopTimer(&timer);
-  printf("time: repulsion.\n");
-  printTimer(&timer);
-  // Attraction on edges
-  startTimer(&timer);
-  fa2Attraction(g, forceX, forceY);
-  stopTimer(&timer);
-  printf("time: attraction.\n");
-  printTimer(&timer);
-
-  // Calculate speed of vertices.
-  // Update swing of vertices.
-  fa2UpdateSwing(g, forceX, forceY, oldForceX, oldForceY, swg);
-
-  // Update traction of vertices.
-  fa2UpdateTract(g, forceX, forceY, oldForceX, oldForceY, tra);
-
   // Update speed of vertices.
   fa2UpdateSpeed(g, speed, swg, forceX, forceY, graphSpeed);
 
   // Update displacement of vertices.
   fa2UpdateDisplacement(g, speed, forceX, forceY, dispX, dispY);
 
-  // Set current forces as old forces in vertex data.
-  fa2SaveOldForces(g, forceX, forceY, oldForceX, oldForceY);
-
   // Update vertex locations based on speed.
   startTimer(&timer);
   fa2UpdateLocation(g, dispX, dispY);
 
   stopTimer(&timer);
-  printf("time: moving vertices.\n");
-  printTimer(&timer);
+  //printf("time: moving vertices.\n");
+  //printTimer(&timer);
+
+  // Set current forces as old forces in vertex data.
+  fa2SaveOldForces(g, forceX, forceY, oldForceX, oldForceY);
 }
 
 void fa2RunOnGraph(Graph* g, unsigned int n)
@@ -374,8 +373,10 @@ void fa2RunOnGraph(Graph* g, unsigned int n)
     startTimer(&timer);
     fa2RunOnce(g);
     stopTimer(&timer);
-    printf("time: iteration.\n");
-    printTimer(&timer);
+    printGraph(g);
+    printf("\n");
+    //printf("time: iteration.\n");
+    //printTimer(&timer);
   }
 }
 
