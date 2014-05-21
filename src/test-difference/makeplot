@@ -6,16 +6,9 @@ if [ $# -ne 3 ]; then
 fi
 
 FILENAME=test.data
-TMPCDATA=fa2c.data
 
-# Remove the first iteration from the C Force Atlas 2, because it lags behind
-# one iteration.
-sed "1,$3d" $2 > $TMPCDATA
-# Remove empty line.
-sed -i '1,1d' $TMPCDATA
- 
 # Run test.py, printing sum of the x+y differences for each node.
-./test.py $1 $TMPCDATA > $FILENAME
+./test.py $1 $2 $3 > $FILENAME
 # Plot the difference over iterations.
 /usr/bin/gnuplot <<__EOF
 set terminal png
@@ -23,6 +16,8 @@ set output "plot.png"
 plot "$FILENAME" with lines
 __EOF
 
+cat $FILENAME
+
 # Remove temporary files.
-rm $FILENAME $TMPCDATA
+rm $FILENAME 
 
