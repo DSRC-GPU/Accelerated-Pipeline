@@ -43,6 +43,12 @@ crowdgeneration/CrowGenCpp/simulations/
 # Documentation
 doc/
 
+# Resources
+res/
+
+# Experiments
+experiments/
+
 # Autoconf & Automake
 
 Makefile
