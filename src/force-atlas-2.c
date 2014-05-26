@@ -162,7 +162,7 @@ void fa2Attraction(Graph* g, float* forceX, float* forceY)
     vectorSubtract(&vx2, &vy2, vx1, vy1);
     // vectorMultiply(&vx2, &vy2, 0.5);
     vectorAdd(&forceX[v1Index], &forceY[v1Index], vx2, vy2);
-    if (i == PRINTID)
+    if (v1Index == PRINTID)
       printf("a\t%f\t%f\n", vx2, vy2);
   }
 }
