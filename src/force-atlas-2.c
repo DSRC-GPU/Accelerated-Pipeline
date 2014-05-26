@@ -109,7 +109,7 @@ void fa2Gravity(Graph* g, float* forceX, float* forceY, unsigned int* deg)
     vectorMultiply(&vx, &vy, K_G * (deg[i] + 1) / vlen);
     vectorAdd(&forceX[i], &forceY[i], vx, vy);
     if (i == PRINTID)
-      printf("g %f\t%f.\n", vx, vy);
+      printf("g\t%f\t%f\n", vx, vy);
   }
 }
 
@@ -138,10 +138,10 @@ void fa2Repulsion(Graph* g, float* forceX, float* forceY, unsigned int* deg)
 
         vectorAdd(&forceX[i], &forceY[i], vx1, vy1);
         if (i == PRINTID)
-          printf("r %i %f\t%f.\n", j, vx1, vy1);
+          printf("r\t%i\t%f\t%f\n", j, vx1, vy1);
       }
       else if (i == PRINTID)
-        printf("r %i.\n", j);
+        printf("r\t%i\n", j);
     }
   }
 }
@@ -163,7 +163,7 @@ void fa2Attraction(Graph* g, float* forceX, float* forceY)
     // vectorMultiply(&vx2, &vy2, 0.5);
     vectorAdd(&forceX[v1Index], &forceY[v1Index], vx2, vy2);
     if (i == PRINTID)
-      printf("a %f\t%f.\n", vx2, vy2);
+      printf("a\t%f\t%f\n", vx2, vy2);
   }
 }
 
