@@ -7,8 +7,8 @@
 #include <string.h>
 #include <assert.h>
 
-#define NODE_START_X 100
-#define NODE_START_Y 100
+#define NODE_START_X 10
+#define NODE_START_Y 10
 
 xmlNode* xmlwGetChild(xmlNode* node, const char* name)
 {
@@ -47,11 +47,11 @@ unsigned int xmlwGetNumEdges(xmlNode* gexf)
 void gexfParseVertex(xmlNode* n, float* vertexXLoc, float* vertexYLoc, int *vertexIds)
 {
   if (!n || !vertexXLoc || !vertexYLoc) return;
-  *vertexXLoc = NODE_START_X;
-  *vertexYLoc = NODE_START_Y;
   const char* id = (const char*) xmlGetProp(n, (const xmlChar*) "id");
   assert(id != NULL);
   *vertexIds = atoi(id);
+  *vertexXLoc = NODE_START_X * (1 + *vertexIds);
+  *vertexYLoc = NODE_START_Y * (1 + *vertexIds);
 }
 
 void gexfParseEdge(xmlNode* n, unsigned int* edgeSource,
