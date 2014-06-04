@@ -163,7 +163,7 @@ void fa2Attraction(Graph* g, float* forceX, float* forceY)
     // vectorMultiply(&vx2, &vy2, 0.5);
     vectorAdd(&forceX[v1Index], &forceY[v1Index], vx2, vy2);
     if (v1Index == PRINTID)
-      printf("a\t%f\t%f\n", vx2, vy2);
+      printf("a\t%i\t%f\t%f\n", v2Index, vx2, vy2);
   }
 }
 
@@ -276,6 +276,9 @@ void fa2UpdateLocation(Graph* g, float* xdisp, float* ydisp)
 {
   for (size_t i = 0; i < g->numvertices; i++)
   {
+    if (xdisp[i] > 25)
+      printf("Move from node %i: at %f, moving %f\n", i, g->vertexXLocs[i],
+          xdisp[i]);
     g->vertexXLocs[i] += xdisp[i];
     g->vertexYLocs[i] += ydisp[i];
   }
@@ -383,6 +386,7 @@ void fa2RunOnGraph(Graph* g, unsigned int n)
     startTimer(&timer);
     fa2RunOnce(g);
     stopTimer(&timer);
+    printf("### %i\n", i);
     printGraph(g);
     printf("\n");
     //printf("time: iteration.\n");
