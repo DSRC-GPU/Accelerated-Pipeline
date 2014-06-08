@@ -12,7 +12,7 @@
 #include "timer.h"
 #include "vector.h"
 
-#define PRINTID 0
+#define PRINTID 5
 
 /*!
  * Calculates the number of neighbours for every node.
@@ -235,6 +235,7 @@ void fa2UpdateSpeedGraph(float gswing, float gtract, float* gspeed)
 void fa2UpdateSpeed(Graph* g, float* speed, float* swg, float* forceX,
     float* forceY, float gs)
 {
+  float sumspeed = 0;
   for (size_t i = 0; i < g->numvertices; i++)
   {
     float vSwg = swg[i];
@@ -245,9 +246,11 @@ void fa2UpdateSpeed(Graph* g, float* speed, float* swg, float* forceX,
       vForceLen = EPSILON;
 
     speed[i] = K_S * gs / (1 + (gs * sqrt(vSwg)));
+    sumspeed += speed[i];
     //speed[i] = fmin(speed[i],
     //    K_SMAX / vForceLen);
   }
+  printf("Speed %f\n", sumspeed);
 }
 
 // Save current forces as the previous forces for the next tick.
