@@ -279,9 +279,6 @@ void fa2UpdateLocation(Graph* g, float* xdisp, float* ydisp)
 {
   for (size_t i = 0; i < g->numvertices; i++)
   {
-    if (xdisp[i] > 25)
-      printf("Move from node %i: at %f, moving %f\n", i, g->vertexXLocs[i],
-          xdisp[i]);
     g->vertexXLocs[i] += xdisp[i];
     g->vertexYLocs[i] += ydisp[i];
   }
