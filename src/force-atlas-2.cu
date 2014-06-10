@@ -392,13 +392,13 @@ __global__ void fa2kernel(
     // Update displacement of vertices.
     fa2UpdateDisplacement(gid, numvertices, speed, forceX, forceY, &dispX, &dispY);
 
-    // Set current forces as old forces in vertex data.
-    fa2SaveOldForces(gid, numvertices, forceX, forceY, oldForceX, oldForceY);
-
     // Update vertex locations based on speed.
     // TODO Add a barrier here to make sure no vertex location is update before
     // all vertices have calculated their repulsion and attraction forces.
     fa2UpdateLocation(gid, numvertices, vxLocs, vyLocs, dispX, dispY);
+
+    // Set current forces as old forces in vertex data.
+    fa2SaveOldForces(gid, numvertices, forceX, forceY, oldForceX, oldForceY);
   }
 }
 
