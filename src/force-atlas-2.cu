@@ -246,9 +246,6 @@ __device__ void fa2UpdateSpeedGraph(float gswing, float gtract, float* gspeed)
 
   *gspeed = TAU * (gtract / gswing);
 
-  //if (*gspeed <= 0)
-  //  *gspeed = EPSILON;
-  // Do not allow more then 50% speed increase.
   if (oldSpeed > 0 && *gspeed > 1.5 * oldSpeed)
     *gspeed = 1.5 * oldSpeed;
 }
@@ -266,8 +263,6 @@ __device__ void fa2UpdateSpeed(unsigned int gid, unsigned int numvertices,
       vForceLen = EPSILON;
 
     *speed = K_S * gs / (1 + (gs * sqrt(vSwg)));
-    //*speed = fmin(*speed, (float)
-    //    K_SMAX / vForceLen);
   }
 }
 
@@ -342,6 +337,7 @@ __global__ void fa2kernel(
     unsigned int numedges,
     unsigned int* numNeighbours,
     float* tra, float* swg, 
+    float* forceX, float* forceY,
     float* oldForceX, float* oldForceY,
     float* graphSwing,
     float* graphTract,
@@ -351,54 +347,65 @@ __global__ void fa2kernel(
 
   if (gid < numvertices)
   {
-    float graphSpeed = *oldGraphSpeed;
-
-    float forceX = 0.0;
-    float forceY = 0.0;
-
-    float dispX = 0.0;
-    float dispY = 0.0;
-
-    float speed = 0.0;
-
-    // Update speed of Graph.
-    fa2UpdateSpeedGraph(*graphSwing, *graphTract, &graphSpeed);
-
     if (gid == 0)
     {
-      *oldGraphSpeed = graphSpeed;
       *graphSwing = 0.0;
       *graphTract = 0.0;
     }
 
+    forceX[gid] = 0;
+    forceY[gid] = 0;
+
     // Gravity force
-    fa2Gravity(gid, numvertices, vxLocs, vyLocs, &forceX, &forceY, numNeighbours);
+    fa2Gravity(gid, numvertices, vxLocs, vyLocs, &forceX[gid], &forceY[gid], numNeighbours);
     // Repulsion between vertices
-    fa2Repulsion(gid, numvertices, vxLocs, vyLocs, &forceX, &forceY, numNeighbours);
+    fa2Repulsion(gid, numvertices, vxLocs, vyLocs, &forceX[gid], &forceY[gid], numNeighbours);
     // Attraction on edges
     fa2Attraction(gid, numvertices, vxLocs, vyLocs, numedges, edgeSources,
-        edgeTargets, &forceX, &forceY);
+        edgeTargets, &forceX[gid], &forceY[gid]);
 
     // Calculate speed of vertices.
     // Update swing of vertices.
-    fa2UpdateSwing(gid, numvertices, forceX, forceY, oldForceX, oldForceY, swg);
+    fa2UpdateSwing(gid, numvertices, forceX[gid], forceY[gid], oldForceX, oldForceY, swg);
 
     // Update traction of vertices.
-    fa2UpdateTract(gid, numvertices, forceX, forceY, oldForceX, oldForceY, tra);
+    fa2UpdateTract(gid, numvertices, forceX[gid], forceY[gid], oldForceX, oldForceY, tra);
+  }
+}
+
+__global__ void fa2MoveVertices(
+    float* vxLocs, float* vyLocs,
+    unsigned int numvertices,
+    float* tra, float* swg,
+    float* forceX, float* forceY,
+    float* oldForceX, float* oldForceY,
+    float* graphSwing,
+    float* graphTract)
+{
+  unsigned int gid = threadIdx.x + (blockIdx.x * BLOCK_SIZE);
+
+  if (gid < numvertices)
+  {
+    float speed = 0;
+    float dispX = 0;
+    float dispY = 0;
+
+    float graphSpeed = 0;
+
+    // Update speed of Graph.
+    fa2UpdateSpeedGraph(*graphSwing, *graphTract, &graphSpeed);
 
     // Update speed of vertices.
-    fa2UpdateSpeed(gid, numvertices, &speed, swg, forceX, forceY, graphSpeed);
+    fa2UpdateSpeed(gid, numvertices, &speed, swg, forceX[gid], forceY[gid], graphSpeed);
 
     // Update displacement of vertices.
-    fa2UpdateDisplacement(gid, numvertices, speed, forceX, forceY, &dispX, &dispY);
+    fa2UpdateDisplacement(gid, numvertices, speed, forceX[gid], forceY[gid], &dispX, &dispY);
 
     // Update vertex locations based on speed.
-    // TODO Add a barrier here to make sure no vertex location is update before
-    // all vertices have calculated their repulsion and attraction forces.
     fa2UpdateLocation(gid, numvertices, vxLocs, vyLocs, dispX, dispY);
 
     // Set current forces as old forces in vertex data.
-    fa2SaveOldForces(gid, numvertices, forceX, forceY, oldForceX, oldForceY);
+    fa2SaveOldForces(gid, numvertices, forceX[gid], forceY[gid], oldForceX, oldForceY);
   }
 }
 
@@ -408,6 +415,8 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
   unsigned int* numNeighbours = NULL;
   float* tra = NULL;
   float* swg = NULL;
+  float* forceX = NULL;
+  float* forceY = NULL;
   float* oldForceX = NULL;
   float* oldForceY = NULL;
   float* graphSwing = NULL;
@@ -425,6 +434,8 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
   cudaMalloc(&numNeighbours, g->numvertices * sizeof(int));
   cudaMalloc(&tra, g->numvertices * sizeof(float));
   cudaMalloc(&swg, g->numvertices * sizeof(float));
+  cudaMalloc(&forceX, g->numvertices * sizeof(float));
+  cudaMalloc(&forceY, g->numvertices * sizeof(float));
   cudaMalloc(&oldForceX, g->numvertices * sizeof(float));
   cudaMalloc(&oldForceY, g->numvertices * sizeof(float));
   cudaMalloc(&graphSwing, sizeof(float));
@@ -434,6 +445,8 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
   cudaMemset(numNeighbours, 0, g->numvertices * sizeof(int));
   cudaMemset(tra, 0, g->numvertices * sizeof(float));
   cudaMemset(swg, 0, g->numvertices * sizeof(float));
+  cudaMemset(forceX, 0, g->numvertices * sizeof(float));
+  cudaMemset(forceY, 0, g->numvertices * sizeof(float));
   cudaMemset(oldForceX, 0, g->numvertices * sizeof(float));
   cudaMemset(oldForceY, 0, g->numvertices * sizeof(float));
   cudaMemset(graphSwing, 0, sizeof(float));
@@ -471,6 +484,41 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
     // Run fa2 spring embedding kernel.
     startCudaTimer(&timerIteration);
 
+    // Compute graph speed, vertex forces, speed and displacement.
+    startCudaTimer(&timer);
+    fa2kernel<<<numblocks, BLOCK_SIZE>>>(
+        vxLocs,
+        vyLocs,
+        g->numvertices,
+        edgeSources,
+        edgeTargets,
+        g->numedges,
+        numNeighbours,
+        tra,
+        swg,
+        forceX,
+        forceY,
+        oldForceX,
+        oldForceY,
+        graphSwing,
+        graphTract,
+        graphSpeed);
+    stopCudaTimer(&timer);
+    printf("time: all forces and moving vertices.\n");
+    printCudaTimer(&timer);
+    resetCudaTimer(&timer);
+    cudaError_t code = cudaGetLastError();
+    if (code != cudaSuccess)
+    {
+      printf("Error in kernel 2.\n%s\n", cudaGetErrorString(code));
+      exit(EXIT_FAILURE);
+    }
+
+    stopCudaTimer(&timerIteration);
+    printf("time: iteration.\n");
+    printCudaTimer(&timerIteration);
+    resetCudaTimer(&timerIteration);
+
     cudaMemset(graphSwing, 0, sizeof(float));
     cudaMemset(graphTract, 0, sizeof(float));
 
@@ -485,45 +533,25 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
     printCudaTimer(&timer);
     resetCudaTimer(&timer);
 
-    cudaError_t code = cudaGetLastError();
+    code = cudaGetLastError();
     if (code != cudaSuccess)
     {
       printf("Error in kernel 1.\n%s\n", cudaGetErrorString(code));
       exit(EXIT_FAILURE);
     }
 
-    // Compute graph speed, vertex forces, speed and displacement.
-    startCudaTimer(&timer);
-    fa2kernel<<<numblocks, BLOCK_SIZE>>>(
+    fa2MoveVertices<<<numblocks, BLOCK_SIZE>>>(
         vxLocs,
         vyLocs,
         g->numvertices,
-        edgeSources,
-        edgeTargets,
-        g->numedges,
-        numNeighbours,
         tra,
         swg,
+        forceX,
+        forceY,
         oldForceX,
         oldForceY,
         graphSwing,
-        graphTract,
-        graphSpeed);
-    stopCudaTimer(&timer);
-    printf("time: all forces and moving vertices.\n");
-    printCudaTimer(&timer);
-    resetCudaTimer(&timer);
-    code = cudaGetLastError();
-    if (code != cudaSuccess)
-    {
-      printf("Error in kernel 2.\n%s\n", cudaGetErrorString(code));
-      exit(EXIT_FAILURE);
-    }
-
-    stopCudaTimer(&timerIteration);
-    printf("time: iteration.\n");
-    printCudaTimer(&timerIteration);
-    resetCudaTimer(&timerIteration);
+        graphTract);
   }
 
   startCudaTimer(&timerMem2);
