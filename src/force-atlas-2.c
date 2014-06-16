@@ -12,7 +12,7 @@
 #include "timer.h"
 #include "vector.h"
 
-#define PRINTID 5
+#define PRINTID 0
 
 /*!
  * Calculates the number of neighbours for every node.
@@ -178,6 +178,7 @@ void fa2UpdateSwing(Graph* g, float* forceX, float* forceY,
     vectorSubtract(&fx, &fy, forceX[i], forceY[i]);
     float vlen = vectorGetLength(fx, fy);
     swg[i] = vlen;
+    printf("@@@ %i\t%f\n", i, vlen);
   }
 }
 
@@ -193,6 +194,7 @@ void fa2UpdateTract(Graph* g, float* forceX, float* forceY,
     vectorAdd(&fx, &fy, forceX[i], forceY[i]);
     float vlen = vectorGetLength(fx, fy);
     tra[i] = vlen / 2;
+    printf("!!! %i\t%f\n", i, tra[i]);
   }
 }
 
@@ -204,6 +206,7 @@ void fa2UpdateSwingGraph(Graph* g, float* swg, unsigned int* deg, float* gswing)
   {
     *gswing += (deg[i] + 1) * swg[i];
   }
+  printf("@@@ %f\n", *gswing);
 }
 
 // Calculate the current traction of the graph.
@@ -214,6 +217,7 @@ void fa2UpdateTractGraph(Graph* g, float* tra, unsigned int* deg, float* gtract)
   {
     *gtract += (deg[i] + 1) * tra[i];
   }
+  printf("!!! %f\n", *gtract);
 }
 
 void fa2UpdateSpeedGraph(float gswing, float gtract, float* gspeed)
@@ -250,7 +254,6 @@ void fa2UpdateSpeed(Graph* g, float* speed, float* swg, float* forceX,
     //speed[i] = fmin(speed[i],
     //    K_SMAX / vForceLen);
   }
-  printf("Speed %f\n", sumspeed);
 }
 
 // Save current forces as the previous forces for the next tick.

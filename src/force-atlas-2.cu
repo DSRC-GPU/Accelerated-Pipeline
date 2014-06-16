@@ -13,6 +13,7 @@
 #include "vector.h"
 
 #define BLOCK_SIZE 64
+#define PRINTID 0
 
 // Gravity force
 __device__ void fa2Gravity(unsigned int gid, unsigned int numvertices,
@@ -33,9 +34,9 @@ __device__ void fa2UpdateSwing(unsigned int gid, unsigned int numvertices,
 __device__ void fa2UpdateTract(unsigned int gid, unsigned int numvertices,
     float forceX, float forceY, float* oldForceX, float* oldForceY,
     float* tra);
-__device__ void fa2UpdateSwingGraph(unsigned int gid, unsigned int numvertices,
+__device__ void fa2UpdateSwingGraph(unsigned int numvertices,
     float* swg, int* deg, float* gswing);
-__device__ void fa2UpdateTractGraph(unsigned int gid, unsigned int numvertices,
+__device__ void fa2UpdateTractGraph(unsigned int numvertices,
     float* tra, int* deg, float* gtract);
 __device__ void fa2UpdateSpeedGraph(float gswing, float gtract, float* gspeed);
 __device__ void fa2UpdateSpeed(unsigned int gid, unsigned int numvertices,
@@ -112,7 +113,7 @@ __device__ void fa2Attraction(unsigned int gid, unsigned int numvertices,
     for (size_t i = 0; i < numedges; i++)
     {
       unsigned int source = edgeSources[i];
-      unsigned int target = edgeSources[i];
+      unsigned int target = edgeTargets[i];
       // Edge source is this vertex.
       if (source == gid)
       {
@@ -160,7 +161,7 @@ __device__ void fa2UpdateTract(unsigned int gid, unsigned int numvertices,
 }
 
 // Calculate the current swing of the graph.
-__device__ void fa2UpdateSwingGraph(unsigned int gid, unsigned int numvertices,
+__device__ void fa2UpdateSwingGraph(unsigned int numvertices,
     float* swg, unsigned int* deg, float* gswing)
 {
   __shared__ float scratch[BLOCK_SIZE * 2];
@@ -171,12 +172,18 @@ __device__ void fa2UpdateSwingGraph(unsigned int gid, unsigned int numvertices,
   unsigned int stride = BLOCK_SIZE;
 
   if (base < numvertices)
+  {
     scratch[tx] = (deg[base] + 1) * swg[base];
+    printf("@@@ %i\t%f\n", base, swg[base]);
+  }
   else
     scratch[tx] = 0;
 
   if (base + stride < numvertices)
+  {
     scratch[tx + stride] = (deg[base + stride] + 1) * swg[base + stride];
+    printf("@@@ %i\t%f\n", base + stride, swg[base + stride]);
+  }
   else
     scratch[tx + stride] = 0;
 
@@ -199,7 +206,7 @@ __device__ void fa2UpdateSwingGraph(unsigned int gid, unsigned int numvertices,
 }
 
 // Calculate the current traction of the graph.
-__device__ void fa2UpdateTractGraph(unsigned int gid, unsigned int numvertices,
+__device__ void fa2UpdateTractGraph(unsigned int numvertices,
     float* tra, unsigned int* deg, float* gtract)
 {
   __shared__ float scratch[BLOCK_SIZE * 2];
@@ -210,12 +217,18 @@ __device__ void fa2UpdateTractGraph(unsigned int gid, unsigned int numvertices,
   unsigned int stride = BLOCK_SIZE;
 
   if (base < numvertices)
+  {
     scratch[tx] = (deg[base] + 1) * tra[base];
+    printf("!!! %i\t%f\n", base, tra[base]);
+  }
   else
     scratch[tx] = 0;
 
   if (base + stride < numvertices)
+  {
     scratch[tx + stride] = (deg[base + stride] + 1) * tra[base + stride];
+    printf("!!! %i\t%f\n", base + stride, tra[base + stride]);
+  }
   else
     scratch[tx + stride] = 0;
 
@@ -305,14 +318,15 @@ __global__ void fa2ComputeDegrees(unsigned int numvertices,
   unsigned int gid = threadIdx.x + (blockIdx.x * BLOCK_SIZE);
   if (gid < numvertices)
   {
-    deg[gid] = 0;
+    unsigned int degree = 0;
     for (size_t i = 0; i < numedges; i++)
     {
       if (edgeSources[i] == gid)
       {
-        deg[gid]++;
+        degree++;
       }
     }
+    deg[gid] = degree;
   }
 }
 
@@ -320,13 +334,11 @@ __global__ void fa2GraphSwingTract(unsigned int numvertices,
     float* swg, float* tra, unsigned int* numNeighbours,
     float* graphSwing, float* graphTract)
 {
-  unsigned int gid = threadIdx.x + (blockIdx.x * BLOCK_SIZE);
-
   // Update swing of Graph.
-  fa2UpdateSwingGraph(gid, numvertices, swg, numNeighbours, graphSwing);
+  fa2UpdateSwingGraph(numvertices, swg, numNeighbours, graphSwing);
 
   // Update traction of Graph.
-  fa2UpdateTractGraph(gid, numvertices, tra, numNeighbours, graphTract);
+  fa2UpdateTractGraph(numvertices, tra, numNeighbours, graphTract);
 }
 
 __global__ void fa2kernel(
@@ -347,12 +359,6 @@ __global__ void fa2kernel(
 
   if (gid < numvertices)
   {
-    if (gid == 0)
-    {
-      *graphSwing = 0.0;
-      *graphTract = 0.0;
-    }
-
     forceX[gid] = 0;
     forceY[gid] = 0;
 
@@ -392,6 +398,12 @@ __global__ void fa2MoveVertices(
 
     float graphSpeed = 0;
 
+    if (gid == 0)
+    {
+      printf("@@@ %f\n", *graphSwing);
+      printf("!!! %f\n", *graphTract);
+    }
+
     // Update speed of Graph.
     fa2UpdateSpeedGraph(*graphSwing, *graphTract, &graphSpeed);
 
@@ -430,7 +442,7 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
 
   CudaTimer timerMem1, timerMem2, timerIteration, timer;
 
-  // AllocaCe data for vertices, edges, and fa2 data.
+  // Allocate data for vertices, edges, and fa2 data.
   cudaMalloc(&numNeighbours, g->numvertices * sizeof(int));
   cudaMalloc(&tra, g->numvertices * sizeof(float));
   cudaMalloc(&swg, g->numvertices * sizeof(float));
