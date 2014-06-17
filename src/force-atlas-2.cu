@@ -487,9 +487,18 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
   unsigned int numblocks = ceil(g->numvertices / (float) BLOCK_SIZE);
   unsigned int numblocks_reduction = ceil(numblocks / 2.0);
 
+  cudaGetLastError();
+
   // Compute vertex degrees using current edges.
   fa2ComputeDegrees<<<numblocks, BLOCK_SIZE>>>(g->numvertices, g->numedges,
       edgeSources, numNeighbours);
+
+  cudaError_t code = cudaGetLastError();
+  if (code != cudaSuccess)
+  {
+    printf("Error calculating node degrees.\n%s\n", cudaGetErrorString(code));
+    exit(EXIT_FAILURE);
+  }
 
   for (size_t i = 0; i < iterations; i++)
   {
@@ -519,7 +528,7 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
     printf("time: all forces and moving vertices.\n");
     printCudaTimer(&timer);
     resetCudaTimer(&timer);
-    cudaError_t code = cudaGetLastError();
+    code = cudaGetLastError();
     if (code != cudaSuccess)
     {
       printf("Error in kernel 2.\n%s\n", cudaGetErrorString(code));
