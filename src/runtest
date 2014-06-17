@@ -1,0 +1,11 @@
+
+make clean
+make -j9
+./run $1 $2 > seq
+
+make clean
+make par -j9
+./run $1 $2 > par
+
+diff par seq
+
