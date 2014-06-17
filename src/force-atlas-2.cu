@@ -227,7 +227,7 @@ __global__ void fa2ComputeDegrees(unsigned int numvertices,
  * \param[in] swg Array holding the swing value for each vertex in the graph.
  * \param[in] tra Array holding the traction value for each vertex in the
  *    graph.
- * \param[int] numNeighbours Array holding the out degree value for each vertex
+ * \param[in] numNeighbours Array holding the out degree value for each vertex
  *    in the graph.
  * \param[out] graphSwing Pointer to where the graph swing value should be
  *    stored.
