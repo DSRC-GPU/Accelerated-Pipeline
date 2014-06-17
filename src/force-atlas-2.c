@@ -173,6 +173,7 @@ void fa2UpdateSwing(Graph* g, float* forceX, float* forceY,
 {
   for (size_t i = 0; i < g->numvertices; i++)
   {
+    printf("!!! %f\t%f\t%f\t%f\n", forceX[i], forceY[i], oldForceX[i], oldForceY[i]);
     float fx = oldForceX[i];
     float fy = oldForceY[i];
     vectorSubtract(&fx, &fy, forceX[i], forceY[i]);
@@ -225,21 +226,27 @@ void fa2UpdateSpeedGraph(float gswing, float gtract, float* gspeed)
   float oldSpeed = *gspeed;
 
   if (gswing == 0)
+  {
+    printf("!!! GRAPH SWING 0\n");
     gswing = FLOAT_EPSILON;
+  }
 
   *gspeed = TAU * (gtract / gswing);
 
-  //if (*gspeed <= 0)
-  //  *gspeed = EPSILON;
-  // Do not allow more then 50% speed increase.
   if (oldSpeed > 0 && *gspeed > 1.5 * oldSpeed)
+  {
     *gspeed = 1.5 * oldSpeed;
+    printf("!!! OLD GRAPH SPEED NOT 0\n");
+  }
+
+  printf("!!! gtract %f\n", gtract);
+  printf("!!! gswing %f\n", gswing);
+  printf("!!! speedgraph %f\n", *gspeed);
 }
 
 void fa2UpdateSpeed(Graph* g, float* speed, float* swg, float* forceX,
     float* forceY, float gs)
 {
-  float sumspeed = 0;
   for (size_t i = 0; i < g->numvertices; i++)
   {
     float vSwg = swg[i];
@@ -250,9 +257,7 @@ void fa2UpdateSpeed(Graph* g, float* speed, float* swg, float* forceX,
       vForceLen = EPSILON;
 
     speed[i] = K_S * gs / (1 + (gs * sqrt(vSwg)));
-    sumspeed += speed[i];
-    //speed[i] = fmin(speed[i],
-    //    K_SMAX / vForceLen);
+    printf("!!! speed %f\n", speed[i]);
   }
 }
 

@@ -136,6 +136,7 @@ __device__ void fa2UpdateSwing(unsigned int gid, unsigned int numvertices,
 {
   if (gid < numvertices)
   {
+    printf("!!! %f\t%f\t%f\t%f\n", forceX, forceY, oldForceX[gid], oldForceY[gid]);
     float fx = oldForceX[gid];
     float fy = oldForceY[gid];
     vectorSubtract(&fx, &fy, forceX, forceY);
@@ -255,12 +256,22 @@ __device__ void fa2UpdateSpeedGraph(float gswing, float gtract, float* gspeed)
   float oldSpeed = *gspeed;
 
   if (gswing == 0)
+  {
+    printf("!!! GRAPH SWING 0\n");
     gswing = FLOAT_EPSILON;
+  }
 
   *gspeed = TAU * (gtract / gswing);
 
   if (oldSpeed > 0 && *gspeed > 1.5 * oldSpeed)
+  {
     *gspeed = 1.5 * oldSpeed;
+    printf("!!! OLD GRAPH SPEED NOT 0\n");
+  }
+
+  printf("!!! gtract %f\n", gtract);
+  printf("!!! gswing %f\n", gswing);
+  printf("!!! speedgraph %f\n", *gspeed);
 }
 
 __device__ void fa2UpdateSpeed(unsigned int gid, unsigned int numvertices,
@@ -276,6 +287,7 @@ __device__ void fa2UpdateSpeed(unsigned int gid, unsigned int numvertices,
       vForceLen = EPSILON;
 
     *speed = K_S * gs / (1 + (gs * sqrt(vSwg)));
+    printf("!!! speed %f\n", *speed);
   }
 }
 
@@ -386,7 +398,8 @@ __global__ void fa2MoveVertices(
     float* forceX, float* forceY,
     float* oldForceX, float* oldForceY,
     float* graphSwing,
-    float* graphTract)
+    float* graphTract,
+    float* graphSpeed)
 {
   unsigned int gid = threadIdx.x + (blockIdx.x * BLOCK_SIZE);
 
@@ -396,8 +409,6 @@ __global__ void fa2MoveVertices(
     float dispX = 0;
     float dispY = 0;
 
-    float graphSpeed = 0;
-
     if (gid == 0)
     {
       printf("@@@ %f\n", *graphSwing);
@@ -405,10 +416,10 @@ __global__ void fa2MoveVertices(
     }
 
     // Update speed of Graph.
-    fa2UpdateSpeedGraph(*graphSwing, *graphTract, &graphSpeed);
+    fa2UpdateSpeedGraph(*graphSwing, *graphTract, graphSpeed);
 
     // Update speed of vertices.
-    fa2UpdateSpeed(gid, numvertices, &speed, swg, forceX[gid], forceY[gid], graphSpeed);
+    fa2UpdateSpeed(gid, numvertices, &speed, swg, forceX[gid], forceY[gid], *graphSpeed);
 
     // Update displacement of vertices.
     fa2UpdateDisplacement(gid, numvertices, speed, forceX[gid], forceY[gid], &dispX, &dispY);
@@ -572,7 +583,8 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
         oldForceX,
         oldForceY,
         graphSwing,
-        graphTract);
+        graphTract,
+        graphSpeed);
   }
 
   startCudaTimer(&timerMem2);
