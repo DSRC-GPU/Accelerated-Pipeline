@@ -1,6 +1,6 @@
 /*!
-  \file force-atlas-2.cu
-  A parallel implementation of the Force Atlas 2 spring embedding algorithm.
+ * \file force-atlas-2.cu
+ * A parallel implementation of the Force Atlas 2 spring embedding algorithm.
  */
 
 #include <stdio.h>
@@ -12,44 +12,228 @@
 #include "cuda-timer.h"
 #include "vector.h"
 
+/*!
+ * The number of thread in each thread block.
+ */
 #define BLOCK_SIZE 64
 
-// Gravity force
+/*!
+ * Updates the current force on each vertex with the current gravity.
+ *
+ * \param[in] gid The global ID of this thread.
+ * \param[in] numvertices The total number of vertices in the graph.
+ * \param[in] vxLocs Array that holds the x location of all vertices.
+ * \param[in] vyLocs Array that holds the y location of all vertices.
+ * \param[out] forceX Pointer to the x force on the vertex that belongs to this
+ *    thread.
+ * \param[out] forceY Pointer to the y force on the vertex that belongs to this
+ *    thread.
+ * \param[in] deg Array holding the out degree values for each vertex.
+ */
 __device__ void fa2Gravity(unsigned int gid, unsigned int numvertices,
     float* vxLocs, float* vyLocs, float* forceX, float* forceY,
     unsigned int* deg);
-// Repulsion between vertices
+
+/*!
+ * Updates the current force on each vertex with the current repulsion.
+ *
+ * \param[in] gid The global ID of this thread.
+ * \param[in] numvertices The total number of vertices in the graph.
+ * \param[in] vxLocs Array that holds the x location of all vertices.
+ * \param[in] vyLocs Array that holds the y location of all vertices.
+ * \param[out] forceX Pointer to the x force on the vertex that belongs to this
+ *    thread.
+ * \param[out] forceY Pointer to the y force on the vertex that belongs to this
+ *    thread.
+ * \param[in] deg Array holding the out degree values for each vertex.
+ */
 __device__ void fa2Repulsion(unsigned int gid, unsigned int numvertices,
     float* vxLocs, float* vyLocs, float* forceX, float* forceY,
     unsigned int* deg);
-// Attraction on edges
+
+/*!
+ * Updates the current force on each vertex with the current attraction.
+ *
+ * \param[in] gid The global ID of this thread.
+ * \param[in] numvertices The total number of vertices in the graph.
+ * \param[in] vxLocs Array that holds the x location of all vertices.
+ * \param[in] vyLocs Array that holds the y location of all vertices.
+ * \param[in] numedges The total number of edges in the graph.
+ * \param[in] edgeSources Array holding the vertex ID for each edge source in
+ *    order.
+ * \param[in] edgeTargets Array holding the vertex ID for each edge target in
+ *    order.
+ * \param[out] forceX Pointer to the x force on the vertex that belongs to this
+ *    thread.
+ * \param[out] forceY Pointer to the y force on the vertex that belongs to this
+ *    thread.
+ */
 __device__ void fa2Attraction(unsigned int gid, unsigned int numvertices,
     float* vxLocs, float* vyLocs, int numedges, unsigned int* edgeSources,
     unsigned int* edgeTargets, float* forceX, float* forceY);
 
+/*!
+ * Updates the swing value for each vertex in the graph.
+ *
+ * \param[in] gid The global ID of this thread.
+ * \param[in] numvertices The total number of vertices in the graph.
+ * \param[in] forceX The x force value on the vertex that belongs to this
+ *    thread.
+ * \param[in] forceY The y force value on the vertex that belongs to this
+ *    thread.
+ * \param[in] oldForceX Array holding the x forces of each vertex from the
+ *    previous iteration.
+ * \param[in] oldForceY Array holding the y forces of each vertex from the
+ *    previous iteration.
+ * \param[out] swg Array where the swing values for each vertex should be
+ *    stored.
+ */
 __device__ void fa2UpdateSwing(unsigned int gid, unsigned int numvertices,
     float forceX, float forceY, float* oldForceX, float* oldForceY,
     float* swg);
+
+/*!
+ * Updates the traction value for each vertex in the graph.
+ *
+ * \param[in] gid The global ID of this thread.
+ * \param[in] numvertices The total number of vertices in the graph.
+ * \param[in] forceX The x force value on the vertex that belongs to this
+ *    thread.
+ * \param[in] forceY The y force value on the vertex that belongs to this
+ *    thread.
+ * \param[in] oldForceX Array holding the x forces of each vertex from the
+ *    previous iteration.
+ * \param[in] oldForceY Array holding the y forces of each vertex from the
+ *    previous iteration.
+ * \param[out] swg Array where the traction values for each vertex should be
+ *    stored.
+ */
 __device__ void fa2UpdateTract(unsigned int gid, unsigned int numvertices,
     float forceX, float forceY, float* oldForceX, float* oldForceY,
     float* tra);
+
+/*!
+ * Updates the swing value for the graph itself.
+ *
+ * \param[in] numvertices The total number of vertices in the graph.
+ * \param[in] swg Array holding the swing values of each vertex in the graph.
+ * \param[in] deg Array holding the out degree values of each vertex in the
+ *    graph.
+ * \param[out] gswing Pointer to where the graph swing value should be stored.
+ */
 __device__ void fa2UpdateSwingGraph(unsigned int numvertices,
     float* swg, int* deg, float* gswing);
+
+/*!
+ * Updates the traction value for the graph itself.
+ *
+ * \param[in] numvertices The total number of vertices in the graph.
+ * \param[in] tra Array holding the traction values of each vertex in the graph.
+ * \param[in] deg Array holding the out degree values of each vertex in the
+ *    graph.
+ * \param[out] gtract Pointer to where the graph traction value should be stored.
+ */
 __device__ void fa2UpdateTractGraph(unsigned int numvertices,
     float* tra, int* deg, float* gtract);
+
+/*!
+ * Updates the speed value for the graph itself.
+ *
+ * \param[in] gswing The swing value of the graph.
+ * \param[in] gtract The traction value of the graph.
+ * \param[out] gspeed Pointer where the graph speed should be stored.
+ */
 __device__ void fa2UpdateSpeedGraph(float gswing, float gtract, float* gspeed);
+
+/*!
+ * Updates the speed value for each vertex in the graph.
+ *
+ * \param[in] gid The global ID of this thread.
+ * \param[in] numvertices The total number of vertices in the graph.
+ * \param[out] speed Pointer to where the speed value of the vertex that belongs
+ *    to this thread should be stored.
+ * \param[in] forceX The x force on the vertex that belongs to this thread.
+ * \param[in] forceY The y force on the vertex that belongs to this thread.
+ * \param[in] gs The graph speed value.
+ */
 __device__ void fa2UpdateSpeed(unsigned int gid, unsigned int numvertices,
     float* speed, float* swg, float forceX, float forceY, float gs);
+
+/*!
+ * Copies the forces of this iteration to another array. Overwrites the values
+ * in the destination array.
+ *
+ * \param[in] gid The global ID of this thread.
+ * \param[in] numvertices The total number of vertices in the graph.
+ * \param[in] forceX The x force on the vertex that belongs to this thread.
+ * \param[in] forceY The y force on the vertex that belongs to this thread.
+ * \param[out] oldForceX Array that will be used to store the x forces of this
+ *    iteration.
+ * \param[out] oldForceY Array that will be used to store the y forces of this
+ *    iteration.
+ */
 __device__ void fa2SaveOldForces(unsigned int gid, unsigned int numvertices,
     float forceX, float forceY, float* oldForceX, float* oldForceY);
+
+/*!
+ * Updates the vertex displacement array.
+ *
+ * \param[in] gid The global ID of this thread.
+ * \param[in] numvertices The total number of vertices in the graph.
+ * \param[in] speed The speed value for the vertex that belongs to this thread.
+ * \param[in] forceX The x force value for the vertex that belongs to this
+ *    thread.
+ * \param[in] forceY The y force value for the vertex that belongs to this
+ *    thread.
+ * \param[out] dispX Pointer to where the x displacement for the vertex that
+ *    belongs to this thread should be stored.
+ * \param[out] dispY Pointer to where the y displacement for the vertex that
+ *    belongs to this thread should be stored.
+ */
 __device__ void fa2UpdateDisplacement(unsigned int gid,
     unsigned int numvertices, float speed, float forceX, float forceY,
     float* dispX, float* dispY);
+
+/*!
+ * Updates the location of each vertex.
+ *
+ * \param[in] gid The global ID of this thread.
+ * \param[in] numvertices The total number of vertices in the graph.
+ * \param[out] vxLocs Array containing the x location of every vertex.
+ * \param[out] vyLocs Array containing the y location of every vertex.
+ * \param[in] xdisp The x displacement value for the vertex that belongs to this
+ *    thread.
+ * \param[in] ydisp The y displacement value for the vertex that belongs to this
+ *    thread.
+ */
 __device__ void fa2UpdateLocation(unsigned int gid, unsigned int numvertices,
     float* vxLocs, float* vyLocs, float xdisp, float ydisp);
 
+/*!
+ * Computes the out degree for each vertex.
+ *
+ * \param[in] numvertices The total number of vertices in the graph.
+ * \param[in] numedges The total number of edges in the graph.
+ * \param[in] edgeSources Array holding the vertex index for each edge-source.
+ * \param[out] deg Array holding the out degree for each vertex.
+ */
 __global__ void fa2ComputeDegrees(unsigned int numvertices,
     unsigned int numedges, unsigned int* edgeSources, unsigned int* deg);
+
+/*!
+ * CUDA Kernel that computes the graph swing and graph traction values.
+ *
+ * \param[in] numvertices The total number of vertices in the graph.
+ * \param[in] swg Array holding the swing value for each vertex in the graph.
+ * \param[in] tra Array holding the traction value for each vertex in the
+ *    graph.
+ * \param[int] numNeighbours Array holding the out degree value for each vertex
+ *    in the graph.
+ * \param[out] graphSwing Pointer to where the graph swing value should be
+ *    stored.
+ * \param[out] graphTract Pointer to where the graph traction value should be
+ *    stored.
+ */
 __global__ void fa2GraphSwingTract(unsigned int numvertices,
     float* swg, float* tra, unsigned int* numNeighbours,
     float* graphSwing, float* graphTract);

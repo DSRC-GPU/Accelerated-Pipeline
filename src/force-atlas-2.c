@@ -32,7 +32,7 @@ void fa2Gravity(Graph* g, float* forceX, float* forceY, unsigned int* deg);
 /*!
  * Applies repulsion forces on each vertex.
  * \param g The graph that contains the vertices on which to apply the repulsion
- * forces.
+ *    forces.
  * \param forceX Array holding the x-direction forces on each vertex.
  * \param forceY Array holding the y-direction forces on each vertex.
  * \param deg Array holding the out-degree of each vertex.
@@ -43,7 +43,7 @@ void fa2Repulsion(Graph* g, float* forceX, float* forceY, unsigned int* deg);
  * Applies attraction forces on all pairs of vertices that are connected by an
  * edge.
  * \param g The graph which holds the vertices and edges on which to apply the
- * attraction forces.
+ *    attraction forces.
  * \param forceX Array holding the x-direction forces on each vertex.
  * \param forceY Array holding the y-direction forces on each vertex.
  */
@@ -55,9 +55,9 @@ void fa2Attraction(Graph* g, float* forceX, float* forceY);
  * \param[in] forceX Array holding the x-direction forces on each vertex.
  * \param[in] forceY Array holding the y-direction forces on each vertex.
  * \param[in] oldForceX Array holding the x-direction forces on each vertex for the
- * previous iteration.
+ *    previous iteration.
  * \param[in] oldForceY Array holding the y-direction forces on each vertex for the
- * previous iteration.
+ *    previous iteration.
  * \param[out] swg An array holding the calculated swing values for each vertex.
  */
 void fa2UpdateSwing(Graph* g, float* forceX, float* forceY, float* oldForceX,
@@ -69,21 +69,92 @@ void fa2UpdateSwing(Graph* g, float* forceX, float* forceY, float* oldForceX,
  * \param[in] forceX Array holding the x-direction forces on each vertex.
  * \param[in] forceY Array holding the y-direction forces on each vertex.
  * \param[in] oldForceX Array holding the x-direction forces on each vertex for the
- * previous iteration.
+ *    previous iteration.
  * \param[in] oldForceY Array holding the y-direction forces on each vertex for the
- * previous iteration.
+ *    previous iteration.
  * \param[out] tra An array holding the calculated traction values for each
- * vertex.
+ *    vertex.
  */
 void fa2UpdateTract(Graph* g, float* forceX, float* forceY, float* oldForceX,
     float* oldForceY, float* tra);
 
-void fa2UpdateSwingGraph(Graph*, float*, unsigned int*, float*);
-void fa2UpdateTractGraph(Graph*, float*, unsigned int*, float*);
-void fa2UpdateSpeedGraph(float, float, float*);
+/*!
+ * Update the swing value of the Graph itself.
+ * \param[in] g The graph whose swing value should be calculated.
+ * \param[in] swg The array holding the swing values for each vertex in the
+ *    graph.
+ * \param[in] deg The array holding the out degree values for each vertex in the
+ *    graph.
+ * \param[out] gSwing A float pointer where the graph swing value should be
+ *    stored.
+ */
+void fa2UpdateSwingGraph(Graph* g, float* swg, unsigned int* deg, float* gSwing);
+
+/*!
+ * Update the traction value of the graph itself.
+ * \param[in] g The graph whoses traction should be calculated.
+ * \param[in] tra The array holding the traction values for each vertex in the
+ *    graph.
+ * \param[in] deg The array holding the out degree values for each vertex in the
+ *    graph.
+ * \param[out] gTract A float pointer where the graph traction value should be
+ *    stored.
+ */
+void fa2UpdateTractGraph(Graph* g, float* tra, unsigned int* deg, float* gTract);
+
+/*!
+ * Updates the speed value of the graph itself.
+ * \param[in] gSwing The graph swing value.
+ * \param[in] gTract The graph traction value.
+ * \param[out] gSpeed The graph speed value.
+ */
+void fa2UpdateSpeedGraph(float gSwing, float gTract, float* gSpeed);
+
+/*!
+ * Updates the speed value for each vertex in the graph.
+ * \param[in] g The graph.
+ * \param[out] speed The array where the speed values should be stored.
+ * \param[in] swg The swing values for all vertices in the graph.
+ * \param[in] forceX The x forces for all vertices in the graph.
+ * \param[in] forceY The y forces for all vertices in the graph.
+ * \param[in] gSpeed The graph speed value.
+ */
 void fa2UpdateSpeed(Graph*, float*, float*, float*, float*, float);
+
+/*!
+ * Updates the displacement value for each vertex in the graph.
+ * \param[in] g The graph.
+ * \param[in] speed The array that holds the speed values for each vertex.
+ * \param[in] forceX The x forces for each vertex in the graph.
+ * \param[in] forceY The y forces for each vertex in the graph.
+ * \param[out] dispX The array where the x displacement for each vertex should
+ *    be stored.
+ * \param[out] dispY The array where the y displacement for each vertex should
+ *    be stored.
+ */
 void fa2UpdateDisplacement(Graph*, float*, float*, float*, float*, float*);
+
+/*!
+ * Stores the forces from the current iteration as old forces. Deletes the
+ * forces from the previous iteration.
+ * 
+ * \param[in] g The graph.
+ * \param[in] forceX The x forces of the current iteration.
+ * \param[in] forceY The y forces of the current iteration.
+ * \param[out] oldForceX The array that should be used to store the x forces of
+ *    the current iteration.
+ * \param[out] oldForceY The array that should be used to store the y forces of
+ *    the current iteration.
+ */
 void fa2SaveOldForces(Graph*, float*, float*, float*, float*);
+
+/*!
+ * Updates the location of each vertex according to the given displacement.
+ *
+ * \param[in] g The graph.
+ * \param[in] dispX The array of x displacement values for each vertex.
+ * \param[in] dispY The array of y displacement values for each vertex.
+ */
 void fa2UpdateLocation(Graph*, float*, float*);
 
 void calcNumNeighbours(Graph* g, unsigned int* deg)
