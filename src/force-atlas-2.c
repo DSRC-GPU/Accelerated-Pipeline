@@ -12,8 +12,6 @@
 #include "timer.h"
 #include "vector.h"
 
-#define PRINTID 0
-
 /*!
  * Calculates the number of neighbours for every node.
  * \param[in] g The input graph.
@@ -108,8 +106,6 @@ void fa2Gravity(Graph* g, float* forceX, float* forceY, unsigned int* deg)
     vectorInverse(&vx, &vy);
     vectorMultiply(&vx, &vy, K_G * (deg[i] + 1) / vlen);
     vectorAdd(&forceX[i], &forceY[i], vx, vy);
-    if (i == PRINTID)
-      printf("g\t%f\t%f\n", vx, vy);
   }
 }
 
@@ -137,11 +133,7 @@ void fa2Repulsion(Graph* g, float* forceX, float* forceY, unsigned int* deg)
         // vectorMultiply(&vx1, &vy1, 0.5);
 
         vectorAdd(&forceX[i], &forceY[i], vx1, vy1);
-        if (i == PRINTID)
-          printf("r\t%i\t%f\t%f\n", j, vx1, vy1);
       }
-      else if (i == PRINTID)
-        printf("r\t%i\n", j);
     }
   }
 }
@@ -162,8 +154,6 @@ void fa2Attraction(Graph* g, float* forceX, float* forceY)
     vectorSubtract(&vx2, &vy2, vx1, vy1);
     // vectorMultiply(&vx2, &vy2, 0.5);
     vectorAdd(&forceX[v1Index], &forceY[v1Index], vx2, vy2);
-    if (v1Index == PRINTID)
-      printf("a\t%i\t%f\t%f\n", v2Index, vx2, vy2);
   }
 }
 
@@ -383,9 +373,6 @@ void fa2RunOnGraph(Graph* g, unsigned int n)
     startTimer(&timer);
     fa2RunOnce(g);
     stopTimer(&timer);
-    printf("### %i\n", i);
-    printGraph(g);
-    printf("\n");
     //printf("time: iteration.\n");
     //printTimer(&timer);
   }

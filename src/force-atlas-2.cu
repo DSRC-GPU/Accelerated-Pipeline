@@ -13,7 +13,6 @@
 #include "vector.h"
 
 #define BLOCK_SIZE 64
-#define PRINTID 0
 
 // Gravity force
 __device__ void fa2Gravity(unsigned int gid, unsigned int numvertices,
