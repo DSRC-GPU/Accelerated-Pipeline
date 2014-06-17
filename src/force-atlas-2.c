@@ -173,13 +173,11 @@ void fa2UpdateSwing(Graph* g, float* forceX, float* forceY,
 {
   for (size_t i = 0; i < g->numvertices; i++)
   {
-    printf("!!! %f\t%f\t%f\t%f\n", forceX[i], forceY[i], oldForceX[i], oldForceY[i]);
     float fx = oldForceX[i];
     float fy = oldForceY[i];
     vectorSubtract(&fx, &fy, forceX[i], forceY[i]);
     float vlen = vectorGetLength(fx, fy);
     swg[i] = vlen;
-    printf("@@@ %i\t%f\n", i, vlen);
   }
 }
 
@@ -195,7 +193,6 @@ void fa2UpdateTract(Graph* g, float* forceX, float* forceY,
     vectorAdd(&fx, &fy, forceX[i], forceY[i]);
     float vlen = vectorGetLength(fx, fy);
     tra[i] = vlen / 2;
-    printf("!!! %i\t%f\n", i, tra[i]);
   }
 }
 
@@ -207,7 +204,6 @@ void fa2UpdateSwingGraph(Graph* g, float* swg, unsigned int* deg, float* gswing)
   {
     *gswing += (deg[i] + 1) * swg[i];
   }
-  printf("@@@ %f\n", *gswing);
 }
 
 // Calculate the current traction of the graph.
@@ -218,7 +214,6 @@ void fa2UpdateTractGraph(Graph* g, float* tra, unsigned int* deg, float* gtract)
   {
     *gtract += (deg[i] + 1) * tra[i];
   }
-  printf("!!! %f\n", *gtract);
 }
 
 void fa2UpdateSpeedGraph(float gswing, float gtract, float* gspeed)
@@ -227,7 +222,6 @@ void fa2UpdateSpeedGraph(float gswing, float gtract, float* gspeed)
 
   if (gswing == 0)
   {
-    printf("!!! GRAPH SWING 0\n");
     gswing = FLOAT_EPSILON;
   }
 
@@ -236,12 +230,8 @@ void fa2UpdateSpeedGraph(float gswing, float gtract, float* gspeed)
   if (oldSpeed > 0 && *gspeed > 1.5 * oldSpeed)
   {
     *gspeed = 1.5 * oldSpeed;
-    printf("!!! OLD GRAPH SPEED NOT 0\n");
   }
 
-  printf("!!! gtract %f\n", gtract);
-  printf("!!! gswing %f\n", gswing);
-  printf("!!! speedgraph %f\n", *gspeed);
 }
 
 void fa2UpdateSpeed(Graph* g, float* speed, float* swg, float* forceX,
@@ -257,7 +247,6 @@ void fa2UpdateSpeed(Graph* g, float* speed, float* swg, float* forceX,
       vForceLen = EPSILON;
 
     speed[i] = K_S * gs / (1 + (gs * sqrt(vSwg)));
-    printf("!!! speed %f\n", speed[i]);
   }
 }
 

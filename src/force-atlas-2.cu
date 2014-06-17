@@ -136,7 +136,6 @@ __device__ void fa2UpdateSwing(unsigned int gid, unsigned int numvertices,
 {
   if (gid < numvertices)
   {
-    printf("!!! %f\t%f\t%f\t%f\n", forceX, forceY, oldForceX[gid], oldForceY[gid]);
     float fx = oldForceX[gid];
     float fy = oldForceY[gid];
     vectorSubtract(&fx, &fy, forceX, forceY);
@@ -175,7 +174,6 @@ __device__ void fa2UpdateSwingGraph(unsigned int numvertices,
   if (base < numvertices)
   {
     scratch[tx] = (deg[base] + 1) * swg[base];
-    printf("@@@ %i\t%f\n", base, swg[base]);
   }
   else
     scratch[tx] = 0;
@@ -183,7 +181,6 @@ __device__ void fa2UpdateSwingGraph(unsigned int numvertices,
   if (base + stride < numvertices)
   {
     scratch[tx + stride] = (deg[base + stride] + 1) * swg[base + stride];
-    printf("@@@ %i\t%f\n", base + stride, swg[base + stride]);
   }
   else
     scratch[tx + stride] = 0;
@@ -220,7 +217,6 @@ __device__ void fa2UpdateTractGraph(unsigned int numvertices,
   if (base < numvertices)
   {
     scratch[tx] = (deg[base] + 1) * tra[base];
-    printf("!!! %i\t%f\n", base, tra[base]);
   }
   else
     scratch[tx] = 0;
@@ -228,7 +224,6 @@ __device__ void fa2UpdateTractGraph(unsigned int numvertices,
   if (base + stride < numvertices)
   {
     scratch[tx + stride] = (deg[base + stride] + 1) * tra[base + stride];
-    printf("!!! %i\t%f\n", base + stride, tra[base + stride]);
   }
   else
     scratch[tx + stride] = 0;
@@ -257,7 +252,6 @@ __device__ void fa2UpdateSpeedGraph(float gswing, float gtract, float* gspeed)
 
   if (gswing == 0)
   {
-    printf("!!! GRAPH SWING 0\n");
     gswing = FLOAT_EPSILON;
   }
 
@@ -266,12 +260,8 @@ __device__ void fa2UpdateSpeedGraph(float gswing, float gtract, float* gspeed)
   if (oldSpeed > 0 && *gspeed > 1.5 * oldSpeed)
   {
     *gspeed = 1.5 * oldSpeed;
-    printf("!!! OLD GRAPH SPEED NOT 0\n");
   }
 
-  printf("!!! gtract %f\n", gtract);
-  printf("!!! gswing %f\n", gswing);
-  printf("!!! speedgraph %f\n", *gspeed);
 }
 
 __device__ void fa2UpdateSpeed(unsigned int gid, unsigned int numvertices,
@@ -287,7 +277,6 @@ __device__ void fa2UpdateSpeed(unsigned int gid, unsigned int numvertices,
       vForceLen = EPSILON;
 
     *speed = K_S * gs / (1 + (gs * sqrt(vSwg)));
-    printf("!!! speed %f\n", *speed);
   }
 }
 
@@ -408,12 +397,6 @@ __global__ void fa2MoveVertices(
     float speed = 0;
     float dispX = 0;
     float dispY = 0;
-
-    if (gid == 0)
-    {
-      printf("@@@ %f\n", *graphSwing);
-      printf("!!! %f\n", *graphTract);
-    }
 
     // Update speed of Graph.
     fa2UpdateSpeedGraph(*graphSwing, *graphTract, graphSpeed);
