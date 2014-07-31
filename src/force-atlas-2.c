@@ -162,13 +162,14 @@ void calcNumNeighbours(Graph* g, unsigned int* deg)
   for (size_t i = 0; i < g->numedges; i++)
   {
     unsigned int node = g->edgeSources[i];
-    deg[node]++; 
+    deg[node]++;
   }
 }
 
 void fa2Gravity(Graph* g, float* forceX, float* forceY, unsigned int* deg)
 {
-  if (!g) return;
+  if (!g)
+    return;
   for (size_t i = 0; i < g->numvertices; i++)
   {
     float vx = g->vertexXLocs[i];
@@ -182,12 +183,14 @@ void fa2Gravity(Graph* g, float* forceX, float* forceY, unsigned int* deg)
 
 void fa2Repulsion(Graph* g, float* forceX, float* forceY, unsigned int* deg)
 {
-  if (!g) return;
+  if (!g)
+    return;
   for (size_t i = 0; i < g->numvertices; i++)
   {
     for (size_t j = 0; j < g->numvertices; j++)
     {
-      if (i == j) continue;
+      if (i == j)
+        continue;
       float vx1 = g->vertexXLocs[i];
       float vy1 = g->vertexYLocs[i];
       float vx2 = g->vertexXLocs[j];
@@ -199,8 +202,8 @@ void fa2Repulsion(Graph* g, float* forceX, float* forceY, unsigned int* deg)
       if (dist > 0)
       {
         vectorNormalize(&vx1, &vy1);
-        vectorMultiply(&vx1, &vy1, K_R * (((deg[i] + 1) * (deg[j] + 1))
-              / dist));
+        vectorMultiply(&vx1, &vy1,
+            K_R * (((deg[i] + 1) * (deg[j] + 1)) / dist));
         // vectorMultiply(&vx1, &vy1, 0.5);
 
         vectorAdd(&forceX[i], &forceY[i], vx1, vy1);
@@ -211,7 +214,8 @@ void fa2Repulsion(Graph* g, float* forceX, float* forceY, unsigned int* deg)
 
 void fa2Attraction(Graph* g, float* forceX, float* forceY)
 {
-  if (!g) return;
+  if (!g)
+    return;
   for (size_t i = 0; i < g->numedges; i++)
   {
     int v1Index = g->edgeSources[i];
@@ -229,8 +233,8 @@ void fa2Attraction(Graph* g, float* forceX, float* forceY)
 }
 
 // Updates the swing for each vertex, as described in the Force Atlas 2 paper.
-void fa2UpdateSwing(Graph* g, float* forceX, float* forceY,
-    float* oldForceX, float* oldForceY, float* swg)
+void fa2UpdateSwing(Graph* g, float* forceX, float* forceY, float* oldForceX,
+    float* oldForceY, float* swg)
 {
   for (size_t i = 0; i < g->numvertices; i++)
   {
@@ -244,8 +248,8 @@ void fa2UpdateSwing(Graph* g, float* forceX, float* forceY,
 
 // Updates the traction for each vertex, as described in the Force Atlas 2
 // paper.
-void fa2UpdateTract(Graph* g, float* forceX, float* forceY,
-    float* oldForceX, float* oldForceY, float* tra)
+void fa2UpdateTract(Graph* g, float* forceX, float* forceY, float* oldForceX,
+    float* oldForceY, float* tra)
 {
   for (size_t i = 0; i < g->numvertices; i++)
   {
@@ -312,8 +316,8 @@ void fa2UpdateSpeed(Graph* g, float* speed, float* swg, float* forceX,
 }
 
 // Save current forces as the previous forces for the next tick.
-void fa2SaveOldForces(Graph* g, float* forceX, float* forceY,
-    float* oldForceX, float* oldForceY)
+void fa2SaveOldForces(Graph* g, float* forceX, float* forceY, float* oldForceX,
+    float* oldForceY)
 {
   for (size_t i = 0; i < g->numvertices; i++)
   {
@@ -322,8 +326,8 @@ void fa2SaveOldForces(Graph* g, float* forceX, float* forceY,
   }
 }
 
-void fa2UpdateDisplacement(Graph* g, float* speed, float* forceX,
-    float* forceY, float* dispX, float* dispY)
+void fa2UpdateDisplacement(Graph* g, float* speed, float* forceX, float* forceY,
+    float* dispX, float* dispY)
 {
   for (size_t i = 0; i < g->numvertices; i++)
   {
@@ -364,7 +368,8 @@ void fa2RunOnce(Graph* g)
 
   if (firstRun)
   {
-    numNeighbours = (unsigned int*) calloc(g->numvertices, sizeof(unsigned int));
+    numNeighbours = (unsigned int*) calloc(g->numvertices,
+        sizeof(unsigned int));
     calcNumNeighbours(g, numNeighbours);
     tra = (float*) calloc(g->numvertices, sizeof(float));
     swg = (float*) calloc(g->numvertices, sizeof(float));

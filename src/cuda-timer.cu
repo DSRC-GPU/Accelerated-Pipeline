@@ -1,4 +1,3 @@
-
 #include "cuda-timer.h"
 #include <stdio.h>
 

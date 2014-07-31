@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <time.h>
 #include "timer.h"
@@ -7,13 +6,13 @@ void startTimer(Timer* t)
 {
   t->wallTimerEnd = 0;
   t->cpuTimerEnd = 0;
-  t->wallTimerStart = time(NULL);
+  t->wallTimerStart = time(NULL );
   t->cpuTimerStart = clock();
 }
 
 void stopTimer(Timer* t)
 {
-  t->wallTimerEnd = time(NULL);
+  t->wallTimerEnd = time(NULL );
   t->cpuTimerEnd = clock();
 }
 
@@ -36,11 +35,11 @@ void printTimer(Timer* t)
   }
   else
   {
-    wallEnd = time(NULL);
+    wallEnd = time(NULL );
     cpuEnd = clock();
   }
   printf("Elapsed wall time (s):  %ld\n", (long) (wallEnd - t->wallTimerStart));
   printf("Elapsed cpu time (ms):  %f\n",
-      (float) 1000*(cpuEnd - t->cpuTimerStart)/CLOCKS_PER_SEC);
+      (float) 1000 * (cpuEnd - t->cpuTimerStart) / CLOCKS_PER_SEC);
 }
 

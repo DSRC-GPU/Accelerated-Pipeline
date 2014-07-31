@@ -1,4 +1,3 @@
-
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -32,11 +31,12 @@ Graph* newGraph(unsigned int numedges, unsigned int numvertices)
 
 void printGraph(Graph* g)
 {
-  if (!g) return;
+  if (!g)
+    return;
   for (size_t i = 0; i < g->vertices->numvertices; i++)
   {
-    printf("%d %.15f %.15f\n",
-        g->vertices->vertexIds[i] , g->vertices->vertexXLocs[i], g->vertices->vertexYLocs[i]);
+    printf("%d %.15f %.15f\n", g->vertices->vertexIds[i],
+        g->vertices->vertexXLocs[i], g->vertices->vertexYLocs[i]);
   }
 }
 

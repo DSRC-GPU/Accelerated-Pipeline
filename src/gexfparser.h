@@ -1,6 +1,6 @@
 /*!
-  \file gexfparser.h
-  Parses a gexf file to a graph.
+ \file gexfparser.h
+ Parses a gexf file to a graph.
  */
 #ifndef GEXFPARSER_H
 #define GEXFPARSER_H

@@ -1,4 +1,3 @@
-
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,7 +11,7 @@
 
 int main(int argc, char* argv[])
 {
-  srand(time(NULL));
+  srand(time(NULL ));
 
   // Input parsing.
   const char* inputFile = NULL;
@@ -37,7 +36,7 @@ int main(int argc, char* argv[])
     else
     {
       printf("Unrecognized parameter: %s.\n", argv[i]);
-   //   exit(EXIT_FAILURE);
+      //   exit(EXIT_FAILURE);
     }
   }
 

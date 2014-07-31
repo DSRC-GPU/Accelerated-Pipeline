@@ -1,6 +1,6 @@
 /*!
-  \file graph.h
-  A simple graph implementation.
+ \file graph.h
+ A simple graph implementation.
  */
 #ifndef GRAPH_H
 #define GRAPH_H
@@ -10,9 +10,9 @@
  */
 typedef struct Edges
 {
-	unsigned int numedges;
-	unsigned int* edgeSources;
-	unsigned int* edgeTargets;
+  unsigned int numedges;
+  unsigned int* edgeSources;
+  unsigned int* edgeTargets;
 } Edges;
 
 /*!
@@ -20,10 +20,10 @@ typedef struct Edges
  */
 typedef struct Vertices
 {
-	unsigned int numvertices;
-	int* vertexIds;
-	float* vertexXLocs;
-	float* vertexYLocs;
+  unsigned int numvertices;
+  int* vertexIds;
+  float* vertexXLocs;
+  float* vertexYLocs;
 } Vertices;
 
 /*!
@@ -31,8 +31,8 @@ typedef struct Vertices
  */
 typedef struct Graph
 {
-	Edges* edges;
-	Vertices* vertices;
+  Edges* edges;
+  Vertices* vertices;
 } Graph;
 
 /*!
@@ -51,8 +51,8 @@ Vertices* newVertices(unsigned int num);
 Graph* newGraph(unsigned int numEdges, unsigned int numVertices);
 
 /*!
-  Print the details of the graph to stdout.
-  \param[in] g The graph to print.
+ Print the details of the graph to stdout.
+ \param[in] g The graph to print.
  */
 void printGraph(Graph* g);
 

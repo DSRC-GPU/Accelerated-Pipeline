@@ -69,8 +69,9 @@ __device__ void fa2Repulsion(unsigned int gid, unsigned int numvertices,
  *    thread.
  */
 __device__ void fa2Attraction(unsigned int gid, unsigned int numvertices,
-    float* vxLocs, float* vyLocs, unsigned int numedges, unsigned int* edgeSources,
-    unsigned int* edgeTargets, float* forceX, float* forceY);
+    float* vxLocs, float* vyLocs, unsigned int numedges,
+    unsigned int* edgeSources, unsigned int* edgeTargets, float* forceX,
+    float* forceY);
 
 /*!
  * Updates the swing value for each vertex in the graph.
@@ -89,8 +90,7 @@ __device__ void fa2Attraction(unsigned int gid, unsigned int numvertices,
  *    stored.
  */
 __device__ void fa2UpdateSwing(unsigned int gid, unsigned int numvertices,
-    float forceX, float forceY, float* oldForceX, float* oldForceY,
-    float* swg);
+    float forceX, float forceY, float* oldForceX, float* oldForceY, float* swg);
 
 /*!
  * Updates the traction value for each vertex in the graph.
@@ -109,8 +109,7 @@ __device__ void fa2UpdateSwing(unsigned int gid, unsigned int numvertices,
  *    stored.
  */
 __device__ void fa2UpdateTract(unsigned int gid, unsigned int numvertices,
-    float forceX, float forceY, float* oldForceX, float* oldForceY,
-    float* tra);
+    float forceX, float forceY, float* oldForceX, float* oldForceY, float* tra);
 
 /*!
  * Updates the swing value for the graph itself.
@@ -121,8 +120,8 @@ __device__ void fa2UpdateTract(unsigned int gid, unsigned int numvertices,
  *    graph.
  * \param[out] gswing Pointer to where the graph swing value should be stored.
  */
-__device__ void fa2UpdateSwingGraph(unsigned int numvertices,
-    float* swg, int* deg, float* gswing);
+__device__ void fa2UpdateSwingGraph(unsigned int numvertices, float* swg,
+    int* deg, float* gswing);
 
 /*!
  * Updates the traction value for the graph itself.
@@ -133,8 +132,8 @@ __device__ void fa2UpdateSwingGraph(unsigned int numvertices,
  *    graph.
  * \param[out] gtract Pointer to where the graph traction value should be stored.
  */
-__device__ void fa2UpdateTractGraph(unsigned int numvertices,
-    float* tra, int* deg, float* gtract);
+__device__ void fa2UpdateTractGraph(unsigned int numvertices, float* tra,
+    int* deg, float* gtract);
 
 /*!
  * Updates the speed value for the graph itself.
@@ -234,9 +233,9 @@ __global__ void fa2ComputeDegrees(unsigned int numvertices,
  * \param[out] graphTract Pointer to where the graph traction value should be
  *    stored.
  */
-__global__ void fa2GraphSwingTract(unsigned int numvertices,
-    float* swg, float* tra, unsigned int* numNeighbours,
-    float* graphSwing, float* graphTract);
+__global__ void fa2GraphSwingTract(unsigned int numvertices, float* swg,
+    float* tra, unsigned int* numNeighbours, float* graphSwing,
+    float* graphTract);
 
 __device__ void fa2Gravity(unsigned int gid, unsigned int numvertices,
     float* vxLocs, float* vyLocs, float* forceX, float* forceY,
@@ -261,7 +260,8 @@ __device__ void fa2Repulsion(unsigned int gid, unsigned int numvertices,
   {
     for (size_t j = 0; j < numvertices; j++)
     {
-      if (gid == j) continue;
+      if (gid == j)
+        continue;
       float vx1 = vxLocs[gid];
       float vy1 = vyLocs[gid];
       float vx2 = vxLocs[j];
@@ -273,8 +273,8 @@ __device__ void fa2Repulsion(unsigned int gid, unsigned int numvertices,
       if (dist > 0)
       {
         vectorNormalize(&vx1, &vy1);
-        vectorMultiply(&vx1, &vy1, K_R * (((deg[gid] + 1) * (deg[j] + 1))
-              / dist));
+        vectorMultiply(&vx1, &vy1,
+            K_R * (((deg[gid] + 1) * (deg[j] + 1)) / dist));
         // vectorMultiply(&vx1, &vy1, 0.5);
 
         vectorAdd(forceX, forceY, vx1, vy1);
@@ -314,8 +314,7 @@ __device__ void fa2Attraction(unsigned int gid, unsigned int numvertices,
 
 // Updates the swing for each vertex, as described in the Force Atlas 2 paper.
 __device__ void fa2UpdateSwing(unsigned int gid, unsigned int numvertices,
-    float forceX, float forceY, float* oldForceX, float* oldForceY,
-    float* swg)
+    float forceX, float forceY, float* oldForceX, float* oldForceY, float* swg)
 {
   if (gid < numvertices)
   {
@@ -330,8 +329,7 @@ __device__ void fa2UpdateSwing(unsigned int gid, unsigned int numvertices,
 // Updates the traction for each vertex, as described in the Force Atlas 2
 // paper.
 __device__ void fa2UpdateTract(unsigned int gid, unsigned int numvertices,
-    float forceX, float forceY, float* oldForceX, float* oldForceY,
-    float* tra)
+    float forceX, float forceY, float* oldForceX, float* oldForceY, float* tra)
 {
   if (gid < numvertices)
   {
@@ -344,8 +342,8 @@ __device__ void fa2UpdateTract(unsigned int gid, unsigned int numvertices,
 }
 
 // Calculate the current swing of the graph.
-__device__ void fa2UpdateSwingGraph(unsigned int numvertices,
-    float* swg, unsigned int* deg, float* gswing)
+__device__ void fa2UpdateSwingGraph(unsigned int numvertices, float* swg,
+    unsigned int* deg, float* gswing)
 {
   __shared__ float scratch[BLOCK_SIZE * 2];
 
@@ -387,8 +385,8 @@ __device__ void fa2UpdateSwingGraph(unsigned int numvertices,
 }
 
 // Calculate the current traction of the graph.
-__device__ void fa2UpdateTractGraph(unsigned int numvertices,
-    float* tra, unsigned int* deg, float* gtract)
+__device__ void fa2UpdateTractGraph(unsigned int numvertices, float* tra,
+    unsigned int* deg, float* gtract)
 {
   __shared__ float scratch[BLOCK_SIZE * 2];
 
@@ -514,9 +512,9 @@ __global__ void fa2ComputeDegrees(unsigned int numvertices,
   }
 }
 
-__global__ void fa2GraphSwingTract(unsigned int numvertices,
-    float* swg, float* tra, unsigned int* numNeighbours,
-    float* graphSwing, float* graphTract)
+__global__ void fa2GraphSwingTract(unsigned int numvertices, float* swg,
+    float* tra, unsigned int* numNeighbours, float* graphSwing,
+    float* graphTract)
 {
   // Update swing of Graph.
   fa2UpdateSwingGraph(numvertices, swg, numNeighbours, graphSwing);
@@ -525,19 +523,12 @@ __global__ void fa2GraphSwingTract(unsigned int numvertices,
   fa2UpdateTractGraph(numvertices, tra, numNeighbours, graphTract);
 }
 
-__global__ void fa2kernel(
-    float* vxLocs, float* vyLocs,
-    unsigned int numvertices,
-    unsigned int* edgeSources,
-    unsigned int* edgeTargets,
-    unsigned int numedges,
-    unsigned int* numNeighbours,
-    float* tra, float* swg, 
-    float* forceX, float* forceY,
-    float* oldForceX, float* oldForceY,
-    float* graphSwing,
-    float* graphTract,
-    float* oldGraphSpeed)
+__global__ void fa2kernel(float* vxLocs, float* vyLocs,
+    unsigned int numvertices, unsigned int* edgeSources,
+    unsigned int* edgeTargets, unsigned int numedges,
+    unsigned int* numNeighbours, float* tra, float* swg, float* forceX,
+    float* forceY, float* oldForceX, float* oldForceY, float* graphSwing,
+    float* graphTract, float* oldGraphSpeed)
 {
   unsigned int gid = threadIdx.x + (blockIdx.x * BLOCK_SIZE);
 
@@ -547,31 +538,30 @@ __global__ void fa2kernel(
     forceY[gid] = 0;
 
     // Gravity force
-    fa2Gravity(gid, numvertices, vxLocs, vyLocs, &forceX[gid], &forceY[gid], numNeighbours);
+    fa2Gravity(gid, numvertices, vxLocs, vyLocs, &forceX[gid], &forceY[gid],
+        numNeighbours);
     // Repulsion between vertices
-    fa2Repulsion(gid, numvertices, vxLocs, vyLocs, &forceX[gid], &forceY[gid], numNeighbours);
+    fa2Repulsion(gid, numvertices, vxLocs, vyLocs, &forceX[gid], &forceY[gid],
+        numNeighbours);
     // Attraction on edges
     fa2Attraction(gid, numvertices, vxLocs, vyLocs, numedges, edgeSources,
         edgeTargets, &forceX[gid], &forceY[gid]);
 
     // Calculate speed of vertices.
     // Update swing of vertices.
-    fa2UpdateSwing(gid, numvertices, forceX[gid], forceY[gid], oldForceX, oldForceY, swg);
+    fa2UpdateSwing(gid, numvertices, forceX[gid], forceY[gid], oldForceX,
+        oldForceY, swg);
 
     // Update traction of vertices.
-    fa2UpdateTract(gid, numvertices, forceX[gid], forceY[gid], oldForceX, oldForceY, tra);
+    fa2UpdateTract(gid, numvertices, forceX[gid], forceY[gid], oldForceX,
+        oldForceY, tra);
   }
 }
 
-__global__ void fa2MoveVertices(
-    float* vxLocs, float* vyLocs,
-    unsigned int numvertices,
-    float* tra, float* swg,
-    float* forceX, float* forceY,
-    float* oldForceX, float* oldForceY,
-    float* graphSwing,
-    float* graphTract,
-    float* graphSpeed)
+__global__ void fa2MoveVertices(float* vxLocs, float* vyLocs,
+    unsigned int numvertices, float* tra, float* swg, float* forceX,
+    float* forceY, float* oldForceX, float* oldForceY, float* graphSwing,
+    float* graphTract, float* graphSpeed)
 {
   unsigned int gid = threadIdx.x + (blockIdx.x * BLOCK_SIZE);
 
@@ -585,16 +575,19 @@ __global__ void fa2MoveVertices(
     fa2UpdateSpeedGraph(*graphSwing, *graphTract, graphSpeed);
 
     // Update speed of vertices.
-    fa2UpdateSpeed(gid, numvertices, &speed, swg, forceX[gid], forceY[gid], *graphSpeed);
+    fa2UpdateSpeed(gid, numvertices, &speed, swg, forceX[gid], forceY[gid],
+        *graphSpeed);
 
     // Update displacement of vertices.
-    fa2UpdateDisplacement(gid, numvertices, speed, forceX[gid], forceY[gid], &dispX, &dispY);
+    fa2UpdateDisplacement(gid, numvertices, speed, forceX[gid], forceY[gid],
+        &dispX, &dispY);
 
     // Update vertex locations based on speed.
     fa2UpdateLocation(gid, numvertices, vxLocs, vyLocs, dispX, dispY);
 
     // Set current forces as old forces in vertex data.
-    fa2SaveOldForces(gid, numvertices, forceX[gid], forceY[gid], oldForceX, oldForceY);
+    fa2SaveOldForces(gid, numvertices, forceX[gid], forceY[gid], oldForceX,
+        oldForceY);
   }
 }
 
@@ -650,10 +643,10 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
   startCudaTimer(&timerMem1);
 
   // Copy vertices and edges to device.
-  cudaMemcpy((void*) vxLocs, g->vertices->vertexXLocs, g->vertices->numvertices * sizeof(float),
-      cudaMemcpyHostToDevice);
-  cudaMemcpy((void*) vyLocs, g->vertices->vertexYLocs, g->vertices->numvertices * sizeof(float),
-      cudaMemcpyHostToDevice);
+  cudaMemcpy((void*) vxLocs, g->vertices->vertexXLocs,
+      g->vertices->numvertices * sizeof(float), cudaMemcpyHostToDevice);
+  cudaMemcpy((void*) vyLocs, g->vertices->vertexYLocs,
+      g->vertices->numvertices * sizeof(float), cudaMemcpyHostToDevice);
   cudaMemcpy((void*) edgeSources, g->edges->edgeSources,
       g->edges->numedges * sizeof(unsigned int), cudaMemcpyHostToDevice);
   cudaMemcpy((void*) edgeTargets, g->edges->edgeTargets,
@@ -667,8 +660,8 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
   cudaGetLastError();
 
   // Compute vertex degrees using current edges.
-  fa2ComputeDegrees<<<numblocks, BLOCK_SIZE>>>(g->vertices->numvertices, g->edges->numedges,
-      edgeSources, numNeighbours);
+  fa2ComputeDegrees<<<numblocks, BLOCK_SIZE>>>(g->vertices->numvertices,
+      g->edges->numedges, edgeSources, numNeighbours);
 
   cudaError_t code = cudaGetLastError();
   if (code != cudaSuccess)
@@ -684,23 +677,10 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
 
     // Compute graph speed, vertex forces, speed and displacement.
     startCudaTimer(&timer);
-    fa2kernel<<<numblocks, BLOCK_SIZE>>>(
-        vxLocs,
-        vyLocs,
-        g->vertices->numvertices,
-        edgeSources,
-        edgeTargets,
-        g->edges->numedges,
-        numNeighbours,
-        tra,
-        swg,
-        forceX,
-        forceY,
-        oldForceX,
-        oldForceY,
-        graphSwing,
-        graphTract,
-        graphSpeed);
+    fa2kernel<<<numblocks, BLOCK_SIZE>>>(vxLocs, vyLocs,
+        g->vertices->numvertices, edgeSources, edgeTargets, g->edges->numedges,
+        numNeighbours, tra, swg, forceX, forceY, oldForceX, oldForceY,
+        graphSwing, graphTract, graphSpeed);
     stopCudaTimer(&timer);
     printf("time: all forces and moving vertices.\n");
     printCudaTimer(&timer);
@@ -723,9 +703,8 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
     // Run reductions on vertex swing and traction.
     startCudaTimer(&timer);
     fa2GraphSwingTract<<<numblocks_reduction, BLOCK_SIZE>>>(
-        g->vertices->numvertices,
-        swg, tra, numNeighbours,
-        graphSwing, graphTract);
+        g->vertices->numvertices, swg, tra, numNeighbours, graphSwing,
+        graphTract);
     stopCudaTimer(&timer);
     printf("time: graph swing and traction.\n");
     printCudaTimer(&timer);
@@ -738,28 +717,18 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
       exit(EXIT_FAILURE);
     }
 
-    fa2MoveVertices<<<numblocks, BLOCK_SIZE>>>(
-        vxLocs,
-        vyLocs,
-        g->vertices->numvertices,
-        tra,
-        swg,
-        forceX,
-        forceY,
-        oldForceX,
-        oldForceY,
-        graphSwing,
-        graphTract,
-        graphSpeed);
+    fa2MoveVertices<<<numblocks, BLOCK_SIZE>>>(vxLocs, vyLocs,
+        g->vertices->numvertices, tra, swg, forceX, forceY, oldForceX,
+        oldForceY, graphSwing, graphTract, graphSpeed);
   }
 
   startCudaTimer(&timerMem2);
 
   // Update graph with new vertex positions.
-  cudaMemcpy((void*) g->vertices->vertexXLocs, vxLocs, g->vertices->numvertices * sizeof(float),
-      cudaMemcpyDeviceToHost);
-  cudaMemcpy((void*) g->vertices->vertexYLocs, vyLocs, g->vertices->numvertices * sizeof(float),
-      cudaMemcpyDeviceToHost);
+  cudaMemcpy((void*) g->vertices->vertexXLocs, vxLocs,
+      g->vertices->numvertices * sizeof(float), cudaMemcpyDeviceToHost);
+  cudaMemcpy((void*) g->vertices->vertexYLocs, vyLocs,
+      g->vertices->numvertices * sizeof(float), cudaMemcpyDeviceToHost);
   cudaMemcpy((void*) g->edges->edgeSources, edgeSources,
       g->edges->numedges * sizeof(unsigned int), cudaMemcpyDeviceToHost);
   cudaMemcpy((void*) g->edges->edgeTargets, edgeTargets,
