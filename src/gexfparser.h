@@ -8,10 +8,10 @@
 #include "graph.h"
 
 /*!
-  Parses a gexf file to a graph.
-  \param[out] g The outputted graph.
-  \param[in] in The location of the gexf file to parse.
+ * Parses a gexf file to a graph.
+ * \param[in] in The location of the gexf file to parse.
+ * \return The new graph.
  */
-void gexfParseFile(Graph* g, const char* in);
+Graph* gexfParseFile(const char* in);
 
 #endif

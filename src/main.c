@@ -49,8 +49,7 @@ int main(int argc, char* argv[])
   }
 
   // Feedback to user.
-  Graph* g = (Graph*) calloc(1, sizeof(Graph));
-  gexfParseFile(g, inputFile);
+  Graph* g = gexfParseFile(inputFile);
 
   // Printing
   //printGraph(g);

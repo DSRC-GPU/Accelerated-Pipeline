@@ -620,54 +620,54 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
   CudaTimer timerMem1, timerMem2, timerIteration, timer;
 
   // Allocate data for vertices, edges, and fa2 data.
-  cudaMalloc(&numNeighbours, g->numvertices * sizeof(int));
-  cudaMalloc(&tra, g->numvertices * sizeof(float));
-  cudaMalloc(&swg, g->numvertices * sizeof(float));
-  cudaMalloc(&forceX, g->numvertices * sizeof(float));
-  cudaMalloc(&forceY, g->numvertices * sizeof(float));
-  cudaMalloc(&oldForceX, g->numvertices * sizeof(float));
-  cudaMalloc(&oldForceY, g->numvertices * sizeof(float));
+  cudaMalloc(&numNeighbours, g->vertices->numvertices * sizeof(int));
+  cudaMalloc(&tra, g->vertices->numvertices * sizeof(float));
+  cudaMalloc(&swg, g->vertices->numvertices * sizeof(float));
+  cudaMalloc(&forceX, g->vertices->numvertices * sizeof(float));
+  cudaMalloc(&forceY, g->vertices->numvertices * sizeof(float));
+  cudaMalloc(&oldForceX, g->vertices->numvertices * sizeof(float));
+  cudaMalloc(&oldForceY, g->vertices->numvertices * sizeof(float));
   cudaMalloc(&graphSwing, sizeof(float));
   cudaMalloc(&graphTract, sizeof(float));
   cudaMalloc(&graphSpeed, sizeof(float));
 
-  cudaMemset(numNeighbours, 0, g->numvertices * sizeof(int));
-  cudaMemset(tra, 0, g->numvertices * sizeof(float));
-  cudaMemset(swg, 0, g->numvertices * sizeof(float));
-  cudaMemset(forceX, 0, g->numvertices * sizeof(float));
-  cudaMemset(forceY, 0, g->numvertices * sizeof(float));
-  cudaMemset(oldForceX, 0, g->numvertices * sizeof(float));
-  cudaMemset(oldForceY, 0, g->numvertices * sizeof(float));
+  cudaMemset(numNeighbours, 0, g->vertices->numvertices * sizeof(int));
+  cudaMemset(tra, 0, g->vertices->numvertices * sizeof(float));
+  cudaMemset(swg, 0, g->vertices->numvertices * sizeof(float));
+  cudaMemset(forceX, 0, g->vertices->numvertices * sizeof(float));
+  cudaMemset(forceY, 0, g->vertices->numvertices * sizeof(float));
+  cudaMemset(oldForceX, 0, g->vertices->numvertices * sizeof(float));
+  cudaMemset(oldForceY, 0, g->vertices->numvertices * sizeof(float));
   cudaMemset(graphSwing, 0, sizeof(float));
   cudaMemset(graphTract, 0, sizeof(float));
   cudaMemset(graphSpeed, 0, sizeof(float));
 
-  cudaMalloc(&vxLocs, g->numvertices * sizeof(float));
-  cudaMalloc(&vyLocs, g->numvertices * sizeof(float));
-  cudaMalloc(&edgeSources, g->numedges * sizeof(unsigned int));
-  cudaMalloc(&edgeTargets, g->numedges * sizeof(unsigned int));
+  cudaMalloc(&vxLocs, g->vertices->numvertices * sizeof(float));
+  cudaMalloc(&vyLocs, g->vertices->numvertices * sizeof(float));
+  cudaMalloc(&edgeSources, g->edges->numedges * sizeof(unsigned int));
+  cudaMalloc(&edgeTargets, g->edges->numedges * sizeof(unsigned int));
 
   startCudaTimer(&timerMem1);
 
   // Copy vertices and edges to device.
-  cudaMemcpy((void*) vxLocs, g->vertexXLocs, g->numvertices * sizeof(float),
+  cudaMemcpy((void*) vxLocs, g->vertices->vertexXLocs, g->vertices->numvertices * sizeof(float),
       cudaMemcpyHostToDevice);
-  cudaMemcpy((void*) vyLocs, g->vertexYLocs, g->numvertices * sizeof(float),
+  cudaMemcpy((void*) vyLocs, g->vertices->vertexYLocs, g->vertices->numvertices * sizeof(float),
       cudaMemcpyHostToDevice);
-  cudaMemcpy((void*) edgeSources, g->edgeSources,
-      g->numedges * sizeof(unsigned int), cudaMemcpyHostToDevice);
-  cudaMemcpy((void*) edgeTargets, g->edgeTargets,
-      g->numedges * sizeof(unsigned int), cudaMemcpyHostToDevice);
+  cudaMemcpy((void*) edgeSources, g->edges->edgeSources,
+      g->edges->numedges * sizeof(unsigned int), cudaMemcpyHostToDevice);
+  cudaMemcpy((void*) edgeTargets, g->edges->edgeTargets,
+      g->edges->numedges * sizeof(unsigned int), cudaMemcpyHostToDevice);
 
   stopCudaTimer(&timerMem1);
 
-  unsigned int numblocks = ceil(g->numvertices / (float) BLOCK_SIZE);
+  unsigned int numblocks = ceil(g->vertices->numvertices / (float) BLOCK_SIZE);
   unsigned int numblocks_reduction = ceil(numblocks / 2.0);
 
   cudaGetLastError();
 
   // Compute vertex degrees using current edges.
-  fa2ComputeDegrees<<<numblocks, BLOCK_SIZE>>>(g->numvertices, g->numedges,
+  fa2ComputeDegrees<<<numblocks, BLOCK_SIZE>>>(g->vertices->numvertices, g->edges->numedges,
       edgeSources, numNeighbours);
 
   cudaError_t code = cudaGetLastError();
@@ -687,10 +687,10 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
     fa2kernel<<<numblocks, BLOCK_SIZE>>>(
         vxLocs,
         vyLocs,
-        g->numvertices,
+        g->vertices->numvertices,
         edgeSources,
         edgeTargets,
-        g->numedges,
+        g->edges->numedges,
         numNeighbours,
         tra,
         swg,
@@ -723,7 +723,7 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
     // Run reductions on vertex swing and traction.
     startCudaTimer(&timer);
     fa2GraphSwingTract<<<numblocks_reduction, BLOCK_SIZE>>>(
-        g->numvertices,
+        g->vertices->numvertices,
         swg, tra, numNeighbours,
         graphSwing, graphTract);
     stopCudaTimer(&timer);
@@ -741,7 +741,7 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
     fa2MoveVertices<<<numblocks, BLOCK_SIZE>>>(
         vxLocs,
         vyLocs,
-        g->numvertices,
+        g->vertices->numvertices,
         tra,
         swg,
         forceX,
@@ -756,14 +756,14 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
   startCudaTimer(&timerMem2);
 
   // Update graph with new vertex positions.
-  cudaMemcpy((void*) g->vertexXLocs, vxLocs, g->numvertices * sizeof(float),
+  cudaMemcpy((void*) g->vertices->vertexXLocs, vxLocs, g->vertices->numvertices * sizeof(float),
       cudaMemcpyDeviceToHost);
-  cudaMemcpy((void*) g->vertexYLocs, vyLocs, g->numvertices * sizeof(float),
+  cudaMemcpy((void*) g->vertices->vertexYLocs, vyLocs, g->vertices->numvertices * sizeof(float),
       cudaMemcpyDeviceToHost);
-  cudaMemcpy((void*) g->edgeSources, edgeSources,
-      g->numedges * sizeof(unsigned int), cudaMemcpyDeviceToHost);
-  cudaMemcpy((void*) g->edgeTargets, edgeTargets,
-      g->numedges * sizeof(unsigned int), cudaMemcpyDeviceToHost);
+  cudaMemcpy((void*) g->edges->edgeSources, edgeSources,
+      g->edges->numedges * sizeof(unsigned int), cudaMemcpyDeviceToHost);
+  cudaMemcpy((void*) g->edges->edgeTargets, edgeTargets,
+      g->edges->numedges * sizeof(unsigned int), cudaMemcpyDeviceToHost);
 
   stopCudaTimer(&timerMem2);
   printf("time: copying data from host to device.\n");
