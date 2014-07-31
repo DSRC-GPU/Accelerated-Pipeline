@@ -69,7 +69,7 @@ __device__ void fa2Repulsion(unsigned int gid, unsigned int numvertices,
  *    thread.
  */
 __device__ void fa2Attraction(unsigned int gid, unsigned int numvertices,
-    float* vxLocs, float* vyLocs, int numedges, unsigned int* edgeSources,
+    float* vxLocs, float* vyLocs, unsigned int numedges, unsigned int* edgeSources,
     unsigned int* edgeTargets, float* forceX, float* forceY);
 
 /*!
