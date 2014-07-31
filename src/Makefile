@@ -1,5 +1,5 @@
 
-CC = g++
+CC = g++-4.7
 CPPFLAGS = -I/usr/include/libxml2 -O0
 CFLAGS = -DDEBUG -Wall -Wextra -pedantic -g -ffloat-store
 LDFLAGS = -lm -lxml2 -lpthread
@@ -7,7 +7,8 @@ LDFLAGS = -lm -lxml2 -lpthread
 NVCC = nvcc
 CUDA_LINK = link.o
 CUDA_ARCH = -arch=sm_20
-NVCCFLAGS	= $(CUDA_ARCH) -dc --ptxas-options=-v -prec-sqrt=true -prec-div=true
+NVCCFLAGS	= $(CUDA_ARCH) -dc --ptxas-options=-v -prec-sqrt=true -prec-div=true \
+            -ccbin=`which g++-4.7`
 CUDA_LDFLAGS	:= $(LDFLAGS) -lcudart
 LIBS = 
 CUDA_LIBS	= $(LIBS) -L"$(CUDA_INSTALL_PATH)/lib64"
