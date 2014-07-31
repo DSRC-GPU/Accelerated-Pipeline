@@ -1,4 +1,4 @@
-SpringEmbedr
-============
+# Accelerated Pipeline
 
-Custom spring embedding program, using GPU acceleration.
+Identifying groups in moving crowds using temporal graphs, accelerated using GPU
+infrastructures.

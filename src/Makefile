@@ -12,7 +12,7 @@ CUDA_LDFLAGS	:= $(LDFLAGS) -lcudart
 LIBS = 
 CUDA_LIBS	= $(LIBS) -L"$(CUDA_INSTALL_PATH)/lib64"
 
-TARGETS = springembedr
+TARGETS = ap
 
 OBJECTS = main.c.o graph.c.o gexfparser.c.o timer.c.o
 OBJECTS_SEQ = vector.c.o force-atlas-2.c.o
