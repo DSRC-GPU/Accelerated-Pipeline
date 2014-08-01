@@ -57,6 +57,23 @@ int main(int argc, char* argv[])
   Timer timer;
   startTimer(&timer);
   fa2RunOnGraph(g, numTicks);
+
+  unsigned int numgraphs = 10;
+  Edges** edges = (Edges**) calloc(numgraphs, sizeof(Edges*));
+
+  for (size_t i = 0; i < numgraphs; i++)
+  {
+    edges[i] = g->edges;
+  }
+
+  Vertices** verticesOut = (Vertices**) calloc(numgraphs, sizeof(Vertices*));
+
+  for (size_t i = 0; i < numgraphs; i++)
+  {
+    verticesOut[i] = newVertices(g->vertices->numvertices);
+  }
+
+  fa2RunOnGraphInStream(g->vertices, edges, numgraphs, 10, verticesOut);
   stopTimer(&timer);
   //printf("time: total.\n");
   //printTimer(&timer);
