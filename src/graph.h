@@ -40,6 +40,8 @@ typedef struct Graph
  */
 Edges* newEdges(unsigned int num);
 
+void edgesUpdateSize(Edges* edges, unsigned int numedges);
+
 /*!
  * Create a new Vertices struct with place for the specified number of vertices.
  */

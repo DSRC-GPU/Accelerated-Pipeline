@@ -47,39 +47,35 @@ int main(int argc, char* argv[])
     exit(EXIT_FAILURE);
   }
 
-  // Feedback to user.
-  Graph* g = gexfParseFile(inputFile);
-
-  // Printing
-  //printGraph(g);
-
-  // Computing.
-  Timer timer;
-  startTimer(&timer);
-  fa2RunOnGraph(g, numTicks);
-
-  unsigned int numgraphs = 10;
-  Edges** edges = (Edges**) calloc(numgraphs, sizeof(Edges*));
-
-  for (size_t i = 0; i < numgraphs; i++)
-  {
-    edges[i] = g->edges;
-  }
+  unsigned int numgraphs = 1;
+  Vertices* vertices = gexfParseFileVertices(inputFile);
+  Edges* edges = gexfParseFileEdges(inputFile, 0);
 
   Vertices** verticesOut = (Vertices**) calloc(numgraphs, sizeof(Vertices*));
 
   for (size_t i = 0; i < numgraphs; i++)
   {
-    verticesOut[i] = newVertices(g->vertices->numvertices);
+    verticesOut[i] = newVertices(vertices->numvertices);
   }
 
-  fa2RunOnGraphInStream(g->vertices, edges, numgraphs, 10, verticesOut);
+  Graph* testgraph = gexfParseFile(inputFile);
+
+  // Computing.
+  Timer timer;
+  startTimer(&timer);
+ // fa2RunOnGraphInStream(testgraph->vertices, &testgraph->edges, numgraphs, 100, verticesOut);
+  fa2RunOnGraph(testgraph, 100);
   stopTimer(&timer);
   //printf("time: total.\n");
   //printTimer(&timer);
 
   // Printing
+  Graph* g = newGraph(0, 0);
+  g->vertices = verticesOut[numgraphs - 1];
+  g->vertices->numvertices = vertices->numvertices;
+
   printGraph(g);
+  printGraph(testgraph);
 
   free(g);
 }

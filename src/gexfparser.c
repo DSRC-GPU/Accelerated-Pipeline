@@ -1,5 +1,4 @@
 #include "gexfparser.h"
-#include "libxml/parser.h"
 #include "timer.h"
 
 #include <stdlib.h>
@@ -92,23 +91,40 @@ void gexfParseVertices(xmlNode* gexf, float* vertexXLocs, float* vertexYLocs,
   }
 }
 
-void gexfParseEdges(xmlNode* gexf, unsigned int* edgeTargets,
-    unsigned int* edgeSources)
+int edgeValidAt(xmlNode* node, int step)
+{
+  xmlNode* spells = xmlwGetChild(node, "spells");
+  if (!spells)
+    return 0;
+  xmlNode* spell = xmlwGetChild(spells, "spell");
+  if (!spell)
+    return 0;
+  int start = atoi((const char*) xmlGetProp(spell, (const xmlChar*) "start"));
+  int end = atoi((const char*) xmlGetProp(spell, (const xmlChar*) "end"));
+  if (start <= step && step <= end)
+    return 1;
+  else
+    return 0;
+}
+
+unsigned int gexfParseEdges(xmlNode* gexf, unsigned int* edgeTargets,
+    unsigned int* edgeSources, int step)
 {
   if (!gexf || !edgeTargets || !edgeSources)
-    return;
+    return -1;
   xmlNode* graph = xmlwGetChild(gexf, "graph");
   if (!graph)
-    return;
+    return -1;
   xmlNode* xmledges = xmlwGetChild(graph, "edges");
   if (!xmledges)
-    return;
+    return -1;
 
   size_t i = 0;
   xmlNode* node = xmlwGetChild(xmledges, "edge");
   while (node)
   {
-    if (xmlGetProp(node, (const xmlChar*) "id"))
+    if (step >= 0 && edgeValidAt(node, step)
+        && xmlGetProp(node, (const xmlChar*) "id"))
     {
       gexfParseEdge(node, &edgeSources[i], &edgeTargets[i]);
       i++;
@@ -118,64 +134,81 @@ void gexfParseEdges(xmlNode* gexf, unsigned int* edgeTargets,
 
     node = node->next;
   }
+  return i;
 }
 
-Graph* gexfParseFile(const char* in)
+void gexfParseSetup(const char* in, xmlDoc** doc, xmlNode** root_element)
 {
-  Timer timer;
-
-  startTimer(&timer);
-
   if (!in)
   {
     printf("Invalid Input file pointer. Exit.\n");
     exit(EXIT_FAILURE);
   }
 
-  xmlDoc *doc = NULL;
-  xmlNode *root_element = NULL;
-
   /*parse the file and get the DOM */
-  doc = xmlReadFile(in, NULL, 256);
+  *doc = xmlReadFile(in, NULL, 256);
 
-  if (doc == NULL )
+  if (*doc == NULL )
   {
     printf("error: could not parse file %s\n", in);
     exit(EXIT_FAILURE);
   }
 
   /*Get the root element node */
-  root_element = xmlDocGetRootElement(doc);
+  *root_element = xmlDocGetRootElement(*doc);
+}
+
+void gexfParseCleanup(xmlDoc* doc)
+{
+  xmlFreeDoc(doc);
+}
+
+Vertices* gexfParseVerticesFromRoot(xmlNode* rootelem)
+{
+  unsigned int numvertices = xmlwGetNumNodes(rootelem);
+  Vertices* vertices = newVertices(numvertices);
+  vertices->numvertices = numvertices;
+  gexfParseVertices(rootelem, vertices->vertexXLocs, vertices->vertexYLocs,
+      vertices->vertexIds);
+  return vertices;
+}
+
+Edges* gexfParseEdgesFromRoot(xmlNode* rootelem)
+{
+  unsigned int numedges = xmlwGetNumEdges(rootelem) * 2;
+  Edges* edges = newEdges(numedges);
+  edges->numedges = numedges;
+  gexfParseEdges(rootelem, edges->edgeTargets, edges->edgeSources, -1);
+  return edges;
+}
+
+Edges* gexfParseEdgesFromRootAtStep(xmlNode* rootelem, int timestep)
+{
+  unsigned int numedges = xmlwGetNumEdges(rootelem) * 2;
+  Edges* edges = newEdges(numedges);
+  edges->numedges = numedges;
+  numedges = gexfParseEdges(rootelem, edges->edgeTargets, edges->edgeSources,
+      timestep);
+  edgesUpdateSize(edges, numedges);
+  return edges;
+}
+
+Graph* gexfParseFile(const char* in)
+{
+  Timer timer;
+  startTimer(&timer);
+
+  xmlDoc* doc;
+  xmlNode* root_element;
+  gexfParseSetup(in, &doc, &root_element);
 
   // Create graph data structure.
-  unsigned int numNodes = xmlwGetNumNodes(root_element);
-  unsigned int numEdges = xmlwGetNumEdges(root_element) * 2;
+  Graph* g = newGraph(0, 0);
 
-  Graph* g = newGraph(numEdges, numNodes);
+  g->vertices = gexfParseVerticesFromRoot(root_element);
+  g->edges = gexfParseEdgesFromRoot(root_element);
 
-  g->vertices->numvertices = numNodes;
-  g->edges->numedges = numEdges;
-
-  float* vertexXLoc = (float*) calloc(numNodes, sizeof(float));
-  float* vertexYLoc = (float*) calloc(numNodes, sizeof(float));
-  unsigned int* edgeStart = (unsigned int*) calloc(numEdges,
-      sizeof(unsigned int));
-  unsigned int* edgeEnd = (unsigned int*) calloc(numEdges,
-      sizeof(unsigned int));
-  g->vertices->vertexIds = (int*) calloc(numNodes, sizeof(int));
-  assert(g->vertices->vertexIds != NULL);
-
-  g->vertices->vertexXLocs = vertexXLoc;
-  g->vertices->vertexYLocs = vertexYLoc;
-  g->edges->edgeSources = edgeStart;
-  g->edges->edgeTargets = edgeEnd;
-
-  gexfParseVertices(root_element, vertexXLoc, vertexYLoc,
-      g->vertices->vertexIds);
-  gexfParseEdges(root_element, edgeStart, edgeEnd);
-
-  /*free the document */
-  xmlFreeDoc(doc);
+  gexfParseCleanup(doc);
 
   /*
    * Free the global variables that may
@@ -188,4 +221,72 @@ Graph* gexfParseFile(const char* in)
   //printTimer(&timer);
 
   return g;
+}
+
+Vertices* gexfParseFileVertices(const char* in)
+{
+  xmlDoc* doc;
+  xmlNode* rootelem;
+  gexfParseSetup(in, &doc, &rootelem);
+  Vertices* vertices = gexfParseVerticesFromRoot(rootelem);
+  gexfParseCleanup(doc);
+  return vertices;
+}
+
+Edges* gexfParseFileEdges(const char* in, int timestep)
+{
+  xmlDoc* doc;
+  xmlNode* rootelem;
+  gexfParseSetup(in, &doc, &rootelem);
+  Edges* edges = gexfParseEdgesFromRootAtStep(rootelem, timestep);
+  gexfParseCleanup(doc);
+  return edges;
+}
+
+Edges** gexfParseFileEdgesInInterval(const char* in, int timestart, int timeend)
+{
+  int interval = timeend - timestart + 1;
+  if (interval < 1)
+    return NULL ;
+  Edges** edgeArray = (Edges**) calloc(interval, sizeof(Edges*));
+  for (int i = 0; i < interval; i++)
+  {
+    edgeArray[i] = gexfParseFileEdges(in, timestart + i);
+  }
+  return edgeArray;
+}
+
+int gexfFindLastEdgeTime(const char* in)
+{
+  xmlDoc* doc;
+  xmlNode* rootelem;
+  gexfParseSetup(in, &doc, &rootelem);
+  int maxi = 0;
+
+  xmlNode* graph = xmlwGetChild(rootelem, "graph");
+  if (!graph)
+    return -1;
+  xmlNode* xmledges = xmlwGetChild(graph, "edges");
+  if (!xmledges)
+    return -1;
+
+  xmlNode* node = xmlwGetChild(xmledges, "edge");
+  while (node)
+  {
+    if (xmlGetProp(node, (const xmlChar*) "id"))
+    {
+      xmlNode* spells = xmlwGetChild(node, "spells");
+      if (!spells)
+        return -1;
+      xmlNode* spell = xmlwGetChild(spells, "spell");
+      if (!spell)
+        return -1;
+      int val = atoi((const char*) xmlGetProp(spell, (const xmlChar*) "end"));
+      if (val > maxi)
+        maxi = val;
+    }
+
+    node = node->next;
+  }
+  return maxi;
 }

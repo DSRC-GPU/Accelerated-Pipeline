@@ -12,12 +12,24 @@ Edges* newEdges(unsigned int num)
   return edges;
 }
 
+void edgesUpdateSize(Edges* edges, unsigned int numedges)
+{
+  unsigned int* sources = (unsigned int*) realloc(edges->edgeSources,
+      sizeof(float) * numedges);
+  unsigned int* targets = (unsigned int*) realloc(edges->edgeTargets,
+      sizeof(float) * numedges);
+  edges->edgeSources = sources;
+  edges->edgeTargets = targets;
+  edges->numedges = numedges;
+}
+
 Vertices* newVertices(unsigned int num)
 {
   Vertices* vertices = (Vertices*) calloc(1, sizeof(Vertices));
   vertices->vertexIds = (int*) calloc(num, sizeof(int));
   vertices->vertexXLocs = (float*) calloc(num, sizeof(float));
   vertices->vertexYLocs = (float*) calloc(num, sizeof(float));
+  vertices->numvertices = 0;
   return vertices;
 }
 
