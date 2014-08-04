@@ -49,13 +49,13 @@ int main(int argc, char* argv[])
 
   Graph* testgraph = (Graph*) calloc(1, sizeof(Graph));
   testgraph->vertices = vertices;
-  //testgraph->edges = edges;
 
   Vertices** verticesOut = (Vertices**) calloc(numgraphs, sizeof(Vertices*));
   for (size_t i = 0; i < numgraphs; i++)
   {
     verticesOut[i] = newVertices(vertices->numvertices);
     verticesOut[i]->numvertices = vertices->numvertices;
+    verticesOut[i]->vertexIds = vertices->vertexIds;
   }
 
   // Computing.
