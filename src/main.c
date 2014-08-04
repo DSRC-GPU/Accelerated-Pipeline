@@ -16,7 +16,6 @@ int main(int argc, char* argv[])
   // Input parsing.
   const char* inputFile = NULL;
   unsigned int numTicks = 100;
-  int runForever = 0;
 
   for (int i = 1; i < argc; i++)
   {
@@ -24,10 +23,6 @@ int main(int argc, char* argv[])
     {
       // Input file param.
       inputFile = argv[++i];
-    }
-    else if (!strcmp(argv[i], "-I"))
-    {
-      runForever = 1;
     }
     else if (!strcmp(argv[i], "-n"))
     {
@@ -49,34 +44,31 @@ int main(int argc, char* argv[])
 
   unsigned int numgraphs = 1;
   Vertices* vertices = gexfParseFileVertices(inputFile);
-  Edges* edges = gexfParseFileEdges(inputFile, 0);
+  //Edges* edges = gexfParseFileEdges(inputFile, 0);
+  Edges** edges = gexfParseFileEdgesInInterval(inputFile, 0, 199);
+
+  Graph* testgraph = (Graph*) calloc(1, sizeof(Graph));
+  testgraph->vertices = vertices;
+  //testgraph->edges = edges;
 
   Vertices** verticesOut = (Vertices**) calloc(numgraphs, sizeof(Vertices*));
-
   for (size_t i = 0; i < numgraphs; i++)
   {
     verticesOut[i] = newVertices(vertices->numvertices);
+    verticesOut[i]->numvertices = vertices->numvertices;
   }
-
-  Graph* testgraph = gexfParseFile(inputFile);
 
   // Computing.
   Timer timer;
   startTimer(&timer);
- // fa2RunOnGraphInStream(testgraph->vertices, &testgraph->edges, numgraphs, 100, verticesOut);
-  fa2RunOnGraph(testgraph, 100);
+  fa2RunOnGraphInStream(testgraph->vertices, edges, numgraphs,
+      numTicks, verticesOut);
   stopTimer(&timer);
   //printf("time: total.\n");
   //printTimer(&timer);
 
   // Printing
-  Graph* g = newGraph(0, 0);
-  g->vertices = verticesOut[numgraphs - 1];
-  g->vertices->numvertices = vertices->numvertices;
-
-  printGraph(g);
+  testgraph->vertices = verticesOut[numgraphs - 1];
   printGraph(testgraph);
-
-  free(g);
 }
 
