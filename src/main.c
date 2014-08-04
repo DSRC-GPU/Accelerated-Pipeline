@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
     else
     {
       printf("Unrecognized parameter: %s.\n", argv[i]);
-      //   exit(EXIT_FAILURE);
+      // exit(EXIT_FAILURE);
     }
   }
 
