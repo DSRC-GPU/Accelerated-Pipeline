@@ -43,9 +43,19 @@ Edges* newEdges(unsigned int num);
 void edgesUpdateSize(Edges* edges, unsigned int numedges);
 
 /*!
+ * Frees the memory allocated for the edges struct.
+ */
+void freeEdges(Edges* edges);
+
+/*!
  * Create a new Vertices struct with place for the specified number of vertices.
  */
 Vertices* newVertices(unsigned int num);
+
+/*!
+ * Frees the memory allocated for the edges struct.
+ */
+void freeVertices(Vertices* vertices);
 
 /*!
  * Create a new Graph struct with place for the specified number of edges and vertices.
@@ -57,6 +67,11 @@ Graph* newGraph(unsigned int numEdges, unsigned int numVertices);
  \param[in] g The graph to print.
  */
 void printGraph(Graph* g);
+
+/*!
+ * Free the memory allocated for the graph struct.
+ */
+void freeGraph(Graph* graph);
 
 #endif
 

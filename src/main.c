@@ -70,5 +70,7 @@ int main(int argc, char* argv[])
   // Printing
   testgraph->vertices = verticesOut[numgraphs - 1];
   printGraph(testgraph);
+
+  freeGraph(testgraph);
 }
 

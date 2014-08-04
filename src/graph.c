@@ -52,3 +52,24 @@ void printGraph(Graph* g)
   }
 }
 
+void freeEdges(Edges* edges)
+{
+  free(edges->edgeSources);
+  free(edges->edgeTargets);
+  free(edges);
+}
+
+void freeVertices(Vertices* vertices)
+{
+  free(vertices->vertexIds);
+  free(vertices->vertexXLocs);
+  free(vertices->vertexYLocs);
+  free(vertices);
+}
+
+void freeGraph(Graph* graph)
+{
+  freeEdges(graph->edges);
+  freeVertices(graph->vertices);
+  free(graph);
+}
