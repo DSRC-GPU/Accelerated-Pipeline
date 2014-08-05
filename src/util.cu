@@ -6,24 +6,32 @@
 
 __global__ void utilVectorAddKernel(float* dst, float* src, unsigned int num)
 {
-  // FIXME Implement.
+  unsigned int gid = threadIdx.x + BLOCK_SIZE * blockIdx.x;
+  if (gid < num)
+    dst[gid] += src[gid];
 }
 
 __global__ void utilVectorMultiplyKernel(float* dst, float* src,
     unsigned int num)
 {
-  // FIXME Implement.
+  unsigned int gid = threadIdx.x + BLOCK_SIZE * blockIdx.x;
+  if (gid < num)
+    dst[gid] *= src[gid];
 }
 
 __global__ void utilVectorDevideKernel(float* dst, float* src, unsigned int num)
 {
-  // FIXME Implement.
+  unsigned int gid = threadIdx.x + BLOCK_SIZE * blockIdx.x;
+  if (gid < num)
+    dst[gid] /= src[gid];
 }
 
 __global__ void utilVectorDevideByScalarKernel(float* dst, float denumerator,
     unsigned int num)
 {
-  // FIXME Implement.
+  unsigned int gid = threadIdx.x + BLOCK_SIZE * blockIdx.x;
+  if (gid < num)
+    dst[gid] /= denumerator;
 }
 
 void utilVectorAddInStream(float* dst, float* src, unsigned int num,
