@@ -75,11 +75,12 @@ void fa2RunOnGraph(Graph* g, unsigned int n);
  * \param[in] edges An array of Edges pointers. This array is in fact the 'window'.
  * \param[in] numgraphs the number of graphs in the array.
  * \param[in] iterations the number of iterations the spring embedding should run.
- * \param[out] vertices an array on the host where the resulting vertex locations should be placed.
- * Array has the same size as numgraphs.
+ * \param[out] averageSpeedX the x-coordinates for the average speed vectors for all vertices.
+ * \param[out] averageSpeedY the y-coordinates for the average speed vectors for all vertices.
  */
-void fa2RunOnGraphInStream(Vertices* verticesIn, Edges** edges, unsigned int numgraphs,
-    unsigned int iterations, Vertices** vertices);
+void fa2RunOnGraphInStream(Vertices* verticesIn, Edges** edges,
+    unsigned int numgraphs, unsigned int iterations, float** averageSpeedX,
+    float** averageSpeedY);
 
 #endif
 
