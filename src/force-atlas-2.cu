@@ -782,9 +782,9 @@ void fa2RunOnGraphInStream(Vertices* vertices, Edges** edgesIn,
   fa2PrepareGeneralMemory(&data, vertices->numvertices);
 
   // Copy vertices to device.
-  cudaMemcpyAsync((void*) data.vxLocs, vertices->vertexXLocs,
+  cudaMemcpy((void*) data.vxLocs, vertices->vertexXLocs,
       vertices->numvertices * sizeof(float), cudaMemcpyHostToDevice);
-  cudaMemcpyAsync((void*) data.vyLocs, vertices->vertexYLocs,
+  cudaMemcpy((void*) data.vyLocs, vertices->vertexYLocs,
       vertices->numvertices * sizeof(float), cudaMemcpyHostToDevice);
 
   // Initializing arrays for average speed vectors.

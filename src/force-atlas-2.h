@@ -83,4 +83,3 @@ void fa2RunOnGraphInStream(Vertices* verticesIn, Edges** edges,
     float** averageSpeedY);
 
 #endif
-

@@ -12,12 +12,12 @@ void speedVectorInit(float** averageSpeedX, float** averageSpeedY,
 {
   cudaMalloc(averageSpeedX, numvertices);
   cudaMalloc(averageSpeedY, numvertices);
-  cudaMemset(*averageSpeedX, 0, sizeof(float) * numvertices);
-  cudaMemset(*averageSpeedY, 0, sizeof(float) * numvertices);
+  utilVectorSetByScalar(*averageSpeedX, 0, numvertices);
+  utilVectorSetByScalar(*averageSpeedY, 0, numvertices);
   utilVectorAdd(*averageSpeedX, vxLocs, numvertices);
-  utilVectorMultiply(*averageSpeedX, vxLocs, numvertices);
+  utilVectorMultiplyByScalar(*averageSpeedX, -1, numvertices);
   utilVectorAdd(*averageSpeedY, vyLocs, numvertices);
-  utilVectorMultiply(*averageSpeedY, vyLocs, numvertices);
+  utilVectorMultiplyByScalar(*averageSpeedY, -1, numvertices);
 }
 
 void speedVectorUpdate(float* vxLocs, float* vyLocs, float* averageSpeedX,
