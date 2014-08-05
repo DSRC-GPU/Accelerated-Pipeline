@@ -12,11 +12,8 @@
 #include "cuda-timer.h"
 #include "cuda-stream.h"
 #include "vector.h"
-
-/*!
- * The number of thread in each thread block.
- */
-#define BLOCK_SIZE 64
+#include "speedvector.h"
+#include "util.h"
 
 /*!
  * Updates the current force on each vertex with the current gravity.
@@ -774,14 +771,25 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
   fa2CleanMemory(&data);
 }
 
-void fa2RunOnGraphInStream(Vertices* verticesIn, Edges** edgesIn, unsigned int numgraphs,
-    unsigned int iterations, Vertices** verticesOut)
+void fa2RunOnGraphInStream(Vertices* vertices, Edges** edgesIn,
+    unsigned int numgraphs, unsigned int iterations, float** averageSpeedX,
+    float** averageSpeedY)
 {
   CudaTimer timerMem1, timerMem2, timerIteration, timer;
   cudaStream_t* streams = createCudaStreams(numgraphs);
 
   ForceAtlas2Data data;
-  fa2PrepareGeneralMemory(&data, verticesIn->numvertices);
+  fa2PrepareGeneralMemory(&data, vertices->numvertices);
+
+  // Copy vertices to device.
+  cudaMemcpy((void*) data.vxLocs, vertices->vertexXLocs,
+      vertices->numvertices * sizeof(float), cudaMemcpyHostToDevice);
+  cudaMemcpy((void*) data.vyLocs, vertices->vertexYLocs,
+      vertices->numvertices * sizeof(float), cudaMemcpyHostToDevice);
+
+  // Initializing arrays for average speed vectors.
+  speedVectorInit(averageSpeedX, averageSpeedY, data.vxLocs, data.vyLocs,
+      vertices->numvertices);
 
   for (unsigned int timestep = 0; timestep < numgraphs; timestep++)
   {
@@ -794,31 +802,22 @@ void fa2RunOnGraphInStream(Vertices* verticesIn, Edges** edgesIn, unsigned int n
 
     startCudaTimer(&timerMem1);
 
-    // Copy vertices and edges to device.
-    cudaMemcpyAsync((void*) data.vxLocs, verticesIn->vertexXLocs,
-        verticesIn->numvertices * sizeof(float), cudaMemcpyHostToDevice,
-        stream);
-    cudaMemcpyAsync((void*) data.vyLocs, verticesIn->vertexYLocs,
-        verticesIn->numvertices * sizeof(float), cudaMemcpyHostToDevice,
-        stream);
+    // Copy edges to device.
     cudaMemcpyAsync((void*) edgeData.edgeSources, edges->edgeSources,
-        edges->numedges * sizeof(unsigned int), cudaMemcpyHostToDevice,
-        stream);
+        edges->numedges * sizeof(unsigned int), cudaMemcpyHostToDevice, stream);
     cudaMemcpyAsync((void*) edgeData.edgeTargets, edges->edgeTargets,
-        edges->numedges * sizeof(unsigned int), cudaMemcpyHostToDevice,
-        stream);
+        edges->numedges * sizeof(unsigned int), cudaMemcpyHostToDevice, stream);
 
     stopCudaTimer(&timerMem1);
 
-    unsigned int numblocks = ceil(
-        verticesIn->numvertices / (float) BLOCK_SIZE);
+    unsigned int numblocks = ceil(vertices->numvertices / (float) BLOCK_SIZE);
     unsigned int numblocks_reduction = ceil(numblocks / 2.0);
 
     cudaGetLastError();
 
     // Compute vertex degrees using current edges.
     fa2ComputeDegrees<<<numblocks, BLOCK_SIZE, 0, stream>>>(
-        verticesIn->numvertices, edges->numedges, edgeData.edgeSources,
+        vertices->numvertices, edges->numedges, edgeData.edgeSources,
         data.numNeighbours);
 
     cudaError_t code = cudaGetLastError();
@@ -836,10 +835,10 @@ void fa2RunOnGraphInStream(Vertices* verticesIn, Edges** edgesIn, unsigned int n
       // Compute graph speed, vertex forces, speed and displacement.
       startCudaTimer(&timer);
       fa2kernel<<<numblocks, BLOCK_SIZE, 0, stream>>>(data.vxLocs, data.vyLocs,
-          verticesIn->numvertices, edgeData.edgeSources, edgeData.edgeTargets,
-          edges->numedges, data.numNeighbours, data.tra, data.swg,
-          data.forceX, data.forceY, data.oldForceX, data.oldForceY,
-          data.graphSwing, data.graphTract, data.graphSpeed);
+          vertices->numvertices, edgeData.edgeSources, edgeData.edgeTargets,
+          edges->numedges, data.numNeighbours, data.tra, data.swg, data.forceX,
+          data.forceY, data.oldForceX, data.oldForceY, data.graphSwing,
+          data.graphTract, data.graphSpeed);
       stopCudaTimer(&timer);
       printf("time: all forces and moving vertices.\n");
       printCudaTimer(&timer);
@@ -862,7 +861,7 @@ void fa2RunOnGraphInStream(Vertices* verticesIn, Edges** edgesIn, unsigned int n
       // Run reductions on vertex swing and traction.
       startCudaTimer(&timer);
       fa2GraphSwingTract<<<numblocks_reduction, BLOCK_SIZE, 0, stream>>>(
-          verticesIn->numvertices, data.swg, data.tra, data.numNeighbours,
+          vertices->numvertices, data.swg, data.tra, data.numNeighbours,
           data.graphSwing, data.graphTract);
       stopCudaTimer(&timer);
       printf("time: graph swing and traction.\n");
@@ -877,20 +876,21 @@ void fa2RunOnGraphInStream(Vertices* verticesIn, Edges** edgesIn, unsigned int n
       }
 
       fa2MoveVertices<<<numblocks, BLOCK_SIZE, 0, stream>>>(data.vxLocs,
-          data.vyLocs, verticesIn->numvertices, data.tra, data.swg,
-          data.forceX, data.forceY, data.oldForceX, data.oldForceY,
-          data.graphSwing, data.graphTract, data.graphSpeed);
+          data.vyLocs, vertices->numvertices, data.tra, data.swg, data.forceX,
+          data.forceY, data.oldForceX, data.oldForceY, data.graphSwing,
+          data.graphTract, data.graphSpeed);
     }
+
+    speedVectorUpdate(data.vxLocs, data.vyLocs, *averageSpeedX, *averageSpeedY,
+        vertices->numvertices, &stream);
 
     startCudaTimer(&timerMem2);
 
     // Update graph with new vertex positions.
-    cudaMemcpyAsync((void*) verticesOut[timestep]->vertexXLocs, data.vxLocs,
-        verticesIn->numvertices * sizeof(float), cudaMemcpyDeviceToHost,
-        stream);
-    cudaMemcpyAsync((void*) verticesOut[timestep]->vertexYLocs, data.vyLocs,
-        verticesIn->numvertices * sizeof(float), cudaMemcpyDeviceToHost,
-        stream);
+    cudaMemcpyAsync((void*) vertices->vertexXLocs, data.vxLocs,
+        vertices->numvertices * sizeof(float), cudaMemcpyDeviceToHost, stream);
+    cudaMemcpyAsync((void*) vertices->vertexYLocs, data.vyLocs,
+        vertices->numvertices * sizeof(float), cudaMemcpyDeviceToHost, stream);
 
     stopCudaTimer(&timerMem2);
     printf("time: copying data from host to device.\n");
@@ -902,6 +902,7 @@ void fa2RunOnGraphInStream(Vertices* verticesIn, Edges** edgesIn, unsigned int n
 
     fa2CleanEdgeMemory(&edgeData);
   }
+  speedVectorFinish(*averageSpeedX, *averageSpeedY, numgraphs, vertices->numvertices);
   fa2CleanGeneralMemory(&data);
 }
 

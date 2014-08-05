@@ -47,30 +47,24 @@ int main(int argc, char* argv[])
   //Edges* edges = gexfParseFileEdges(inputFile, 0);
   Edges** edges = gexfParseFileEdgesInInterval(inputFile, 0, 199);
 
-  Graph* testgraph = (Graph*) calloc(1, sizeof(Graph));
-  testgraph->vertices = vertices;
+  Graph* graph = (Graph*) calloc(1, sizeof(Graph));
+  graph->vertices = vertices;
 
-  Vertices** verticesOut = (Vertices**) calloc(numgraphs, sizeof(Vertices*));
-  for (size_t i = 0; i < numgraphs; i++)
-  {
-    verticesOut[i] = newVertices(vertices->numvertices);
-    verticesOut[i]->numvertices = vertices->numvertices;
-    verticesOut[i]->vertexIds = vertices->vertexIds;
-  }
+  float* averageSpeedX = NULL;
+  float* averageSpeedY = NULL;
 
   // Computing.
   Timer timer;
   startTimer(&timer);
-  fa2RunOnGraphInStream(testgraph->vertices, edges, numgraphs,
-      numTicks, verticesOut);
+  fa2RunOnGraphInStream(graph->vertices, edges, numgraphs,
+      numTicks, &averageSpeedX, &averageSpeedY);
   stopTimer(&timer);
   //printf("time: total.\n");
   //printTimer(&timer);
 
   // Printing
-  testgraph->vertices = verticesOut[numgraphs - 1];
-  printGraph(testgraph);
+  printGraph(graph);
 
-  freeGraph(testgraph);
+  freeGraph(graph);
 }
 
