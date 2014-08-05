@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <limits.h>
 
 #define NODE_START_X 10
 #define NODE_START_Y 10
@@ -91,7 +92,7 @@ void gexfParseVertices(xmlNode* gexf, float* vertexXLocs, float* vertexYLocs,
   }
 }
 
-int edgeValidAt(xmlNode* node, int step)
+int edgeValidAt(xmlNode* node, int stepstart, int stepend)
 {
   xmlNode* spells = xmlwGetChild(node, "spells");
   if (!spells)
@@ -101,14 +102,14 @@ int edgeValidAt(xmlNode* node, int step)
     return 0;
   int start = atoi((const char*) xmlGetProp(spell, (const xmlChar*) "start"));
   int end = atoi((const char*) xmlGetProp(spell, (const xmlChar*) "end"));
-  if (start <= step && step <= end)
-    return 1;
-  else
+  if (start > stepend || stepstart > end)
     return 0;
+  else
+    return 1;
 }
 
 unsigned int gexfParseEdges(xmlNode* gexf, unsigned int* edgeTargets,
-    unsigned int* edgeSources, int step)
+    unsigned int* edgeSources, int stepstart, int stepend)
 {
   if (!gexf || !edgeTargets || !edgeSources)
     return -1;
@@ -123,7 +124,7 @@ unsigned int gexfParseEdges(xmlNode* gexf, unsigned int* edgeTargets,
   xmlNode* node = xmlwGetChild(xmledges, "edge");
   while (node)
   {
-    if (step >= 0 && edgeValidAt(node, step)
+    if (edgeValidAt(node, stepstart, stepend)
         && xmlGetProp(node, (const xmlChar*) "id"))
     {
       gexfParseEdge(node, &edgeSources[i], &edgeTargets[i]);
@@ -178,17 +179,18 @@ Edges* gexfParseEdgesFromRoot(xmlNode* rootelem)
   unsigned int numedges = xmlwGetNumEdges(rootelem) * 2;
   Edges* edges = newEdges(numedges);
   edges->numedges = numedges;
-  gexfParseEdges(rootelem, edges->edgeTargets, edges->edgeSources, -1);
+  gexfParseEdges(rootelem, edges->edgeTargets, edges->edgeSources, 0, INT_MAX);
   return edges;
 }
 
-Edges* gexfParseEdgesFromRootAtStep(xmlNode* rootelem, int timestep)
+Edges* gexfParseEdgesFromRootInInterval(xmlNode* rootelem, int timestepStart,
+    int timestepEnd)
 {
   unsigned int numedges = xmlwGetNumEdges(rootelem) * 2;
   Edges* edges = newEdges(numedges);
   edges->numedges = numedges;
   numedges = gexfParseEdges(rootelem, edges->edgeTargets, edges->edgeSources,
-      timestep);
+      timestepStart, timestepEnd);
   edgesUpdateSize(edges, numedges);
   return edges;
 }
@@ -233,26 +235,32 @@ Vertices* gexfParseFileVertices(const char* in)
   return vertices;
 }
 
-Edges* gexfParseFileEdges(const char* in, int timestep)
+Edges* gexfParseFileEdgesSomewhereInInterval(const char* in, int stepstart,
+    int stepend)
 {
   xmlDoc* doc;
   xmlNode* rootelem;
   gexfParseSetup(in, &doc, &rootelem);
-  Edges* edges = gexfParseEdgesFromRootAtStep(rootelem, timestep);
+  Edges* edges = gexfParseEdgesFromRootInInterval(rootelem, stepstart, stepend);
   gexfParseCleanup(doc);
   return edges;
 }
 
-Edges** gexfParseFileEdgesInInterval(const char* in, int timestart, int timeend)
+Edges** gexfParseFileEdgesAtSteps(const char* in, int stepstart, int stepend,
+    size_t* edgesLength)
 {
-  int interval = timeend - timestart + 1;
+  int interval = stepend - stepstart + 1;
+  *edgesLength = interval + 1;
   if (interval < 1)
     return NULL ;
-  Edges** edgeArray = (Edges**) calloc(interval, sizeof(Edges*));
+  Edges** edgeArray = (Edges**) calloc(*edgesLength, sizeof(Edges*));
   for (int i = 0; i < interval; i++)
   {
-    edgeArray[i] = gexfParseFileEdges(in, timestart + i);
+    edgeArray[i] = gexfParseFileEdgesSomewhereInInterval(in, stepstart + i,
+        stepstart + i);
   }
+  edgeArray[interval] = gexfParseFileEdgesSomewhereInInterval(in, stepstart,
+      stepend);
   return edgeArray;
 }
 

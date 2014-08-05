@@ -34,24 +34,33 @@ Graph* gexfParseFile(const char* in);
 Vertices* gexfParseFileVertices(const char* in);
 
 /*!
- * Parses all edges from the gexf file that are valid at the given timestep.
+ * Parses all edges from the gexf file that are valid at some point in the given interval.
  *
  * \param[in] in the gexf file to parse.
- * \param[in] timestep the timestap which is used to filter out all non-valid edges.
+ * \param[in] stepstart the begin of the interval.
+ * \param[in] stepend the end of the interval
  * \return a new edges struct.
  */
-Edges* gexfParseFileEdges(const char* in, int timestep);
+Edges* gexfParseFileEdgesSomewhereInInterval(const char* in, int stepstart, int stepend);
 
 /*!
  * Parses all edges from the gexf file stat are valid within the given interval.
+ * The Edges* at index k (k <= timeend - timestart) are edges that are valid at timestep k - 1.
+ * These can be used for the edges for every timestep within the time window.
+ *
+ * The Edges* at index k (k = timeend - timestart + 1) are edges that are valid
+ * somewhere in the interval [timestart, timeend].
+ * These can be used for the smoothening of the average speed vectors.
  *
  * \param[in] in the gexf file to parse.
  * \param[in] timestart the begin of the time interval (inclusive)
  * \param[in] timeend the end of the time interval (inclusive)
- * \return an array of Edges. This array has size timeend - timestart.
+ * \param[out] edgesLength the length of the returned edges array.
+ * In case you are unable to calculate.
+ * \return an array of Edges. This array has size timeend - timestart + 1.
  */
-Edges** gexfParseFileEdgesInInterval(const char* in, int timestart,
-    int timeend);
+Edges** gexfParseFileEdgesAtSteps(const char* in, int timestart,
+    int timeend, size_t* edgesLength);
 
 /*!
  * Looks through the document and finds the last timestep any edge is active.
