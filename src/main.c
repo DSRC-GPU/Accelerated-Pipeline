@@ -45,7 +45,6 @@ int main(int argc, char* argv[])
 
   unsigned int numgraphs = 1;
   Vertices* vertices = gexfParseFileVertices(inputFile);
-  //Edges* edges = gexfParseFileEdges(inputFile, 0);
   size_t edgesLength;
   Edges** edges = gexfParseFileEdgesAtSteps(inputFile, 0, 199, &edgesLength);
 
