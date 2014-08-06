@@ -43,13 +43,14 @@ int main(int argc, char* argv[])
     exit(EXIT_FAILURE);
   }
 
+  Graph* graph = (Graph*) calloc(1, sizeof(Graph));
+
   unsigned int numgraphs = 1;
   Vertices* vertices = gexfParseFileVertices(inputFile);
-  size_t edgesLength;
-  Edges** edges = gexfParseFileEdgesAtSteps(inputFile, 0, 199, &edgesLength);
-
-  Graph* graph = (Graph*) calloc(1, sizeof(Graph));
   graph->vertices = vertices;
+  size_t edgesLength;
+  Edges** edges = gexfParseFileEdgesAtSteps(inputFile, graph, 0, 199,
+      &edgesLength);
 
   float* averageSpeedX = NULL;
   float* averageSpeedY = NULL;
