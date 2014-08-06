@@ -10,9 +10,8 @@
  */
 typedef struct Edges
 {
-  unsigned int numedges;
-  unsigned int* edgeSources;
-  unsigned int* edgeTargets;
+  unsigned int* numedges;
+  unsigned int** edgeTargets;
 } Edges;
 
 /*!
@@ -40,12 +39,32 @@ typedef struct Graph
  */
 Edges* newEdges(unsigned int num);
 
-void edgesUpdateSize(Edges* edges, unsigned int numedges);
+/*!
+ * Allocates memory to save an amount of edges from the specified vertex.
+ */
+void graphSetEdgeSpaceForVertex(Graph* graph, unsigned int vertexId,
+    unsigned int numedges);
+
+/*!
+ * Allocates memory to save an amount of edges for all vertices.
+ */
+void graphSetEdgeSpaceForAllVertices(Graph* graph, unsigned int numedges);
+
+/*!
+ * Add an outgoing edge to a vertex. This edge is one-way.
+ */
+void graphAddEdgeToVertex(Graph* graph, unsigned int sourceVertexId,
+    unsigned int targetVertexId);
+
+/*!
+ * Reallocate the memory for all edges to match the number of edges each vertex has.
+ */
+void graphShrinkEdgeSpaceToNumberOfEdges(Graph* graph)
 
 /*!
  * Frees the memory allocated for the edges struct.
  */
-void freeEdges(Edges* edges);
+void freeEdges(Edges* edges, unsigned int numvertices);
 
 /*!
  * Create a new Vertices struct with place for the specified number of vertices.

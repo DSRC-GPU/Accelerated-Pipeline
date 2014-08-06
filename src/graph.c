@@ -3,24 +3,13 @@
 #include <stdio.h>
 #include "graph.h"
 
-Edges* newEdges(unsigned int num)
+Edges* newEdges(unsigned int numvertices)
 {
   Edges* edges = (Edges*) calloc(1, sizeof(Edges));
-  edges->edgeSources = (unsigned int*) calloc(num, sizeof(float));
-  edges->edgeTargets = (unsigned int*) calloc(num, sizeof(float));
-  edges->numedges = 0;
+  edges->numedges = (unsigned int*) calloc(numvertices, sizeof(float));
+  edges->edgeTargets = (unsigned int**) calloc(numvertices,
+      sizeof(unsigned int*));
   return edges;
-}
-
-void edgesUpdateSize(Edges* edges, unsigned int numedges)
-{
-  unsigned int* sources = (unsigned int*) realloc(edges->edgeSources,
-      sizeof(float) * numedges);
-  unsigned int* targets = (unsigned int*) realloc(edges->edgeTargets,
-      sizeof(float) * numedges);
-  edges->edgeSources = sources;
-  edges->edgeTargets = targets;
-  edges->numedges = numedges;
 }
 
 Vertices* newVertices(unsigned int num)
@@ -41,6 +30,38 @@ Graph* newGraph(unsigned int numedges, unsigned int numvertices)
   return graph;
 }
 
+void graphSetEdgeSpaceForVertex(Graph* graph, unsigned int vertexId,
+    unsigned int numedges)
+{
+  graph->edges->edgeTargets[vertexId] = (unsigned int*) calloc(numedges,
+      sizeof(unsigned int));
+}
+
+void graphSetEdgeSpaceForAllVertices(Graph* graph, unsigned int numedges)
+{
+  for (size_t i = 0; i < graph->vertices->numvertices; i++)
+  {
+    graph->edges->edgeTargets[i] = (unsigned int*) calloc(numedges,
+        sizeof(unsigned int));
+  }
+}
+
+void graphAddEdgeToVertex(Graph* graph, unsigned int sourceVertexId,
+    unsigned int targetVertexId)
+{
+  unsigned int index = graph->edges->numedges[sourceVertexId]++;
+  graph->edges->edgeTargets[sourceVertexId][index - 1] = targetVertexId;
+}
+
+void graphShrinkEdgeSpaceToNumberOfEdges(Graph* graph)
+{
+  for (size_t i = 0; i < graph->vertices->numvertices; i++)
+  {
+    graph->edges->edgeTargets[i] = (unsigned int*) realloc(
+        graph->edges->edgeTargets[i], graph->edges->numedges[i]);
+  }
+}
+
 void printGraph(Graph* g)
 {
   if (!g)
@@ -52,10 +73,14 @@ void printGraph(Graph* g)
   }
 }
 
-void freeEdges(Edges* edges)
+void freeEdges(Edges* edges, unsigned int numvertices)
 {
-  free(edges->edgeSources);
+  for (size_t i = 0; i < numvertices; i++)
+  {
+    free(edges->edgeTargets[i]);
+  }
   free(edges->edgeTargets);
+  free(edges->numedges);
   free(edges);
 }
 
@@ -69,7 +94,7 @@ void freeVertices(Vertices* vertices)
 
 void freeGraph(Graph* graph)
 {
-  freeEdges(graph->edges);
+  freeEdges(graph->edges, graph->vertices->numvertices);
   freeVertices(graph->vertices);
   free(graph);
 }
