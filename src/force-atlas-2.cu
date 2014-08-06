@@ -282,21 +282,19 @@ __device__ void fa2Repulsion(unsigned int gid, unsigned int numvertices,
 }
 
 __device__ void fa2Attraction(unsigned int gid, unsigned int numvertices,
-    float* vxLocs, float* vyLocs, unsigned int numedges,
-    unsigned int* edgeSources, unsigned int* edgeTargets, float* forceX,
-    float* forceY)
+    float* vxLocs, float* vyLocs, unsigned int* numedges,
+    unsigned int** edgeTargets, float* forceX, float* forceY)
 {
   if (gid < numvertices)
   {
     float vx1 = vxLocs[gid];
     float vy1 = vyLocs[gid];
-    // Complete scan on edge array.
-    for (size_t i = 0; i < numedges; i++)
+    // Each thread goes through its array of edges.
+    for (size_t i = 0; i < numedges[gid]; i++)
     {
-      unsigned int source = edgeSources[i];
-      unsigned int target = edgeTargets[i];
+      unsigned int target = edgeTargets[gid][i];
       // Edge source is this vertex.
-      if (source == gid)
+      if (gid < target)
       {
         // Compute attraction force.
         float vx2 = vxLocs[target];
@@ -522,9 +520,8 @@ __global__ void fa2GraphSwingTract(unsigned int numvertices, float* swg,
 }
 
 __global__ void fa2kernel(float* vxLocs, float* vyLocs,
-    unsigned int numvertices, unsigned int* edgeSources,
-    unsigned int* edgeTargets, unsigned int numedges,
-    unsigned int* numNeighbours, float* tra, float* swg, float* forceX,
+    unsigned int numvertices, unsigned int** edgeTargets,
+    unsigned int* numedges, float* tra, float* swg, float* forceX,
     float* forceY, float* oldForceX, float* oldForceY, float* graphSwing,
     float* graphTract, float* oldGraphSpeed)
 {
@@ -537,13 +534,13 @@ __global__ void fa2kernel(float* vxLocs, float* vyLocs,
 
     // Gravity force
     fa2Gravity(gid, numvertices, vxLocs, vyLocs, &forceX[gid], &forceY[gid],
-        numNeighbours);
+        numedges);
     // Repulsion between vertices
     fa2Repulsion(gid, numvertices, vxLocs, vyLocs, &forceX[gid], &forceY[gid],
-        numNeighbours);
+        numedges);
     // Attraction on edges
-    fa2Attraction(gid, numvertices, vxLocs, vyLocs, numedges, edgeSources,
-        edgeTargets, &forceX[gid], &forceY[gid]);
+    fa2Attraction(gid, numvertices, vxLocs, vyLocs, numedges, edgeTargets,
+        &forceX[gid], &forceY[gid]);
 
     // Calculate speed of vertices.
     // Update swing of vertices.
@@ -589,10 +586,19 @@ __global__ void fa2MoveVertices(float* vxLocs, float* vyLocs,
   }
 }
 
+__global__ void fa2PrepareEdgeMemoryKernel(ForceAtlas2Data* data,
+    unsigned int** tempEdgeTargets, unsigned int numvertices)
+{
+  unsigned int gid = threadIdx.x + BLOCK_SIZE * blockIdx.x;
+  if (gid < numvertices)
+  {
+    data->edgeTargets[gid] = tempEdgeTargets[gid];
+  }
+}
+
 void fa2PrepareGeneralMemory(ForceAtlas2Data* data, unsigned int numvertices)
 {
   // Allocate data for vertices, edges, and fa2 data.
-  cudaMalloc(&data->numNeighbours, numvertices * sizeof(int));
   cudaMalloc(&data->tra, numvertices * sizeof(float));
   cudaMalloc(&data->swg, numvertices * sizeof(float));
   cudaMalloc(&data->forceX, numvertices * sizeof(float));
@@ -603,7 +609,6 @@ void fa2PrepareGeneralMemory(ForceAtlas2Data* data, unsigned int numvertices)
   cudaMalloc(&data->graphTract, sizeof(float));
   cudaMalloc(&data->graphSpeed, sizeof(float));
 
-  cudaMemset(data->numNeighbours, 0, numvertices * sizeof(int));
   cudaMemset(data->tra, 0, numvertices * sizeof(float));
   cudaMemset(data->swg, 0, numvertices * sizeof(float));
   cudaMemset(data->forceX, 0, numvertices * sizeof(float));
@@ -619,22 +624,38 @@ void fa2PrepareGeneralMemory(ForceAtlas2Data* data, unsigned int numvertices)
   cudaMalloc(&data->vyLocs, numvertices * sizeof(float));
 }
 
-void fa2PrepareEdgeMemory(ForceAtlas2Data* data, unsigned int numedges)
+void fa2PrepareEdgeMemory(ForceAtlas2Data* data, Edges* edges,
+    unsigned int numvertices)
 {
-  cudaMalloc(&data->edgeSources, numedges * sizeof(unsigned int));
-  cudaMalloc(&data->edgeTargets, numedges * sizeof(unsigned int));
+  cudaMalloc(&data->numEdges, numvertices * sizeof(unsigned int));
+  cudaMemcpy(&data->numEdges, edges->numedges,
+      numvertices * sizeof(unsigned int), cudaMemcpyHostToDevice);
+  data->edgeTargets = (unsigned int**) calloc(numvertices,
+      sizeof(unsigned int*));
+
+  unsigned int** tempEdgeTargets = (unsigned int**) calloc(numvertices,
+      sizeof(unsigned int*));
+  for (size_t i = 0; i < numvertices; i++)
+  {
+    cudaMalloc(&tempEdgeTargets[i], edges->numedges[i] * sizeof(unsigned int));
+    cudaMemcpy(&tempEdgeTargets[i], edges->edgeTargets[i],
+        edges->numedges[i] * sizeof(unsigned int), cudaMemcpyHostToDevice);
+  }
+  unsigned int numblocks = ceil(numvertices / (float) BLOCK_SIZE);
+  fa2PrepareEdgeMemoryKernel<<<numblocks, BLOCK_SIZE>>>(data, tempEdgeTargets,
+      numvertices);
+  free(tempEdgeTargets);
 }
 
-void fa2PrepareMemory(ForceAtlas2Data* data, unsigned int numvertices,
-    unsigned int numedges)
+void fa2PrepareMemory(ForceAtlas2Data* data, Edges* edges,
+    unsigned int numvertices)
 {
   fa2PrepareGeneralMemory(data, numvertices);
-  fa2PrepareEdgeMemory(data, numedges);
+  fa2PrepareEdgeMemory(data, edges, numvertices);
 }
 
 void fa2CleanGeneralMemory(ForceAtlas2Data* data)
 {
-  cudaFree(data->numNeighbours);
   cudaFree(data->tra);
   cudaFree(data->swg);
   cudaFree(data->forceX);
@@ -648,16 +669,20 @@ void fa2CleanGeneralMemory(ForceAtlas2Data* data)
   cudaFree(data->vyLocs);
 }
 
-void fa2CleanEdgeMemory(ForceAtlas2Data* data)
+void fa2CleanEdgeMemory(ForceAtlas2Data* data, unsigned int numvertices)
 {
-  cudaFree(data->edgeSources);
+  for (size_t i = 0; i < numvertices; i++)
+  {
+    cudaFree(data->edgeTargets[i]);
+  }
   cudaFree(data->edgeTargets);
+  cudaFree(data->numEdges);
 }
 
-void fa2CleanMemory(ForceAtlas2Data* data)
+void fa2CleanMemory(ForceAtlas2Data* data, unsigned int numvertices)
 {
   fa2CleanGeneralMemory(data);
-  fa2CleanEdgeMemory(data);
+  fa2CleanEdgeMemory(data, numvertices);
 }
 
 void fa2RunOnGraph(Graph* g, unsigned int iterations)
@@ -665,20 +690,17 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
   CudaTimer timerMem1, timerMem2, timerIteration, timer;
 
   // Allocate data for vertices, edges, and fa2 data.
+  // Also copies edge data to device.
   ForceAtlas2Data data;
-  fa2PrepareMemory(&data, g->vertices->numvertices, g->edges->numedges);
+  fa2PrepareMemory(&data, g->edges, g->vertices->numvertices);
 
   startCudaTimer(&timerMem1);
 
-  // Copy vertices and edges to device.
+  // Copy vertices to device explicitly.
   cudaMemcpy((void*) data.vxLocs, g->vertices->vertexXLocs,
       g->vertices->numvertices * sizeof(float), cudaMemcpyHostToDevice);
   cudaMemcpy((void*) data.vyLocs, g->vertices->vertexYLocs,
       g->vertices->numvertices * sizeof(float), cudaMemcpyHostToDevice);
-  cudaMemcpy((void*) data.edgeSources, g->edges->edgeSources,
-      g->edges->numedges * sizeof(unsigned int), cudaMemcpyHostToDevice);
-  cudaMemcpy((void*) data.edgeTargets, g->edges->edgeTargets,
-      g->edges->numedges * sizeof(unsigned int), cudaMemcpyHostToDevice);
 
   stopCudaTimer(&timerMem1);
 
@@ -686,10 +708,6 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
   unsigned int numblocks_reduction = ceil(numblocks / 2.0);
 
   cudaGetLastError();
-
-  // Compute vertex degrees using current edges.
-  fa2ComputeDegrees<<<numblocks, BLOCK_SIZE>>>(g->vertices->numvertices,
-      g->edges->numedges, data.edgeSources, data.numNeighbours);
 
   cudaError_t code = cudaGetLastError();
   if (code != cudaSuccess)
@@ -706,10 +724,9 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
     // Compute graph speed, vertex forces, speed and displacement.
     startCudaTimer(&timer);
     fa2kernel<<<numblocks, BLOCK_SIZE>>>(data.vxLocs, data.vyLocs,
-        g->vertices->numvertices, data.edgeSources, data.edgeTargets,
-        g->edges->numedges, data.numNeighbours, data.tra, data.swg, data.forceX,
-        data.forceY, data.oldForceX, data.oldForceY, data.graphSwing,
-        data.graphTract, data.graphSpeed);
+        g->vertices->numvertices, data.edgeTargets, g->edges->numedges,
+        data.tra, data.swg, data.forceX, data.forceY, data.oldForceX,
+        data.oldForceY, data.graphSwing, data.graphTract, data.graphSpeed);
     stopCudaTimer(&timer);
     printf("time: all forces and moving vertices.\n");
     printCudaTimer(&timer);
@@ -732,7 +749,7 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
     // Run reductions on vertex swing and traction.
     startCudaTimer(&timer);
     fa2GraphSwingTract<<<numblocks_reduction, BLOCK_SIZE>>>(
-        g->vertices->numvertices, data.swg, data.tra, data.numNeighbours,
+        g->vertices->numvertices, data.swg, data.tra, data.numEdges,
         data.graphSwing, data.graphTract);
     stopCudaTimer(&timer);
     printf("time: graph swing and traction.\n");
@@ -768,7 +785,7 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
   resetCudaTimer(&timerMem1);
   resetCudaTimer(&timerMem2);
 
-  fa2CleanMemory(&data);
+  fa2CleanMemory(&data, g->vertices->numvertices);
 }
 
 void fa2RunOnGraphInStream(Vertices* vertices, Edges** edgesIn,
@@ -798,27 +815,15 @@ void fa2RunOnGraphInStream(Vertices* vertices, Edges** edgesIn,
     Edges* edges = edgesIn[timestep];
     cudaStream_t stream = streams[timestep];
 
-    fa2PrepareEdgeMemory(&edgeData, edges->numedges);
-
     startCudaTimer(&timerMem1);
-
-    // Copy edges to device.
-    cudaMemcpyAsync((void*) edgeData.edgeSources, edges->edgeSources,
-        edges->numedges * sizeof(unsigned int), cudaMemcpyHostToDevice, stream);
-    cudaMemcpyAsync((void*) edgeData.edgeTargets, edges->edgeTargets,
-        edges->numedges * sizeof(unsigned int), cudaMemcpyHostToDevice, stream);
-
+    // Prepare memory for edges and copy them to device.
+    fa2PrepareEdgeMemory(&edgeData, edges, vertices->numvertices);
     stopCudaTimer(&timerMem1);
 
     unsigned int numblocks = ceil(vertices->numvertices / (float) BLOCK_SIZE);
     unsigned int numblocks_reduction = ceil(numblocks / 2.0);
 
     cudaGetLastError();
-
-    // Compute vertex degrees using current edges.
-    fa2ComputeDegrees<<<numblocks, BLOCK_SIZE, 0, stream>>>(
-        vertices->numvertices, edges->numedges, edgeData.edgeSources,
-        data.numNeighbours);
 
     cudaError_t code = cudaGetLastError();
     if (code != cudaSuccess)
@@ -835,10 +840,9 @@ void fa2RunOnGraphInStream(Vertices* vertices, Edges** edgesIn,
       // Compute graph speed, vertex forces, speed and displacement.
       startCudaTimer(&timer);
       fa2kernel<<<numblocks, BLOCK_SIZE, 0, stream>>>(data.vxLocs, data.vyLocs,
-          vertices->numvertices, edgeData.edgeSources, edgeData.edgeTargets,
-          edges->numedges, data.numNeighbours, data.tra, data.swg, data.forceX,
-          data.forceY, data.oldForceX, data.oldForceY, data.graphSwing,
-          data.graphTract, data.graphSpeed);
+          vertices->numvertices, edgeData.edgeTargets, edges->numedges,
+          data.tra, data.swg, data.forceX, data.forceY, data.oldForceX,
+          data.oldForceY, data.graphSwing, data.graphTract, data.graphSpeed);
       stopCudaTimer(&timer);
       printf("time: all forces and moving vertices.\n");
       printCudaTimer(&timer);
@@ -861,7 +865,7 @@ void fa2RunOnGraphInStream(Vertices* vertices, Edges** edgesIn,
       // Run reductions on vertex swing and traction.
       startCudaTimer(&timer);
       fa2GraphSwingTract<<<numblocks_reduction, BLOCK_SIZE, 0, stream>>>(
-          vertices->numvertices, data.swg, data.tra, data.numNeighbours,
+          vertices->numvertices, data.swg, data.tra, data.numEdges,
           data.graphSwing, data.graphTract);
       stopCudaTimer(&timer);
       printf("time: graph swing and traction.\n");
@@ -900,9 +904,10 @@ void fa2RunOnGraphInStream(Vertices* vertices, Edges** edgesIn,
     resetCudaTimer(&timerMem1);
     resetCudaTimer(&timerMem2);
 
-    fa2CleanEdgeMemory(&edgeData);
+    fa2CleanEdgeMemory(&edgeData, vertices->numvertices);
   }
-  speedVectorFinish(*averageSpeedX, *averageSpeedY, numgraphs, vertices->numvertices);
+  speedVectorFinish(*averageSpeedX, *averageSpeedY, numgraphs,
+      vertices->numvertices);
   fa2CleanGeneralMemory(&data);
 }
 

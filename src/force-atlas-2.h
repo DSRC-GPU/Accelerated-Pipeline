@@ -33,7 +33,6 @@
  */
 typedef struct ForceAtlas2Data
 {
-  unsigned int* numNeighbours;
   float* tra;
   float* swg;
   float* forceX;
@@ -46,8 +45,8 @@ typedef struct ForceAtlas2Data
 
   float* vxLocs;
   float* vyLocs;
-  unsigned int* edgeSources;
-  unsigned int* edgeTargets;
+  unsigned int* numEdges;
+  unsigned int** edgeTargets;
 } ForceAtlas2Data;
 
 /*!
