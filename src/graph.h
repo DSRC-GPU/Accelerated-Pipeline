@@ -11,7 +11,7 @@
 typedef struct Edges
 {
   unsigned int* numedges;
-  unsigned int** edgeTargets;
+  unsigned int* edgeTargets;
 } Edges;
 
 /*!
