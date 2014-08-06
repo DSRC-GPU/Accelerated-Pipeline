@@ -59,7 +59,7 @@ void graphAddEdgeToVertex(Graph* graph, unsigned int sourceVertexId,
 /*!
  * Reallocate the memory for all edges to match the number of edges each vertex has.
  */
-void graphShrinkEdgeSpaceToNumberOfEdges(Graph* graph)
+void graphShrinkEdgeSpaceToNumberOfEdges(Graph* graph);
 
 /*!
  * Frees the memory allocated for the edges struct.
@@ -79,7 +79,7 @@ void freeVertices(Vertices* vertices);
 /*!
  * Create a new Graph struct with place for the specified number of edges and vertices.
  */
-Graph* newGraph(unsigned int numEdges, unsigned int numVertices);
+Graph* newGraph(unsigned int numVertices);
 
 /*!
  Print the details of the graph to stdout.

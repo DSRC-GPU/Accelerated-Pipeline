@@ -22,10 +22,10 @@ Vertices* newVertices(unsigned int num)
   return vertices;
 }
 
-Graph* newGraph(unsigned int numedges, unsigned int numvertices)
+Graph* newGraph(unsigned int numvertices)
 {
   Graph* graph = (Graph*) calloc(1, sizeof(Graph));
-  graph->edges = newEdges(numedges);
+  graph->edges = newEdges(numvertices);
   graph->vertices = newVertices(numvertices);
   return graph;
 }
@@ -49,7 +49,7 @@ void graphSetEdgeSpaceForAllVertices(Graph* graph, unsigned int numedges)
 void graphAddEdgeToVertex(Graph* graph, unsigned int sourceVertexId,
     unsigned int targetVertexId)
 {
-  unsigned int index = graph->edges->numedges[sourceVertexId]++;
+  unsigned int index = ++graph->edges->numedges[sourceVertexId];
   graph->edges->edgeTargets[sourceVertexId][index - 1] = targetVertexId;
 }
 

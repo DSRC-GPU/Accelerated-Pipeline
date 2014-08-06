@@ -41,7 +41,8 @@ Vertices* gexfParseFileVertices(const char* in);
  * \param[in] stepend the end of the interval
  * \return a new edges struct.
  */
-Edges* gexfParseFileEdgesSomewhereInInterval(const char* in, int stepstart, int stepend);
+Edges* gexfParseFileEdgesSomewhereInInterval(const char* in, int stepstart,
+    int stepend);
 
 /*!
  * Parses all edges from the gexf file stat are valid within the given interval.
@@ -59,7 +60,7 @@ Edges* gexfParseFileEdgesSomewhereInInterval(const char* in, int stepstart, int 
  * In case you are unable to calculate.
  * \return an array of Edges. This array has size timeend - timestart + 1.
  */
-Edges** gexfParseFileEdgesAtSteps(const char* in, int timestart,
+Edges** gexfParseFileEdgesAtSteps(const char* in, Graph* graph, int timestart,
     int timeend, size_t* edgesLength);
 
 /*!
