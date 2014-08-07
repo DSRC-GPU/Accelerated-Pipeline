@@ -290,12 +290,14 @@ __device__ void fa2Attraction(unsigned int gid, unsigned int numvertices,
 {
   if (gid < numvertices)
   {
+    if (gid == 0)
+      DEBUG_PRINT("numedges:%u\n", numedges[gid]);
     float vx1 = vxLocs[gid];
     float vy1 = vyLocs[gid];
     // Each thread goes through its array of edges.
     for (size_t i = 0; i < maxedges; i++)
     {
-      unsigned int index = gid + (maxedges * i);
+      unsigned int index = gid + (numvertices * i);
       unsigned int target = edgeTargets[index];
       if (target == UINT_MAX)
         continue;

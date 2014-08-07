@@ -47,7 +47,7 @@ void graphAddEdgeToVertex(Graph* graph, unsigned int sourceVertexId,
     unsigned int targetVertexId)
 {
   unsigned int index = sourceVertexId
-      + graph->edges->numedges[sourceVertexId]++ * graph->edges->maxedges;
+      + graph->edges->numedges[sourceVertexId]++ * graph->vertices->numvertices;
   graph->edges->edgeTargets[index] = targetVertexId;
 }
 
