@@ -10,6 +10,7 @@
  */
 typedef struct Edges
 {
+  unsigned int maxedges;
   unsigned int* numedges;
   unsigned int* edgeTargets;
 } Edges;
@@ -48,7 +49,7 @@ void graphSetEdgeSpaceForVertex(Graph* graph, unsigned int vertexId,
 /*!
  * Allocates memory to save an amount of edges for all vertices.
  */
-void graphSetEdgeSpaceForAllVertices(Graph* graph, unsigned int numedges);
+void graphSetEdgeSpaceForAllVertices(Graph* graph);
 
 /*!
  * Add an outgoing edge to a vertex. This edge is one-way.
