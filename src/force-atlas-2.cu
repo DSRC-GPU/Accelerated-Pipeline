@@ -297,17 +297,13 @@ __device__ void fa2Attraction(unsigned int gid, unsigned int numvertices,
       unsigned int target = edgeTargets[index];
       if (target == UINT_MAX)
         continue;
-      // Edge source is this vertex.
-      if (gid < target)
-      {
-        // Compute attraction force.
-        float vx2 = vxLocs[target];
-        float vy2 = vyLocs[target];
+      // Compute attraction force.
+      float vx2 = vxLocs[target];
+      float vy2 = vyLocs[target];
 
-        vectorSubtract(&vx2, &vy2, vx1, vy1);
-        // vectorMultiply(&vx2, &vy2, 0.5);
-        vectorAdd(forceX, forceY, vx2, vy2);
-      }
+      vectorSubtract(&vx2, &vy2, vx1, vy1);
+      // vectorMultiply(&vx2, &vy2, 0.5);
+      vectorAdd(forceX, forceY, vx2, vy2);
     }
   }
 }
