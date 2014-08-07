@@ -8,7 +8,7 @@ NVCC = nvcc
 CUDA_LINK = link.o
 CUDA_ARCH = -arch=sm_20
 NVCCFLAGS	= $(CUDA_ARCH) -dc --ptxas-options=-v -prec-sqrt=true -prec-div=true \
-            -ccbin=`which g++-4.7`
+            -ccbin=`which g++-4.7` -DDEBUG
 CUDA_LDFLAGS	:= $(LDFLAGS) -lcudart
 LIBS = 
 CUDA_LIBS	= $(LIBS) -L"$(CUDA_INSTALL_PATH)/lib64"
