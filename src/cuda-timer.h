@@ -11,7 +11,14 @@
  */
 typedef struct CudaTimer
 {
-  cudaEvent_t start, stop;
+  /*!
+   * Struct to save the time when measuring is started.
+   */
+  cudaEvent_t start;
+  /*!
+   * Struct to save the time when measuring is ended.
+   */
+  cudaEvent_t stop;
 } CudaTimer;
 
 /*!

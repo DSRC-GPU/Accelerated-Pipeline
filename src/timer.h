@@ -10,8 +10,22 @@
  */
 typedef struct Timer
 {
-  time_t wallTimerStart, wallTimerEnd;
-  clock_t cpuTimerStart, cpuTimerEnd;
+  /*!
+   * Struct to save wall time start.
+   */
+  time_t wallTimerStart;
+  /*!
+   * Struct to save wall time end.
+   */
+  time_t wallTimerEnd;
+  /*!
+   * Struct to save cpu time start.
+   */
+  clock_t cpuTimerStart;
+  /*!
+   * Struct to save cpu time end.
+   */
+  clock_t cpuTimerEnd;
 } Timer;
 
 /*!

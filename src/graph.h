@@ -10,8 +10,21 @@
  */
 typedef struct Edges
 {
+  /*!
+   * The maximum number of edges for a single vertex.
+   */
   unsigned int maxedges;
+  /*!
+   * An array specifying the number of edges for each vertex.
+   */
   unsigned int* numedges;
+  /*!
+   * An array specifying the target vertex for each edge.
+   * This is a 2D array that is column-major mapped to a 1D array.
+   * This means every edge for vertex i can be found at:
+   * i + numvertices * n
+   * where n can range from 0 to maxedges.
+   */
   unsigned int* edgeTargets;
 } Edges;
 
@@ -20,9 +33,21 @@ typedef struct Edges
  */
 typedef struct Vertices
 {
+  /*!
+   * The total number of vertices.
+   */
   unsigned int numvertices;
+  /*!
+   * The IDs of all vertices. The device assumes that the vertices are in order.
+   */
   int* vertexIds;
+  /*!
+   * An array specifying the x location of each vertex.
+   */
   float* vertexXLocs;
+  /*!
+   * An array specifying the y location of each vertex.
+   */
   float* vertexYLocs;
 } Vertices;
 
@@ -31,7 +56,13 @@ typedef struct Vertices
  */
 typedef struct Graph
 {
+  /*!
+   * The edges in the graph.
+   */
   Edges* edges;
+  /*!
+   * The vertices in the graph.
+   */
   Vertices* vertices;
 } Graph;
 

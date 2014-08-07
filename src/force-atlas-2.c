@@ -117,9 +117,10 @@ void fa2UpdateSpeedGraph(float gSwing, float gTract, float* gSpeed);
  * \param[in] swg The swing values for all vertices in the graph.
  * \param[in] forceX The x forces for all vertices in the graph.
  * \param[in] forceY The y forces for all vertices in the graph.
- * \param[in] gSpeed The graph speed value.
+ * \param[in] gs The graph speed value.
  */
-void fa2UpdateSpeed(Graph*, float*, float*, float*, float*, float);
+void fa2UpdateSpeed(Graph* g, float* speed, float* swg, float* forceX,
+    float* forceY, float gs);
 
 /*!
  * Updates the displacement value for each vertex in the graph.
@@ -152,10 +153,10 @@ void fa2SaveOldForces(Graph*, float*, float*, float*, float*);
  * Updates the location of each vertex according to the given displacement.
  *
  * \param[in] g The graph.
- * \param[in] dispX The array of x displacement values for each vertex.
- * \param[in] dispY The array of y displacement values for each vertex.
+ * \param[in] xdisp The array of x displacement values for each vertex.
+ * \param[in] ydisp The array of y displacement values for each vertex.
  */
-void fa2UpdateLocation(Graph*, float*, float*);
+void fa2UpdateLocation(Graph* g, float* xdisp, float* ydisp);
 
 void calcNumNeighbours(Graph* g, unsigned int* deg)
 {
@@ -346,6 +347,11 @@ void fa2UpdateLocation(Graph* g, float* xdisp, float* ydisp)
   }
 }
 
+/*!
+ * Runs one iteration of the force atlas 2 spring embedding on the given graph.
+ *
+ * \param[in,out] g The graph to use for force atlas 2.
+ */
 void fa2RunOnce(Graph* g)
 {
   static int firstRun = 1;

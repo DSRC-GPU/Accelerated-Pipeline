@@ -57,10 +57,8 @@ __device__ void fa2Repulsion(unsigned int gid, unsigned int numvertices,
  * \param[in] vxLocs Array that holds the x location of all vertices.
  * \param[in] vyLocs Array that holds the y location of all vertices.
  * \param[in] numedges The total number of edges in the graph.
- * \param[in] edgeSources Array holding the vertex ID for each edge source in
- *    order.
- * \param[in] edgeTargets Array holding the vertex ID for each edge target in
- *    order.
+ * \param[in] edgeTargets Array holding the edge targets for all edges.
+ * \param[in] maxedges The maximum number of edges per vertex.
  * \param[out] forceX Pointer to the x force on the vertex that belongs to this
  *    thread.
  * \param[out] forceY Pointer to the y force on the vertex that belongs to this
@@ -103,35 +101,11 @@ __device__ void fa2UpdateSwing(unsigned int gid, unsigned int numvertices,
  *    previous iteration.
  * \param[in] oldForceY Array holding the y forces of each vertex from the
  *    previous iteration.
- * \param[out] swg Array where the traction values for each vertex should be
+ * \param[out] tra Array where the traction values for each vertex should be
  *    stored.
  */
 __device__ void fa2UpdateTract(unsigned int gid, unsigned int numvertices,
     float forceX, float forceY, float* oldForceX, float* oldForceY, float* tra);
-
-/*!
- * Updates the swing value for the graph itself.
- *
- * \param[in] numvertices The total number of vertices in the graph.
- * \param[in] swg Array holding the swing values of each vertex in the graph.
- * \param[in] deg Array holding the out degree values of each vertex in the
- *    graph.
- * \param[out] gswing Pointer to where the graph swing value should be stored.
- */
-__device__ void fa2UpdateSwingGraph(unsigned int numvertices, float* swg,
-    int* deg, float* gswing);
-
-/*!
- * Updates the traction value for the graph itself.
- *
- * \param[in] numvertices The total number of vertices in the graph.
- * \param[in] tra Array holding the traction values of each vertex in the graph.
- * \param[in] deg Array holding the out degree values of each vertex in the
- *    graph.
- * \param[out] gtract Pointer to where the graph traction value should be stored.
- */
-__device__ void fa2UpdateTractGraph(unsigned int numvertices, float* tra,
-    int* deg, float* gtract);
 
 /*!
  * Updates the speed value for the graph itself.
@@ -149,6 +123,7 @@ __device__ void fa2UpdateSpeedGraph(float gswing, float gtract, float* gspeed);
  * \param[in] numvertices The total number of vertices in the graph.
  * \param[out] speed Pointer to where the speed value of the vertex that belongs
  *    to this thread should be stored.
+ * \param[in] swg An array holding the swing values for each vertex.
  * \param[in] forceX The x force on the vertex that belongs to this thread.
  * \param[in] forceY The y force on the vertex that belongs to this thread.
  * \param[in] gs The graph speed value.
@@ -343,7 +318,15 @@ __device__ void fa2UpdateTract(unsigned int gid, unsigned int numvertices,
   }
 }
 
-// Calculate the current swing of the graph.
+/*!
+ * Updates the swing value for the graph itself.
+ *
+ * \param[in] numvertices The total number of vertices in the graph.
+ * \param[in] swg Array holding the swing values of each vertex in the graph.
+ * \param[in] deg Array holding the out degree values of each vertex in the
+ *    graph.
+ * \param[out] gswing Pointer to where the graph swing value should be stored.
+ */
 __device__ void fa2UpdateSwingGraph(unsigned int numvertices, float* swg,
     unsigned int* deg, float* gswing)
 {
@@ -386,7 +369,14 @@ __device__ void fa2UpdateSwingGraph(unsigned int numvertices, float* swg,
     atomicAdd(gswing, scratch[tx]);
 }
 
-// Calculate the current traction of the graph.
+/*!
+ * Updates the graph traction value.
+ *
+ * \param[in] numvertices The total number of vertices in the graph.
+ * \param[in] tra Array holding the traction values of individual vertices.
+ * \param[in] deg Array holding the number of outgoing edges for each vertex.
+ * \param[out] gtract Pointer to where the graph traction should be stored.
+ */
 __device__ void fa2UpdateTractGraph(unsigned int numvertices, float* tra,
     unsigned int* deg, float* gtract)
 {
@@ -525,11 +515,26 @@ __global__ void fa2GraphSwingTract(unsigned int numvertices, float* swg,
   fa2UpdateTractGraph(numvertices, tra, numNeighbours, graphTract);
 }
 
+/*!
+ * The kernel that computes the forces on all vertices.
+ *
+ * \param[in] vxLocs Array holding the x locations for each vertex.
+ * \param[in] vyLocs Array holding the y locations for each vertex.
+ * \param[in] numvertices The total number of vertices.
+ * \param[in] edgeTargets Array representing the edges.
+ * \param[in] numedges Array that holds the number of edges for each vertex.
+ * \param[in] maxedges the maximum number of edges per vertex.
+ * \param[out] tra Array that will be used to store the vertex traction values.
+ * \param[out] swg Array that will be used to store the vertex swing values.
+ * \param[out] forceX Array that will be used to store the x forces on each vertex.
+ * \param[out] forceY Array that will be used to store the y forces on each vertex.
+ * \param[in] oldForceX Array that holds the x forces for each vertex from the previous iteration.
+ * \param[in] oldForceY Array that holds the y forces for each vertex from the previous iteration.
+ */
 __global__ void fa2kernel(float* vxLocs, float* vyLocs,
     unsigned int numvertices, unsigned int* edgeTargets, unsigned int* numedges,
     unsigned int maxedges, float* tra, float* swg, float* forceX, float* forceY,
-    float* oldForceX, float* oldForceY, float* graphSwing, float* graphTract,
-    float* oldGraphSpeed)
+    float* oldForceX, float* oldForceY)
 {
   unsigned int gid = threadIdx.x + (blockIdx.x * BLOCK_SIZE);
 
@@ -559,6 +564,24 @@ __global__ void fa2kernel(float* vxLocs, float* vyLocs,
   }
 }
 
+/*!
+ * Moves the vertices to their new location after force computation is complete.
+ *
+ * \param[in,out] vxLocs The x-locations of the vertices. This will be updated with new positions.
+ * \param[in,out] vyLocs The y-locations of the vertices. This will be updated with new positions.
+ * \param[in] numvertices The total number of vertices.
+ * \param[in] tra An array holding the traction values for each vertex.
+ * \param[in] swg An array holding the swing values for each vertex.
+ * \param[in] forceX An array holding the x forces on each vertex.
+ * \param[in] forceY An array holding the y forces on each vertex.
+ * \param[in,out] oldForceX An array holding the x force on each vertex of the previous iteration.
+ * These values will be overwritten with the current forces.
+ * \param[in,out] oldForceY An array holding the y force on each vertex of the previous iteration.
+ * These values will be overwritten with the current forces.
+ * \param[in] graphSwing the swing value of the graph.
+ * \param[in] graphTract the traction value of the graph.
+ * \param[in] graphSpeed the speed value of the graph.
+ */
 __global__ void fa2MoveVertices(float* vxLocs, float* vyLocs,
     unsigned int numvertices, float* tra, float* swg, float* forceX,
     float* forceY, float* oldForceX, float* oldForceY, float* graphSwing,
@@ -592,6 +615,13 @@ __global__ void fa2MoveVertices(float* vxLocs, float* vyLocs,
   }
 }
 
+/*!
+ * Allocated general memory on the device that will be used when running
+ * force atlas 2.
+ *
+ * \param[in,out] data A valid struct where the pointers need to be saved.
+ * \param[in] numvertices the number of vertices in the graph.
+ */
 void fa2PrepareGeneralMemory(ForceAtlas2Data* data, unsigned int numvertices)
 {
   // Allocate data for vertices, edges, and fa2 data.
@@ -620,6 +650,14 @@ void fa2PrepareGeneralMemory(ForceAtlas2Data* data, unsigned int numvertices)
   cudaMalloc(&data->vyLocs, numvertices * sizeof(float));
 }
 
+/*!
+ * Prepares the edge memory on the device.
+ *
+ * \param[in,out] data A valid data struct where pointers to the edge data need to be stored.
+ * \param[in] edges The edges that need to be copied to the device.
+ * \param[in] numvertices The total number of vertices.
+ * \param[in] stream The cuda stream to use for this action.
+ */
 void fa2PrepareEdgeMemory(ForceAtlas2Data* data, Edges* edges,
     unsigned int numvertices, cudaStream_t* stream)
 {
@@ -634,6 +672,14 @@ void fa2PrepareEdgeMemory(ForceAtlas2Data* data, Edges* edges,
       cudaMemcpyHostToDevice, *stream);
 }
 
+/*!
+ * Prepares all memory to run force atlas 2 on the device.
+ *
+ * \param[in,out] data A valid data object where all pointers should be saved.
+ * \param[in] edges The edges that need to be copied to the device.
+ * \param[in] numvertices The total number of vertices.
+ * \param[in] stream The cuda stream to use while preparing the data.
+ */
 void fa2PrepareMemory(ForceAtlas2Data* data, Edges* edges,
     unsigned int numvertices, cudaStream_t* stream)
 {
@@ -641,6 +687,12 @@ void fa2PrepareMemory(ForceAtlas2Data* data, Edges* edges,
   fa2PrepareEdgeMemory(data, edges, numvertices, stream);
 }
 
+/*!
+ * Cleans the general memory that is required for force atlas 2 on the device.
+ * This includes vertex data. This excludes edge data.
+ *
+ * \param[in] data The struct that holds the data pointers.
+ */
 void fa2CleanGeneralMemory(ForceAtlas2Data* data)
 {
   cudaFree(data->tra);
@@ -656,12 +708,24 @@ void fa2CleanGeneralMemory(ForceAtlas2Data* data)
   cudaFree(data->vyLocs);
 }
 
+/*!
+ * Cleans memory on the device that was reserved for graph edges.
+ *
+ * \param[in] data The data object that contains the edge data.
+ * \param[in] numvertices The number of vertices in the graph.
+ */
 void fa2CleanEdgeMemory(ForceAtlas2Data* data, unsigned int numvertices)
 {
   cudaFree(data->edgeTargets);
   cudaFree(data->numEdges);
 }
 
+/*!
+ * Cleans the memory on the device that is required for running force atlas 2.
+ *
+ * \param[in] data The data that needs to be cleaned.
+ * \param[in] numvertices The total number of vertices.
+ */
 void fa2CleanMemory(ForceAtlas2Data* data, unsigned int numvertices)
 {
   fa2CleanGeneralMemory(data);
@@ -709,8 +773,7 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
     fa2kernel<<<numblocks, BLOCK_SIZE>>>(data.vxLocs, data.vyLocs,
         g->vertices->numvertices, data.edgeTargets, g->edges->numedges,
         g->edges->maxedges, data.tra, data.swg, data.forceX, data.forceY,
-        data.oldForceX, data.oldForceY, data.graphSwing, data.graphTract,
-        data.graphSpeed);
+        data.oldForceX, data.oldForceY);
     stopCudaTimer(&timer);
     printf("time: all forces and moving vertices.\n");
     printCudaTimer(&timer);
@@ -826,8 +889,7 @@ void fa2RunOnGraphInStream(Vertices* vertices, Edges** edgesIn,
       fa2kernel<<<numblocks, BLOCK_SIZE, 0, stream>>>(data.vxLocs, data.vyLocs,
           vertices->numvertices, edgeData.edgeTargets, edgeData.numEdges,
           edges->maxedges, data.tra, data.swg, data.forceX, data.forceY,
-          data.oldForceX, data.oldForceY, data.graphSwing, data.graphTract,
-          data.graphSpeed);
+          data.oldForceX, data.oldForceY);
       stopCudaTimer(&timer);
       printf("time: all forces and moving vertices.\n");
       printCudaTimer(&timer);

@@ -54,6 +54,7 @@ Edges* gexfParseFileEdgesSomewhereInInterval(const char* in, int stepstart,
  * These can be used for the smoothening of the average speed vectors.
  *
  * \param[in] in the gexf file to parse.
+ * \param[in] graph the graph that contains the vertices of the graph.
  * \param[in] timestart the begin of the time interval (inclusive)
  * \param[in] timeend the end of the time interval (inclusive)
  * \param[out] edgesLength the length of the returned edges array.
