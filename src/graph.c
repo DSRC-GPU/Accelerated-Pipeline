@@ -64,17 +64,23 @@ void printGraph(Graph* g)
 
 void freeEdges(Edges* edges)
 {
-  free(edges->edgeTargets);
-  free(edges->numedges);
-  free(edges);
+  if (edges)
+  {
+    free(edges->edgeTargets);
+    free(edges->numedges);
+    free(edges);
+  }
 }
 
 void freeVertices(Vertices* vertices)
 {
-  free(vertices->vertexIds);
-  free(vertices->vertexXLocs);
-  free(vertices->vertexYLocs);
-  free(vertices);
+  if (vertices)
+  {
+    free(vertices->vertexIds);
+    free(vertices->vertexXLocs);
+    free(vertices->vertexYLocs);
+    free(vertices);
+  }
 }
 
 void freeGraph(Graph* graph)
