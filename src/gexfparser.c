@@ -49,6 +49,39 @@ unsigned int xmlwGetNumEdges(xmlNode* gexf)
   return atoi((const char*) xmlGetProp(edges, (const xmlChar*) "count"));
 }
 
+unsigned int xmlwGetMaxEdges(xmlNode* gexf, unsigned int numvertices)
+{
+  if (!gexf)
+    return -1;
+  xmlNode* graph = xmlwGetChild(gexf, "graph");
+  if (!graph)
+    return -1;
+  xmlNode* edges = xmlwGetChild(graph, "edges");
+  if (!edges)
+    return -1;
+  unsigned int* numedges = (unsigned int*) calloc(numvertices,
+      sizeof(unsigned int));
+  xmlNode* node = xmlwGetChild(edges, "edge");
+  while (node)
+  {
+    unsigned int source = atoi(
+        (const char*) xmlGetProp(node, (const xmlChar*) "source"));
+    unsigned int target = atoi(
+        (const char*) xmlGetProp(node, (const xmlChar*) "target"));
+    numedges[source]++;
+    numedges[target]++;
+    node = node->next;
+  }
+  unsigned int max = 0;
+  for (size_t i = 0; i < numvertices; i++)
+  {
+    if (numedges[i] > max)
+      max = numedges[i];
+  }
+  free(numedges);
+  return max;
+}
+
 void gexfParseVertex(xmlNode* n, float* vertexXLoc, float* vertexYLoc,
     int *vertexIds)
 {
@@ -174,26 +207,26 @@ Vertices* gexfParseVerticesFromRoot(xmlNode* rootelem)
   return vertices;
 }
 
-Edges* gexfParseEdgesFromRoot(xmlNode* rootelem, unsigned int numedges,
-    Graph* graph)
+Edges* gexfParseEdgesFromRoot(xmlNode* rootelem, Graph* graph, unsigned int maxedges)
 {
   Edges* edges = newEdges(graph->vertices->numvertices);
-  graphSetEdgeSpaceForAllVertices(graph, numedges);
+  edges->maxedges = maxedges;
+  graphSetEdgeSpaceForAllVertices(graph);
   gexfParseEdges(rootelem, graph, 0, INT_MAX);
   return edges;
 }
 
-Edges* gexfParseEdgesFromRootInInterval(xmlNode* rootelem,
-    unsigned int numedges, Graph* graph, int timestepStart, int timestepEnd)
+Edges* gexfParseEdgesFromRootInInterval(xmlNode* rootelem, Graph* graph, unsigned int maxedges,
+    int timestepStart, int timestepEnd)
 {
   Edges* edges = newEdges(graph->vertices->numvertices);
 
   Edges* originalEdges = graph->edges;
   graph->edges = edges;
+  graph->edges->maxedges = maxedges;
 
-  graphSetEdgeSpaceForAllVertices(graph, numedges);
-  numedges = gexfParseEdges(rootelem, graph, timestepStart, timestepEnd);
-  graphShrinkEdgeSpaceToNumberOfEdges(graph);
+  graphSetEdgeSpaceForAllVertices(graph);
+  gexfParseEdges(rootelem, graph, timestepStart, timestepEnd);
 
   graph->edges = originalEdges;
 
@@ -212,9 +245,10 @@ Graph* gexfParseFile(const char* in)
   // Create graph data structure.
   Graph* g = newGraph(0);
 
-  unsigned int numedges = xmlwGetNumEdges(root_element);
+  unsigned int numvertices = xmlwGetNumNodes(root_element);
+  unsigned int maxEdges = xmlwGetMaxEdges(root_element, numvertices);
   g->vertices = gexfParseVerticesFromRoot(root_element);
-  g->edges = gexfParseEdgesFromRoot(root_element, numedges, g);
+  g->edges = gexfParseEdgesFromRoot(root_element, g, maxEdges);
 
   gexfParseCleanup(doc);
 
@@ -228,7 +262,6 @@ Graph* gexfParseFile(const char* in)
   //printf("time: gexf parsing.\n");
   //printTimer(&timer);
 
-  graphShrinkEdgeSpaceToNumberOfEdges(g);
   return g;
 }
 
@@ -248,9 +281,10 @@ Edges* gexfParseFileEdgesSomewhereInInterval(const char* in, Graph* graph,
   xmlDoc* doc;
   xmlNode* rootelem;
   gexfParseSetup(in, &doc, &rootelem);
-  unsigned int numedges = xmlwGetNumEdges(rootelem);
-  Edges* edges = gexfParseEdgesFromRootInInterval(rootelem, numedges, graph,
-      stepstart, stepend);
+  unsigned int numvertices = xmlwGetNumNodes(rootelem);
+  unsigned int maxedges = xmlwGetMaxEdges(rootelem, numvertices);
+  Edges* edges = gexfParseEdgesFromRootInInterval(rootelem, graph, maxedges, stepstart,
+      stepend);
   gexfParseCleanup(doc);
   return edges;
 }
