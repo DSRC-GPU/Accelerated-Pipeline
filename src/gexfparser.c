@@ -306,38 +306,3 @@ Edges** gexfParseFileEdgesAtSteps(const char* in, Graph* graph, int stepstart,
       stepstart, stepend);
   return edgeArray;
 }
-
-int gexfFindLastEdgeTime(const char* in)
-{
-  xmlDoc* doc;
-  xmlNode* rootelem;
-  gexfParseSetup(in, &doc, &rootelem);
-  int maxi = 0;
-
-  xmlNode* graph = xmlwGetChild(rootelem, "graph");
-  if (!graph)
-    return -1;
-  xmlNode* xmledges = xmlwGetChild(graph, "edges");
-  if (!xmledges)
-    return -1;
-
-  xmlNode* node = xmlwGetChild(xmledges, "edge");
-  while (node)
-  {
-    if (xmlGetProp(node, (const xmlChar*) "id"))
-    {
-      xmlNode* spells = xmlwGetChild(node, "spells");
-      if (!spells)
-        return -1;
-      xmlNode* spell = xmlwGetChild(spells, "spell");
-      if (!spell)
-        return -1;
-      int val = atoi((const char*) xmlGetProp(spell, (const xmlChar*) "end"));
-      if (val > maxi)
-        maxi = val;
-    }
-
-    node = node->next;
-  }
-  return maxi;
-}
