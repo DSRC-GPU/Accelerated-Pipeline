@@ -246,6 +246,8 @@ __device__ void fa2Gravity(unsigned int gid, unsigned int numvertices,
     float vlen = vectorGetLength(vx, vy);
     vectorInverse(&vx, &vy);
     vectorMultiply(&vx, &vy, K_G * (deg[gid] + 1) / vlen);
+    if (gid == 0)
+      DEBUG_PRINT("g:%f\n", vx);
     vectorAdd(forceX, forceY, vx, vy);
   }
 }
@@ -304,6 +306,8 @@ __device__ void fa2Attraction(unsigned int gid, unsigned int numvertices,
       vectorSubtract(&vx2, &vy2, vx1, vy1);
       // vectorMultiply(&vx2, &vy2, 0.5);
       vectorAdd(forceX, forceY, vx2, vy2);
+      if (gid == 0)
+        DEBUG_PRINT("a:%f\t%u\n", vx2, target);
     }
   }
 }
