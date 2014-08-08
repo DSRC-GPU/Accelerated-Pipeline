@@ -8,6 +8,7 @@
 #include "graph.h"
 #include "timer.h"
 #include "vector.h"
+#include "vector-smoothening.h"
 #include <stdio.h>
 
 int main(int argc, char* argv[])
