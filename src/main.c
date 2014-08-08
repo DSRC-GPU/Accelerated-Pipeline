@@ -8,6 +8,7 @@
 #include "graph.h"
 #include "timer.h"
 #include "vector.h"
+#include "vector-smoothening.h"
 #include <stdio.h>
 
 int main(int argc, char* argv[])
@@ -46,6 +47,7 @@ int main(int argc, char* argv[])
   Graph* graph = (Graph*) calloc(1, sizeof(Graph));
 
   unsigned int numgraphs = 1;
+
   Vertices* vertices = gexfParseFileVertices(inputFile);
   graph->vertices = vertices;
   size_t edgesLength;
@@ -64,9 +66,19 @@ int main(int argc, char* argv[])
   //printf("time: total.\n");
   //printTimer(&timer);
 
+  unsigned int* smootheningEdges;
+  unsigned int* smootheningNumEdges;
+  vectorSmootheningPrepareEdges(edges[edgesLength - 1]->edgeTargets,
+      edges[edgesLength - 1]->numedges,
+      edges[edgesLength - 1]->maxedges * graph->vertices->numvertices,
+      graph->vertices->numvertices, &smootheningEdges, &smootheningNumEdges);
+  vectorSmootheningRun(averageSpeedX, averageSpeedY,
+      graph->vertices->numvertices, smootheningNumEdges, smootheningEdges, 10,
+      0.5);
+  vectorSmootheningCleanEdges(smootheningEdges, smootheningNumEdges);
+
   // Printing
   printGraph(graph);
-
   freeGraph(graph);
 }
 
