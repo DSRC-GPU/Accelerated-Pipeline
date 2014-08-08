@@ -33,7 +33,7 @@ void vectorSmootheningCleanEdges(unsigned int* edges, unsigned int* numedges);
  * \param[in] xvectors The x-value of the vertex vectors.
  * \param[in] yvectors The y-value of the vertex vectors.
  * \param[in] numvertices The number of vertices.
- * \param[in] maxedges The maximum number of edges per vertex.
+ * \param[in] numedges The number of edges per vertex.
  * \param[in] edges The vertex edges.
  * \param[in] numiterations The number of iterations the smoothening
  * should run.
