@@ -1,5 +1,5 @@
-/*
- * \file cuda-stream.h
+/*!
+ * \file
  */
 
 #ifndef CUDA_STREAM_H_
