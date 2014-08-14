@@ -8,9 +8,23 @@
 #include "stdio.h"
 #include "util.h"
 
-void pca(float* d_inMatrix, unsigned int inCols, unsigned int inRows,
-    float* d_outMatrix, unsigned int outCols, unsigned int outRows)
+float* pca(float* d_inMatrix, unsigned int inCols, unsigned int inRows,
+    float* d_outMatrix)
 {
+  float* d_Y;
+  float* d_PC;
+  float* d_Signals;
+
+  // Subtract mean for each dimension.
+  pcaUpdateMean(d_inMatrix, inRows, inCols);
+
+  // Calculate matrix Y.
+  pcaCalculateYMatrix(d_inMatrix, inRows, inCols, d_Y);
+
+  // Perform SVD on Y.
+  pcaSVD(d_Y, inRows, inCols, d_PC);
+  // TODO Wrap code below in a function call.
+
   float* h_inMatrix = (float*) calloc(inCols * inRows, sizeof(float));
   h_inMatrix[0] = 1.0;
   h_inMatrix[7] = 4.0;
@@ -73,11 +87,32 @@ void pca(float* d_inMatrix, unsigned int inCols, unsigned int inRows,
     printf("%f\n", h_VT[i]);
   }
 
-  return;
+  // Calculate signals.
+  pcaCalculateSignals(d_PC, d_inMatrix, inRows, inCols, d_Signals);
 
-  cublasHandle_t handle;
-  cublasCreate(&handle);
-  cublasSgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N, inRows, inCols, inRows, &alpha,
-      d_U, outRows, d_inMatrix, inRows, &beta, d_outMatrix, inRows);
-  cublasDestroy(handle);
+  // Return signals
+  return d_Signals;
 }
+
+void pcaUpdateMean(float* d_inMatrix, unsigned int inRows, unsigned int inCols)
+{
+
+}
+
+void pcaCalculateYMatrix(float* d_inMatrix, unsigned int inRows, unsigned int
+    inCols, float* d_Y)
+{
+
+}
+
+void pcaSVD(float* d_Y, unsigned int inRows, unsigned int inCols, float* d_PC)
+{
+
+}
+
+void pcaCalculateSignals(float* d_PC, float* d_inMatrix, unsigned int inRows,
+    unsigned int inCols, float* d_Signals)
+{
+
+}
+

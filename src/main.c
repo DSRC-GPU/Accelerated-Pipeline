@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
     }
   }
 
-  pca(NULL, 5, 4, NULL, 0, 0);
+  pca(NULL, 5, 4, NULL);
   exit(EXIT_SUCCESS);
 
   // Input checking.
