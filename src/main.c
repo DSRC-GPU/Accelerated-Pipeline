@@ -9,6 +9,7 @@
 #include "timer.h"
 #include "vector.h"
 #include "vector-smoothening.h"
+#include "pca.h"
 #include <stdio.h>
 
 int main(int argc, char* argv[])
@@ -36,6 +37,9 @@ int main(int argc, char* argv[])
       // exit(EXIT_FAILURE);
     }
   }
+
+  pca(NULL, 5, 4, NULL, 0, 0);
+  exit(EXIT_SUCCESS);
 
   // Input checking.
   if (!inputFile)
