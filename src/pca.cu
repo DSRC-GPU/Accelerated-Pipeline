@@ -5,18 +5,20 @@
 #include "pca.h"
 #include "cublas_v2.h"
 #include "cula.h"
-#include "stdio.h"
+#include <stdio.h>
 #include "util.h"
 
-float* pca(float* d_inMatrix, unsigned int inCols, unsigned int inRows,
+void pca(float* d_inMatrix, unsigned int inRows, unsigned int inCols,
     float* d_outMatrix)
 {
-  float* d_Y;
-  float* d_PC;
-  float* d_Signals;
+  float* d_Y = NULL;
+  float* d_PC = NULL;
 
   cudaMalloc(&d_PC, inCols * inCols * sizeof(float));
   utilVectorSetByScalar(d_PC, 0, inCols * inCols);
+
+  cudaMalloc(&d_Y, inRows * inCols * sizeof(float));
+  utilVectorSetByScalar(d_Y, 0, inRows * inCols);
 
   // Subtract mean for each dimension.
   pcaUpdateMean(d_inMatrix, inRows, inCols);
@@ -24,42 +26,55 @@ float* pca(float* d_inMatrix, unsigned int inCols, unsigned int inRows,
   // Calculate matrix Y.
   pcaCalculateYMatrix(d_inMatrix, inRows, inCols, d_Y);
 
+  DEBUG_PRINT_DEVICE(d_PC, inCols * inCols);
+
   // Perform SVD on Y.
   pcaSVD(d_Y, inRows, inCols, d_PC);
-  // TODO Wrap code below in a function call.
 
-  float* h_inMatrix = (float*) calloc(inCols * inRows, sizeof(float));
-  h_inMatrix[0] = 1.0;
-  h_inMatrix[7] = 4.0;
-  h_inMatrix[9] = 3.0;
-  h_inMatrix[16] = 2.0;
-  cudaMalloc(&d_inMatrix, inCols * inRows * sizeof(float));
-  cudaMemcpy(d_inMatrix, h_inMatrix, inCols * inRows * sizeof(float),
-      cudaMemcpyHostToDevice);
-  //utilVectorSetByScalar(d_inMatrix, 1, inCols * inRows);
-
-  for (size_t i = 0; i < inRows * inCols; i++)
-  {
-    printf("%f\n", h_inMatrix[i]);
-  }
-  printf("&&&\n");
+  DEBUG_PRINT_DEVICE(d_PC, inCols * inCols);
 
   // Calculate signals.
-  pcaCalculateSignals(d_PC, d_inMatrix, inRows, inCols, d_Signals);
-
-  // Return signals
-  return d_Signals;
+  pcaCalculateSignals(d_PC, d_inMatrix, inRows, inCols, d_outMatrix);
 }
 
 void pcaUpdateMean(float* d_inMatrix, unsigned int inRows, unsigned int inCols)
 {
+  float* d_averageX = NULL;
+  float* d_averageY = NULL;
+  cudaMalloc(&d_averageX, sizeof(float));
+  cudaMalloc(&d_averageY, sizeof(float));
 
+  // Compute the average X and Y values.
+  utilTreeReduction(&d_inMatrix[0], inCols, d_averageX);
+  utilTreeReduction(&d_inMatrix[inCols], inCols, d_averageY);
+
+  float h_averageX, h_averageY;
+  cudaMemcpy(&h_averageX, d_averageX, sizeof(float), cudaMemcpyDeviceToHost);
+  cudaMemcpy(&h_averageY, d_averageY, sizeof(float), cudaMemcpyDeviceToHost);
+
+  utilVectorAddScalar(&d_inMatrix[0], -1 * h_averageX, inCols);
+  utilVectorAddScalar(&d_inMatrix[inCols], -1 * h_averageY, inCols);
 }
 
 void pcaCalculateYMatrix(float* d_inMatrix, unsigned int inRows, unsigned int
     inCols, float* d_Y)
 {
-
+  // Transpose inMatrix
+  // Do not transpose because CULA expects column major ordering.
+  //
+  // const float alpha = 1;
+  // const float beta = 0;
+  // cublasHandle_t handle;
+  // cublasCreate(&handle);
+  // cublasSgeam(handle, CUBLAS_OP_T, CUBLAS_OP_N, inCols, inRows, &alpha,
+  //     d_inMatrix, inRows, &beta, NULL, inRows, d_Y, inCols);
+  // cublasDestroy(handle);
+  
+  // Devide all values by sqrt(N-1)
+  float sqrtN = sqrt(inCols - 1);
+  cudaMemcpy(d_Y, d_inMatrix, inRows * inCols * sizeof(float),
+      cudaMemcpyDeviceToDevice);
+  utilVectorDevideByScalar(d_Y, sqrtN, inRows * inCols); 
 }
 
 void pcaSVD(float* d_Y, unsigned int inRows, unsigned int inCols, float* d_PC)
@@ -83,7 +98,6 @@ void pcaSVD(float* d_Y, unsigned int inRows, unsigned int inCols, float* d_PC)
       inRows, d_PC, inCols);
   culaShutdown();
 
-  // TODO Free some memory.
   cudaFree(S);
   cudaFree(d_U);
 }
@@ -91,6 +105,15 @@ void pcaSVD(float* d_Y, unsigned int inRows, unsigned int inCols, float* d_PC)
 void pcaCalculateSignals(float* d_PC, float* d_inMatrix, unsigned int inRows,
     unsigned int inCols, float* d_Signals)
 {
+  const float alpha = 1;
+  const float beta = 1;
+  cublasHandle_t handle;
+  cublasCreate(&handle);
 
+  cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, inRows, inCols, inRows, &alpha,
+      d_PC, inCols, d_inMatrix, inCols, &beta, d_Signals, inCols);
+  printf("&&&\n");
+
+  cublasDestroy(handle);
 }
 

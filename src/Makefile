@@ -18,7 +18,7 @@ TARGETS = ap
 OBJECTS = main.c.o graph.c.o gexfparser.c.o timer.c.o
 OBJECTS_SEQ = vector.c.o force-atlas-2.c.o
 OBJECTS_PAR = vector.o force-atlas-2.o cuda-timer.o cuda-stream.o util.o \
-	speedvector.o vector-smoothening.o pca.o
+	speedvector.o vector-smoothening.o pca.o test-pca.o test-util.o
 
 %.c.o: %.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@

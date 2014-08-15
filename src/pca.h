@@ -5,7 +5,7 @@
 #ifndef PCA_H_
 #define PCA_H_
 
-float* pca(float* d_inMatrix, unsigned int inCols, unsigned int inRows,
+void pca(float* d_inMatrix, unsigned int inRows, unsigned int inCols,
     float* d_outMatrix);
 
 void pcaUpdateMean(float* d_inMatrix, unsigned int inRows, unsigned int inCols);

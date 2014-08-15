@@ -10,6 +10,8 @@
 #include "vector.h"
 #include "vector-smoothening.h"
 #include "pca.h"
+#include "test-pca.h"
+#include "test-util.h"
 #include <stdio.h>
 
 int main(int argc, char* argv[])
@@ -38,7 +40,7 @@ int main(int argc, char* argv[])
     }
   }
 
-  pca(NULL, 5, 4, NULL);
+  testPca();
   exit(EXIT_SUCCESS);
 
   // Input checking.
