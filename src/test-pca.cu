@@ -25,13 +25,10 @@ void testPca()
 
   pca(d_In, m, n, d_Out);
 
-  printf("&&&\n");
-
   cudaMemcpy(h_In, d_In, m * n * sizeof(float), cudaMemcpyDeviceToHost);
   cudaMemcpy(h_Out, d_Out, m * n * sizeof(float), cudaMemcpyDeviceToHost);
 
   printf("&&&\n");
-
   for (size_t i = 0; i < m * n; i++)
   {
     printf("%f\n", h_In[i]);

@@ -26,8 +26,6 @@ void pca(float* d_inMatrix, unsigned int inRows, unsigned int inCols,
   // Calculate matrix Y.
   pcaCalculateYMatrix(d_inMatrix, inRows, inCols, d_Y);
 
-  DEBUG_PRINT_DEVICE(d_PC, inCols * inCols);
-
   // Perform SVD on Y.
   pcaSVD(d_Y, inRows, inCols, d_PC);
 
@@ -106,12 +104,19 @@ void pcaCalculateSignals(float* d_PC, float* d_inMatrix, unsigned int inRows,
     unsigned int inCols, float* d_Signals)
 {
   const float alpha = 1;
-  const float beta = 1;
+  const float beta = 0;
   cublasHandle_t handle;
   cublasCreate(&handle);
 
-  cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, inRows, inCols, inRows, &alpha,
-      d_PC, inCols, d_inMatrix, inCols, &beta, d_Signals, inCols);
+  float m = inCols;
+  float n = inRows;
+  float k = inCols;
+  float lda = k;
+  float ldb = inCols;
+  float ldc = m;
+
+  cublasSgemm(handle, CUBLAS_OP_T, CUBLAS_OP_T, m, k, n, &alpha,
+      d_PC, lda, d_inMatrix, ldb, &beta, d_Signals, ldc);
   printf("&&&\n");
 
   cublasDestroy(handle);
