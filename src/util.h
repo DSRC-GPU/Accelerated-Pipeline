@@ -10,8 +10,10 @@
  */
 #ifdef DEBUG
 #define DEBUG_PRINT printf
+#define DEBUG_PRINT_DEVICE utilPrintDeviceArray
 #else
 #define DEBUG_PRINT(...)
+#define DEBUG_PRINT_DEVICE(...)
 #endif
 
 /*!
@@ -36,6 +38,8 @@ void utilVectorSetByScalar(float* dst, float scalar, unsigned int num);
  * \param[in] num The number of elements in the arrays.
  */
 void utilVectorAdd(float* dst, float* src, unsigned int num);
+
+void utilVectorAddScalar(float* dst, float scalar, unsigned int num);
 
 /*!
  * Simple gpu vector add in a cuda stream.
@@ -83,5 +87,9 @@ void utilVectorDevide(float* dst, float* src, unsigned int num);
  * \param[in] num The number of elements in the array.
  */
 void utilVectorDevideByScalar(float* dst, float scalar, unsigned int num);
+
+void utilTreeReduction(float* d_M, unsigned int numelems, float* d_outVal);
+
+void utilPrintDeviceArray(float* array, unsigned int numelems);
 
 #endif /* UTIL_H_ */
