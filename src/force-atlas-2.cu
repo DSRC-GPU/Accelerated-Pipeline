@@ -542,22 +542,32 @@ __global__ void fa2kernel(float* vxLocs, float* vyLocs,
   {
     forceX[gid] = 0;
     forceY[gid] = 0;
-
+    
+    if (gid == 0)
+      DEBUG_PRINT("Computing gravity\n");
     // Gravity force
     fa2Gravity(gid, numvertices, vxLocs, vyLocs, &forceX[gid], &forceY[gid],
         numedges);
+    if (gid == 0)
+      DEBUG_PRINT("Computing repulsion\n");
     // Repulsion between vertices
     fa2Repulsion(gid, numvertices, vxLocs, vyLocs, &forceX[gid], &forceY[gid],
         numedges);
+    if (gid == 0)
+      DEBUG_PRINT("Computing attraction\n");
     // Attraction on edges
     fa2Attraction(gid, numvertices, vxLocs, vyLocs, numedges, edgeTargets,
         maxedges, &forceX[gid], &forceY[gid]);
 
+    if (gid == 0)
+      DEBUG_PRINT("Computing swing\n");
     // Calculate speed of vertices.
     // Update swing of vertices.
     fa2UpdateSwing(gid, numvertices, forceX[gid], forceY[gid], oldForceX,
         oldForceY, swg);
 
+    if (gid == 0)
+      DEBUG_PRINT("Computing traction\n");
     // Update traction of vertices.
     fa2UpdateTract(gid, numvertices, forceX[gid], forceY[gid], oldForceX,
         oldForceY, tra);
@@ -656,20 +666,30 @@ void fa2PrepareGeneralMemory(ForceAtlas2Data* data, unsigned int numvertices)
  * \param[in,out] data A valid data struct where pointers to the edge data need to be stored.
  * \param[in] edges The edges that need to be copied to the device.
  * \param[in] numvertices The total number of vertices.
- * \param[in] stream The cuda stream to use for this action.
+ * \param[in] stream The cuda stream to use for this action. If the stream is
+ * NULL the synchronous copy will be used.
  */
 void fa2PrepareEdgeMemory(ForceAtlas2Data* data, Edges* edges,
     unsigned int numvertices, cudaStream_t* stream)
 {
   cudaMalloc(&data->numEdges, numvertices * sizeof(unsigned int));
-  cudaMemcpyAsync((void*) data->numEdges, edges->numedges,
-      numvertices * sizeof(unsigned int), cudaMemcpyHostToDevice, *stream);
-
   cudaMalloc(&data->edgeTargets,
       numvertices * edges->maxedges * sizeof(unsigned int));
-  cudaMemcpyAsync((void*) data->edgeTargets, edges->edgeTargets,
-      numvertices * edges->maxedges * sizeof(unsigned int),
-      cudaMemcpyHostToDevice, *stream);
+
+  if (stream)
+  {
+    cudaMemcpyAsync((void*) data->numEdges, edges->numedges,
+        numvertices * sizeof(unsigned int), cudaMemcpyHostToDevice, *stream);
+    cudaMemcpyAsync((void*) data->edgeTargets, edges->edgeTargets,
+        numvertices * edges->maxedges * sizeof(unsigned int),
+        cudaMemcpyHostToDevice, *stream);
+  } else {
+    cudaMemcpy((void*) data->numEdges, edges->numedges,
+        numvertices * sizeof(unsigned int), cudaMemcpyHostToDevice);
+    cudaMemcpy((void*) data->edgeTargets, edges->edgeTargets,
+        numvertices * edges->maxedges * sizeof(unsigned int),
+        cudaMemcpyHostToDevice);
+  }
 }
 
 /*!
@@ -771,7 +791,7 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
     // Compute graph speed, vertex forces, speed and displacement.
     startCudaTimer(&timer);
     fa2kernel<<<numblocks, BLOCK_SIZE>>>(data.vxLocs, data.vyLocs,
-        g->vertices->numvertices, data.edgeTargets, g->edges->numedges,
+        g->vertices->numvertices, data.edgeTargets, data.numEdges,
         g->edges->maxedges, data.tra, data.swg, data.forceX, data.forceY,
         data.oldForceX, data.oldForceY);
     stopCudaTimer(&timer);

@@ -5,7 +5,7 @@
 float* vectorAverageNewVectorArray(unsigned int numelements)
 {
   float* array = NULL;
-  cudaMalloc(&array, numelements * sizeof(float));
+  cudaMalloc(&array, 2 * numelements * sizeof(float));
   return array;
 }
 
