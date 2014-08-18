@@ -6,9 +6,14 @@
 #include "util.h"
 #include <stdio.h>
 
+
+/*!
+ * This smoothening function is not completely synchronized because it does not
+ * use a global barrier.
+ */
 __global__ void vectorSmootheningRunKernel(float* xvectors, float* yvectors,
     unsigned int numvertices, unsigned int* numedges, unsigned int* edges,
-    float phi)
+    float phi, float* xvectorsOut, float* yvectorsOut)
 {
   unsigned int gid = threadIdx.x + (blockIdx.x * BLOCK_SIZE);
   float newvectorx, newvectory;
@@ -20,15 +25,15 @@ __global__ void vectorSmootheningRunKernel(float* xvectors, float* yvectors,
     for (size_t i = 0; i < numedges[gid]; i++)
     {
       unsigned int index = edges[gid + (numvertices * i)];
-      newvectorx += ((1 - phi) * xvectors[index]) / numedges[gid];
-      newvectory += ((1 - phi) * yvectors[index]) / numedges[gid];
+      newvectorx += ((1 - phi) * xvectorsOut[index]) / numedges[gid];
+      newvectory += ((1 - phi) * yvectorsOut[index]) / numedges[gid];
     }
   }
   __syncthreads();
   if (gid == 0)
     DEBUG_PRINT("change: %f\n", xvectors[gid] - newvectorx);
-  xvectors[gid] = newvectorx;
-  yvectors[gid] = newvectory;
+  xvectorsOut[gid] = newvectorx;
+  yvectorsOut[gid] = newvectory;
 }
 
 void vectorSmootheningPrepareEdges(unsigned int* hostEdges,
@@ -43,6 +48,13 @@ void vectorSmootheningPrepareEdges(unsigned int* hostEdges,
       cudaMemcpyHostToDevice);
 }
 
+void vectorSmootheningPrepareOutput(float** xoutput, float** youtput,
+    unsigned int numvertices)
+{
+  cudaMalloc(xoutput, numvertices * sizeof(float));
+  cudaMalloc(youtput, numvertices * sizeof(float));
+}
+
 void vectorSmootheningCleanEdges(unsigned int* edges, unsigned int* numedges)
 {
   cudaFree(edges);
@@ -51,14 +63,21 @@ void vectorSmootheningCleanEdges(unsigned int* edges, unsigned int* numedges)
 
 void vectorSmootheningRun(float* xvectors, float* yvectors,
     unsigned int numvertices, unsigned int* numedges, unsigned int* edges,
-    unsigned int numiterations, float phi)
+    unsigned int numiterations, float phi, float* xvectorsOut, float* yvectorsOut)
 {
+  // Copy vectors. These will be the constant vectors used for smoothening. The
+  // input array will be used for the smoothened values.
+  cudaMemcpy(xvectorsOut, xvectors, numvertices * sizeof(float),
+      cudaMemcpyDeviceToDevice);
+  cudaMemcpy(yvectorsOut, yvectors, numvertices * sizeof(float),
+      cudaMemcpyDeviceToDevice);
+
   unsigned int numblocks = ceil(numvertices / (float) BLOCK_SIZE);
   for (size_t i = 0; i < numiterations; i++)
   {
     cudaGetLastError();
-    vectorSmootheningRunKernel<<<numblocks, BLOCK_SIZE>>>(xvectors, yvectors,
-        numvertices, numedges, edges, phi);
+    vectorSmootheningRunKernel<<<numblocks, BLOCK_SIZE>>>(xvectors,
+        yvectors, numvertices, numedges, edges, phi, xvectorsOut, yvectorsOut);
     cudaDeviceSynchronize();
     cudaError_t err = cudaGetLastError();
     if (err != cudaSuccess)

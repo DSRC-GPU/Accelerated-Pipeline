@@ -57,6 +57,9 @@ int main(int argc, char* argv[])
   float* averageSpeedX = NULL;
   float* averageSpeedY = NULL;
 
+  float* smoothSpeedX = NULL;
+  float* smoothSpeedY = NULL;
+
   // Computing.
   Timer timer;
   startTimer(&timer);
@@ -72,9 +75,11 @@ int main(int argc, char* argv[])
       edges[edgesLength - 1]->numedges,
       edges[edgesLength - 1]->maxedges * graph->vertices->numvertices,
       graph->vertices->numvertices, &smootheningEdges, &smootheningNumEdges);
+  vectorSmootheningPrepareOutput(&smoothSpeedX, &smoothSpeedY,
+      graph->vertices->numvertices);
   vectorSmootheningRun(averageSpeedX, averageSpeedY,
       graph->vertices->numvertices, smootheningNumEdges, smootheningEdges, 10,
-      0.5);
+      0.5, smoothSpeedX, smoothSpeedY);
   vectorSmootheningCleanEdges(smootheningEdges, smootheningNumEdges);
 
   // Printing

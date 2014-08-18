@@ -20,6 +20,17 @@ void vectorSmootheningPrepareEdges(unsigned int* hostEdges,
     unsigned int totalvertices, unsigned int** edges, unsigned int** numedges);
 
 /*!
+ *  Prepares the memory on the device for the output vectors which are
+ *  smoothened.
+ *
+ *  \param[out] Pointer to where the smoothened x vectors will be stored.
+ *  \param[out] Pointer to where the smoothened y vectors will be stored.
+ *  \param[in] The number of elements for each of the array.
+ */
+void vectorSmootheningPrepareOutput(float** xoutput, float** youtput,
+    unsigned int numvertices);
+
+/*!
  * Cleans the edge memory that was prepared on the device.
  *
  * \param[in] edges The location of the edges on the device.
@@ -38,9 +49,12 @@ void vectorSmootheningCleanEdges(unsigned int* edges, unsigned int* numedges);
  * \param[in] numiterations The number of iterations the smoothening
  * should run.
  * \param[in] phi The smoothening constant.
+ * \param[out] smoothSpeedX Array of smoothened x vectors.
+ * \param[out] smoothSpeedY Array of smoothened y vectors.
  */
 void vectorSmootheningRun(float* xvectors, float* yvectors,
     unsigned int numvertices, unsigned int* numedges, unsigned int* edges,
-    unsigned int numiterations, float phi);
+    unsigned int numiterations, float phi, float* smoothSpeedX, float*
+    smoothSpeedY);
 
 #endif /* VECTOR_SMOOTHENING_H_ */
