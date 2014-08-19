@@ -120,18 +120,23 @@ int main(int argc, char* argv[])
 
   DEBUG_PRINT_DEVICE(projectedData, numvertices * 2);
 
-  // unsigned int* smootheningEdges;
-  // unsigned int* smootheningNumEdges;
-  // vectorSmootheningPrepareEdges(edges[edgesLength - 1]->edgeTargets,
-  //     edges[edgesLength - 1]->numedges,
-  //     edges[edgesLength - 1]->maxedges * graph->vertices->numvertices,
-  //     graph->vertices->numvertices, &smootheningEdges, &smootheningNumEdges);
-  // vectorSmootheningPrepareOutput(&smoothSpeedX, &smoothSpeedY,
-  //     graph->vertices->numvertices);
-  // vectorSmootheningRun(averageSpeedX, averageSpeedY,
-  //     graph->vertices->numvertices, smootheningNumEdges, smootheningEdges, 10,
-  //     0.5, smoothSpeedX, smoothSpeedY);
-  // vectorSmootheningCleanEdges(smootheningEdges, smootheningNumEdges);
+  float* smoothFineValues = utilAllocateData(numvertices * sizeof(float));
+  float* smoothCoarseValues = utilAllocateData(numvertices * sizeof(float));
+  unsigned int* smootheningEdges;
+  unsigned int* smootheningNumEdges;
+  smootheningPrepareEdges(edges[edgesLength - 1]->edgeTargets,
+      edges[edgesLength - 1]->numedges,
+      edges[edgesLength - 1]->maxedges * graph->vertices->numvertices,
+      graph->vertices->numvertices, &smootheningEdges, &smootheningNumEdges);
+  smootheningPrepareOutput(&smoothFineValues, graph->vertices->numvertices);
+  smootheningPrepareOutput(&smoothCoarseValues, graph->vertices->numvertices);
+  smootheningRun(projectedData,
+      graph->vertices->numvertices, smootheningNumEdges, smootheningEdges, 10,
+      0, smoothFineValues);
+  smootheningRun(projectedData,
+      graph->vertices->numvertices, smootheningNumEdges, smootheningEdges, 10,
+      1, smoothCoarseValues);
+  smootheningCleanEdges(smootheningEdges, smootheningNumEdges);
 
   // TODO Free memory with the util functions.
 
