@@ -654,10 +654,6 @@ void fa2PrepareGeneralMemory(ForceAtlas2Data* data, unsigned int numvertices)
   cudaMemset(data->graphSwing, 0, sizeof(float));
   cudaMemset(data->graphTract, 0, sizeof(float));
   cudaMemset(data->graphSpeed, 0, sizeof(float));
-
-  /* These variables are not memsetted because data needs to be copied here */
-  cudaMalloc(&data->vxLocs, numvertices * sizeof(float));
-  cudaMalloc(&data->vyLocs, numvertices * sizeof(float));
 }
 
 /*!
@@ -724,8 +720,6 @@ void fa2CleanGeneralMemory(ForceAtlas2Data* data)
   cudaFree(data->graphSwing);
   cudaFree(data->graphTract);
   cudaFree(data->graphSpeed);
-  cudaFree(data->vxLocs);
-  cudaFree(data->vyLocs);
 }
 
 /*!
@@ -754,22 +748,14 @@ void fa2CleanMemory(ForceAtlas2Data* data, unsigned int numvertices)
 
 void fa2RunOnGraph(Graph* g, unsigned int iterations)
 {
-  CudaTimer timerMem1, timerMem2, timerIteration, timer;
+  CudaTimer timerIteration, timer;
 
   // Allocate data for vertices, edges, and fa2 data.
   // Also copies edge data to device.
   ForceAtlas2Data data;
   fa2PrepareMemory(&data, g->edges, g->vertices->numvertices, NULL);
-
-  startCudaTimer(&timerMem1);
-
-  // Copy vertices to device explicitly.
-  cudaMemcpy((void*) data.vxLocs, g->vertices->vertexXLocs,
-      g->vertices->numvertices * sizeof(float), cudaMemcpyHostToDevice);
-  cudaMemcpy((void*) data.vyLocs, g->vertices->vertexYLocs,
-      g->vertices->numvertices * sizeof(float), cudaMemcpyHostToDevice);
-
-  stopCudaTimer(&timerMem1);
+  data.vxLocs = g->vertices->vertexXLocs;
+  data.vyLocs = g->vertices->vertexYLocs;
 
   unsigned int numblocks = ceil(g->vertices->numvertices / (float) BLOCK_SIZE);
   unsigned int numblocks_reduction = ceil(numblocks / 2.0);
@@ -835,22 +821,6 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
         data.oldForceX, data.oldForceY, data.graphSwing, data.graphTract,
         data.graphSpeed);
   }
-
-  startCudaTimer(&timerMem2);
-
-  // Update graph with new vertex positions.
-  cudaMemcpy((void*) g->vertices->vertexXLocs, data.vxLocs,
-      g->vertices->numvertices * sizeof(float), cudaMemcpyDeviceToHost);
-  cudaMemcpy((void*) g->vertices->vertexYLocs, data.vyLocs,
-      g->vertices->numvertices * sizeof(float), cudaMemcpyDeviceToHost);
-
-  stopCudaTimer(&timerMem2);
-  printf("time: copying data from host to device.\n");
-  printCudaTimer(&timerMem1);
-  printf("time: copying data from device to host.\n");
-  printCudaTimer(&timerMem2);
-  resetCudaTimer(&timerMem1);
-  resetCudaTimer(&timerMem2);
 
   fa2CleanMemory(&data, g->vertices->numvertices);
 }

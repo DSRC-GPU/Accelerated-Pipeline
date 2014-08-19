@@ -59,6 +59,16 @@ int main(int argc, char* argv[])
   Edges** edges = gexfParseFileEdgesAtSteps(inputFile, graph, 0, 199,
       &edgesLength);
 
+  float numvertices = graph->vertices->numvertices;
+
+  // Transfer the vertex data to the gpu.
+  graph->vertices->vertexXLocs =
+   utilDataTransferHostToDevice(graph->vertices->vertexXLocs, numvertices *
+       sizeof(float), 1);
+  graph->vertices->vertexYLocs =
+   utilDataTransferHostToDevice(graph->vertices->vertexYLocs, numvertices *
+       sizeof(float), 1);
+
   float** window = vectorAverageNewWindow();
 
   // Computing.
@@ -71,7 +81,6 @@ int main(int argc, char* argv[])
     // stars positions.
     float* speedvectors =
      vectorAverageNewVectorArray(graph->vertices->numvertices);
-    // FIXME Move vertices to the device.
     utilVectorSetByScalar(speedvectors, 0, graph->vertices->numvertices * 2);
     utilVectorAdd(&speedvectors[0], graph->vertices->vertexXLocs,
         graph->vertices->numvertices);

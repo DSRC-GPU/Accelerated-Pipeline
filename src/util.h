@@ -94,4 +94,9 @@ void utilTreeReduction(float* d_M, unsigned int numelems, float* d_outVal);
 
 void utilPrintDeviceArray(float* array, unsigned int numelems);
 
+float* utilDataTransferHostToDevice(float* src, unsigned int
+    numbytes, unsigned int freeHostMem);
+
+void utilFreeDeviceData(float* dptr);
+
 #endif /* UTIL_H_ */
