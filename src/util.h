@@ -97,6 +97,8 @@ void utilPrintDeviceArray(float* array, unsigned int numelems);
 float* utilDataTransferHostToDevice(float* src, unsigned int
     numbytes, unsigned int freeHostMem);
 
+float* utilAllocateData(unsigned int numbytes);
+
 void utilFreeDeviceData(float* dptr);
 
 #endif /* UTIL_H_ */

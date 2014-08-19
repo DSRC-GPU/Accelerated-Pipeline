@@ -2,7 +2,7 @@
  * \file vector-smoothening.c
  */
 
-#include "vector-smoothening.h"
+#include "smoothening.h"
 #include "util.h"
 #include <stdio.h>
 
@@ -11,7 +11,7 @@
  * This smoothening function is not completely synchronized because it does not
  * use a global barrier.
  */
-__global__ void vectorSmootheningRunKernel(float* xvectors, float* yvectors,
+__global__ void smootheningRunKernel(float* xvectors, float* yvectors,
     unsigned int numvertices, unsigned int* numedges, unsigned int* edges,
     float phi, float* xvectorsOut, float* yvectorsOut)
 {
@@ -36,7 +36,7 @@ __global__ void vectorSmootheningRunKernel(float* xvectors, float* yvectors,
   yvectorsOut[gid] = newvectory;
 }
 
-void vectorSmootheningPrepareEdges(unsigned int* hostEdges,
+void smootheningPrepareEdges(unsigned int* hostEdges,
     unsigned int* hostNumEdges, unsigned int totaledges,
     unsigned int totalvertices, unsigned int** edges, unsigned int** numedges)
 {
@@ -48,20 +48,20 @@ void vectorSmootheningPrepareEdges(unsigned int* hostEdges,
       cudaMemcpyHostToDevice);
 }
 
-void vectorSmootheningPrepareOutput(float** xoutput, float** youtput,
+void smootheningPrepareOutput(float** xoutput, float** youtput,
     unsigned int numvertices)
 {
   cudaMalloc(xoutput, numvertices * sizeof(float));
   cudaMalloc(youtput, numvertices * sizeof(float));
 }
 
-void vectorSmootheningCleanEdges(unsigned int* edges, unsigned int* numedges)
+void smootheningCleanEdges(unsigned int* edges, unsigned int* numedges)
 {
   cudaFree(edges);
   cudaFree(numedges);
 }
 
-void vectorSmootheningRun(float* xvectors, float* yvectors,
+void smootheningRun(float* xvectors, float* yvectors,
     unsigned int numvertices, unsigned int* numedges, unsigned int* edges,
     unsigned int numiterations, float phi, float* xvectorsOut, float* yvectorsOut)
 {
@@ -76,7 +76,7 @@ void vectorSmootheningRun(float* xvectors, float* yvectors,
   for (size_t i = 0; i < numiterations; i++)
   {
     cudaGetLastError();
-    vectorSmootheningRunKernel<<<numblocks, BLOCK_SIZE>>>(xvectors,
+    smootheningRunKernel<<<numblocks, BLOCK_SIZE>>>(xvectors,
         yvectors, numvertices, numedges, edges, phi, xvectorsOut, yvectorsOut);
     cudaDeviceSynchronize();
     cudaError_t err = cudaGetLastError();

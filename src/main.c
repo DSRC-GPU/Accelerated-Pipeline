@@ -1,14 +1,16 @@
+
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 #include "force-atlas-2.h"
 #include "gexfparser.h"
 #include "graph.h"
 #include "timer.h"
 #include "vector.h"
-#include "vector-smoothening.h"
+#include "smoothening.h"
 #include "pca.h"
 #include "test-pca.h"
 #include "test-util.h"
@@ -93,11 +95,13 @@ int main(int argc, char* argv[])
     fa2RunOnGraph(graph, numTicks);
 
     // Add the final vertex positions to obtain the displacement.
-    // utilVectorAdd(&speedvectors[0], graph->vertices->vertexXLocs,
-    //     graph->vertices->numvertices);
-    // utilVectorAdd(&speedvectors[graph->vertices->numvertices],
-    //     graph->vertices->vertexYLocs, graph->vertices->numvertices);
-    // vectorAverageShiftAndAdd(window, speedvectors);
+    utilVectorAdd(&speedvectors[0], graph->vertices->vertexXLocs,
+        graph->vertices->numvertices);
+    utilVectorAdd(&speedvectors[graph->vertices->numvertices],
+        graph->vertices->vertexYLocs, graph->vertices->numvertices);
+    vectorAverageShiftAndAdd(window, speedvectors);
+
+    DEBUG_PRINT_DEVICE(speedvectors, numvertices * 2);
   }
 
   float* averageSpeeds =
@@ -105,9 +109,16 @@ int main(int argc, char* argv[])
   vectorAverageComputeAverage(window,
       graph->vertices->numvertices, averageSpeeds);
 
+  DEBUG_PRINT_DEVICE(averageSpeeds, numvertices * 2);
+
   stopTimer(&timer);
-  //printf("time: total.\n");
-  //printTimer(&timer);
+  printf("time: total.\n");
+  printTimer(&timer);
+
+  float* projectedData = utilAllocateData(numvertices * 2 * sizeof(float));
+  pca(averageSpeeds, 2, numvertices, projectedData);
+
+  DEBUG_PRINT_DEVICE(projectedData, numvertices * 2);
 
   // unsigned int* smootheningEdges;
   // unsigned int* smootheningNumEdges;
@@ -122,9 +133,7 @@ int main(int argc, char* argv[])
   //     0.5, smoothSpeedX, smoothSpeedY);
   // vectorSmootheningCleanEdges(smootheningEdges, smootheningNumEdges);
 
-  // Printing
-  printGraph(graph);
-  freeGraph(graph);
+  // TODO Free memory with the util functions.
 
   printf("Normal program exit.\n");
 }
