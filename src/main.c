@@ -13,6 +13,8 @@
 #include "test-pca.h"
 #include "test-util.h"
 #include <stdio.h>
+#include "vector-average.h"
+#include "util.h"
 
 int main(int argc, char* argv[])
 {
@@ -40,9 +42,6 @@ int main(int argc, char* argv[])
     }
   }
 
-  testPca();
-  exit(EXIT_SUCCESS);
-
   // Input checking.
   if (!inputFile)
   {
@@ -60,36 +59,73 @@ int main(int argc, char* argv[])
   Edges** edges = gexfParseFileEdgesAtSteps(inputFile, graph, 0, 199,
       &edgesLength);
 
-  float* averageSpeedX = NULL;
-  float* averageSpeedY = NULL;
+  float numvertices = graph->vertices->numvertices;
 
-  float* smoothSpeedX = NULL;
-  float* smoothSpeedY = NULL;
+  // Transfer the vertex data to the gpu.
+  graph->vertices->vertexXLocs =
+   utilDataTransferHostToDevice(graph->vertices->vertexXLocs, numvertices *
+       sizeof(float), 1);
+  graph->vertices->vertexYLocs =
+   utilDataTransferHostToDevice(graph->vertices->vertexYLocs, numvertices *
+       sizeof(float), 1);
+
+  float** window = vectorAverageNewWindow();
 
   // Computing.
   Timer timer;
   startTimer(&timer);
-  fa2RunOnGraphInStream(graph->vertices, edges, numgraphs, numTicks,
-      &averageSpeedX, &averageSpeedY);
+
+  for (size_t i = 0; i < WINDOW_SIZE; i++)
+  {
+    // Create new speed vectors and set them to the negative value of the vertex
+    // stars positions.
+    float* speedvectors =
+     vectorAverageNewVectorArray(graph->vertices->numvertices);
+    utilVectorSetByScalar(speedvectors, 0, graph->vertices->numvertices * 2);
+    utilVectorAdd(&speedvectors[0], graph->vertices->vertexXLocs,
+        graph->vertices->numvertices);
+    utilVectorAdd(&speedvectors[graph->vertices->numvertices],
+        graph->vertices->vertexYLocs, graph->vertices->numvertices);
+    utilVectorMultiplyByScalar(speedvectors, -1, graph->vertices->numvertices *
+        2);
+
+    graph->edges = edges[0];
+    fa2RunOnGraph(graph, numTicks);
+
+    // Add the final vertex positions to obtain the displacement.
+    // utilVectorAdd(&speedvectors[0], graph->vertices->vertexXLocs,
+    //     graph->vertices->numvertices);
+    // utilVectorAdd(&speedvectors[graph->vertices->numvertices],
+    //     graph->vertices->vertexYLocs, graph->vertices->numvertices);
+    // vectorAverageShiftAndAdd(window, speedvectors);
+  }
+
+  float* averageSpeeds =
+   vectorAverageNewVectorArray(graph->vertices->numvertices);
+  vectorAverageComputeAverage(window,
+      graph->vertices->numvertices, averageSpeeds);
+
   stopTimer(&timer);
   //printf("time: total.\n");
   //printTimer(&timer);
 
-  unsigned int* smootheningEdges;
-  unsigned int* smootheningNumEdges;
-  vectorSmootheningPrepareEdges(edges[edgesLength - 1]->edgeTargets,
-      edges[edgesLength - 1]->numedges,
-      edges[edgesLength - 1]->maxedges * graph->vertices->numvertices,
-      graph->vertices->numvertices, &smootheningEdges, &smootheningNumEdges);
-  vectorSmootheningPrepareOutput(&smoothSpeedX, &smoothSpeedY,
-      graph->vertices->numvertices);
-  vectorSmootheningRun(averageSpeedX, averageSpeedY,
-      graph->vertices->numvertices, smootheningNumEdges, smootheningEdges, 10,
-      0.5, smoothSpeedX, smoothSpeedY);
-  vectorSmootheningCleanEdges(smootheningEdges, smootheningNumEdges);
+  // unsigned int* smootheningEdges;
+  // unsigned int* smootheningNumEdges;
+  // vectorSmootheningPrepareEdges(edges[edgesLength - 1]->edgeTargets,
+  //     edges[edgesLength - 1]->numedges,
+  //     edges[edgesLength - 1]->maxedges * graph->vertices->numvertices,
+  //     graph->vertices->numvertices, &smootheningEdges, &smootheningNumEdges);
+  // vectorSmootheningPrepareOutput(&smoothSpeedX, &smoothSpeedY,
+  //     graph->vertices->numvertices);
+  // vectorSmootheningRun(averageSpeedX, averageSpeedY,
+  //     graph->vertices->numvertices, smootheningNumEdges, smootheningEdges, 10,
+  //     0.5, smoothSpeedX, smoothSpeedY);
+  // vectorSmootheningCleanEdges(smootheningEdges, smootheningNumEdges);
 
   // Printing
   printGraph(graph);
   freeGraph(graph);
+
+  printf("Normal program exit.\n");
 }
 

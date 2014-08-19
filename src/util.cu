@@ -170,3 +170,19 @@ void utilPrintDeviceArray(float* array, unsigned int numelems)
   cudaDeviceSynchronize();
   utilPrintDeviceArrayKernel<<<numblocks, BLOCK_SIZE>>>(array, numelems);
 }
+
+float* utilDataTransferHostToDevice(float* src, unsigned int
+    numbytes, unsigned int freeHostMem)
+{
+  float* dst = NULL;
+  cudaMalloc(&dst, numbytes);
+  cudaMemcpy(dst, src, numbytes, cudaMemcpyHostToDevice);
+  if (freeHostMem)
+    free(src);
+  return dst;
+}
+
+void utilFreeDeviceData(float* dptr)
+{
+  cudaFree(dptr);
+}

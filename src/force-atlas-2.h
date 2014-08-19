@@ -119,8 +119,8 @@ void fa2CleanMemory(ForceAtlas2Data* data);
 
 /*!
  * Runs the Force Atlas 2 spring embedding on a graph.
- * \param g The graph on which to run the spring embedding.
- * \param n The number of iterations the algorithm should run.
+ * \param[in,out] g The graph on which to run the spring embedding.
+ * \param[in] n The number of iterations the algorithm should run.
  */
 void fa2RunOnGraph(Graph* g, unsigned int n);
 

@@ -16,6 +16,8 @@
 #define DEBUG_PRINT_DEVICE(...)
 #endif
 
+#include <cuda_runtime.h>
+
 /*!
  * Default block size of all cuda kernels.
  */
@@ -91,5 +93,10 @@ void utilVectorDevideByScalar(float* dst, float scalar, unsigned int num);
 void utilTreeReduction(float* d_M, unsigned int numelems, float* d_outVal);
 
 void utilPrintDeviceArray(float* array, unsigned int numelems);
+
+float* utilDataTransferHostToDevice(float* src, unsigned int
+    numbytes, unsigned int freeHostMem);
+
+void utilFreeDeviceData(float* dptr);
 
 #endif /* UTIL_H_ */
