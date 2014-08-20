@@ -80,9 +80,6 @@ void pcaSVD(float* d_Y, unsigned int inRows, unsigned int inCols, float* d_PC)
   char jobu = 'N';
   char jobvt = 'A';
 
-  const float alpha = 1.0f;
-  const float beta = 0.0f;
-
   int min = (inCols < inRows) ? inCols : inRows;
   float* S;
   cudaMalloc(&S, min * sizeof(float));
