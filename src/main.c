@@ -18,6 +18,7 @@
 #include "vector-average.h"
 #include "util.h"
 #include "break-edges.h"
+#include "connected-component.h"
 
 int main(int argc, char* argv[])
 {
@@ -141,6 +142,11 @@ int main(int argc, char* argv[])
 
   breakEdges(graph->vertices->numvertices, smoothFineValues, smoothCoarseValues,
       graph->edges->numedges, graph->edges->edgeTargets);
+
+  // FIXME Get real vertex data.
+  unsigned int* varray = NULL;
+  connectedComponent(graph->vertices->numvertices, graph->edges->numedges,
+      graph->edges->edgeTargets, varray);
 
   printf("Normal program exit.\n");
 }
