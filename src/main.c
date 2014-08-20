@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include "vector-average.h"
 #include "util.h"
+#include "break-edges.h"
 
 int main(int argc, char* argv[])
 {
@@ -127,23 +128,19 @@ int main(int argc, char* argv[])
 
   float* smoothFineValues = (float*) utilAllocateData(numvertices * sizeof(float));
   float* smoothCoarseValues = (float*) utilAllocateData(numvertices * sizeof(float));
-  unsigned int* smootheningEdges;
-  unsigned int* smootheningNumEdges;
-  smootheningPrepareEdges(edges->edgeTargets,
-      edges->numedges,
-      edges->maxedges * graph->vertices->numvertices,
-      graph->vertices->numvertices, &smootheningEdges, &smootheningNumEdges);
   smootheningPrepareOutput(&smoothFineValues, graph->vertices->numvertices);
   smootheningPrepareOutput(&smoothCoarseValues, graph->vertices->numvertices);
   smootheningRun(projectedData,
-      graph->vertices->numvertices, smootheningNumEdges, smootheningEdges, 10,
-      0, smoothFineValues);
+      graph->vertices->numvertices, graph->edges->numedges,
+      graph->edges->edgeTargets, 10, 0, smoothFineValues);
   smootheningRun(projectedData,
-      graph->vertices->numvertices, smootheningNumEdges, smootheningEdges, 10,
-      1, smoothCoarseValues);
-  smootheningCleanEdges(smootheningEdges, smootheningNumEdges);
+      graph->vertices->numvertices, graph->edges->numedges,
+      graph->edges->edgeTargets, 10, 1, smoothCoarseValues);
 
   // TODO Free memory with the util functions.
+
+  breakEdges(graph->vertices->numvertices, smoothFineValues, smoothCoarseValues,
+      graph->edges->numedges, graph->edges->edgeTargets);
 
   printf("Normal program exit.\n");
 }
