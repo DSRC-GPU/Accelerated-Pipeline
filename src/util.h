@@ -94,10 +94,10 @@ void utilTreeReduction(float* d_M, unsigned int numelems, float* d_outVal);
 
 void utilPrintDeviceArray(float* array, unsigned int numelems);
 
-float* utilDataTransferHostToDevice(float* src, unsigned int
+void* utilDataTransferHostToDevice(void* src, unsigned int
     numbytes, unsigned int freeHostMem);
 
-float* utilAllocateData(unsigned int numbytes);
+void* utilAllocateData(unsigned int numbytes);
 
 void utilFreeDeviceData(float* dptr);
 

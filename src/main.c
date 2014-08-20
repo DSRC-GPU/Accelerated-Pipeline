@@ -53,23 +53,29 @@ int main(int argc, char* argv[])
 
   Graph* graph = (Graph*) calloc(1, sizeof(Graph));
 
-  unsigned int numgraphs = 1;
-
   Vertices* vertices = gexfParseFileVertices(inputFile);
   graph->vertices = vertices;
-  size_t edgesLength;
-  Edges** edges = gexfParseFileEdgesAtSteps(inputFile, graph, 0, 199,
-      &edgesLength);
+  Edges* edges = gexfParseFileEdgesSomewhereInInterval(inputFile, graph, 0,
+      WINDOW_SIZE);
+  graph->edges = edges;
 
   float numvertices = graph->vertices->numvertices;
+  float sizeEdgeArray = graph->edges->maxedges * numvertices;
 
   // Transfer the vertex data to the gpu.
-  graph->vertices->vertexXLocs =
+  graph->vertices->vertexXLocs = (float*)
    utilDataTransferHostToDevice(graph->vertices->vertexXLocs, numvertices *
        sizeof(float), 1);
-  graph->vertices->vertexYLocs =
+  graph->vertices->vertexYLocs = (float*)
    utilDataTransferHostToDevice(graph->vertices->vertexYLocs, numvertices *
        sizeof(float), 1);
+
+  // Transfer the edge data to the gpu.
+  graph->edges->numedges = (unsigned int*) utilDataTransferHostToDevice(graph->edges->numedges,
+      numvertices * sizeof(unsigned int), 1);
+  graph->edges->edgeTargets = (unsigned int*)
+   utilDataTransferHostToDevice(graph->edges->edgeTargets,
+      sizeEdgeArray * sizeof(unsigned int), 1);
 
   float** window = vectorAverageNewWindow();
 
@@ -91,7 +97,6 @@ int main(int argc, char* argv[])
     utilVectorMultiplyByScalar(speedvectors, -1, graph->vertices->numvertices *
         2);
 
-    graph->edges = edges[0];
     fa2RunOnGraph(graph, numTicks);
 
     // Add the final vertex positions to obtain the displacement.
@@ -115,18 +120,18 @@ int main(int argc, char* argv[])
   printf("time: total.\n");
   printTimer(&timer);
 
-  float* projectedData = utilAllocateData(numvertices * 2 * sizeof(float));
+  float* projectedData = (float*) utilAllocateData(numvertices * 2 * sizeof(float));
   pca(averageSpeeds, 2, numvertices, projectedData);
 
   DEBUG_PRINT_DEVICE(projectedData, numvertices * 2);
 
-  float* smoothFineValues = utilAllocateData(numvertices * sizeof(float));
-  float* smoothCoarseValues = utilAllocateData(numvertices * sizeof(float));
+  float* smoothFineValues = (float*) utilAllocateData(numvertices * sizeof(float));
+  float* smoothCoarseValues = (float*) utilAllocateData(numvertices * sizeof(float));
   unsigned int* smootheningEdges;
   unsigned int* smootheningNumEdges;
-  smootheningPrepareEdges(edges[edgesLength - 1]->edgeTargets,
-      edges[edgesLength - 1]->numedges,
-      edges[edgesLength - 1]->maxedges * graph->vertices->numvertices,
+  smootheningPrepareEdges(edges->edgeTargets,
+      edges->numedges,
+      edges->maxedges * graph->vertices->numvertices,
       graph->vertices->numvertices, &smootheningEdges, &smootheningNumEdges);
   smootheningPrepareOutput(&smoothFineValues, graph->vertices->numvertices);
   smootheningPrepareOutput(&smoothCoarseValues, graph->vertices->numvertices);

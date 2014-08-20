@@ -172,10 +172,10 @@ void utilPrintDeviceArray(float* array, unsigned int numelems)
   cudaDeviceSynchronize();
 }
 
-float* utilDataTransferHostToDevice(float* src, unsigned int
+void* utilDataTransferHostToDevice(void* src, unsigned int
     numbytes, unsigned int freeHostMem)
 {
-  float* dst = NULL;
+  void* dst = NULL;
   cudaMalloc(&dst, numbytes);
   cudaMemcpy(dst, src, numbytes, cudaMemcpyHostToDevice);
   if (freeHostMem)
@@ -183,9 +183,9 @@ float* utilDataTransferHostToDevice(float* src, unsigned int
   return dst;
 }
 
-float* utilAllocateData(unsigned int numbytes)
+void* utilAllocateData(unsigned int numbytes)
 {
-  float* res = NULL;
+  void* res = NULL;
   cudaMalloc(&res, numbytes);
   return res;
 }

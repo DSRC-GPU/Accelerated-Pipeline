@@ -657,38 +657,6 @@ void fa2PrepareGeneralMemory(ForceAtlas2Data* data, unsigned int numvertices)
 }
 
 /*!
- * Prepares the edge memory on the device.
- *
- * \param[in,out] data A valid data struct where pointers to the edge data need to be stored.
- * \param[in] edges The edges that need to be copied to the device.
- * \param[in] numvertices The total number of vertices.
- * \param[in] stream The cuda stream to use for this action. If the stream is
- * NULL the synchronous copy will be used.
- */
-void fa2PrepareEdgeMemory(ForceAtlas2Data* data, Edges* edges,
-    unsigned int numvertices, cudaStream_t* stream)
-{
-  cudaMalloc(&data->numEdges, numvertices * sizeof(unsigned int));
-  cudaMalloc(&data->edgeTargets,
-      numvertices * edges->maxedges * sizeof(unsigned int));
-
-  if (stream)
-  {
-    cudaMemcpyAsync((void*) data->numEdges, edges->numedges,
-        numvertices * sizeof(unsigned int), cudaMemcpyHostToDevice, *stream);
-    cudaMemcpyAsync((void*) data->edgeTargets, edges->edgeTargets,
-        numvertices * edges->maxedges * sizeof(unsigned int),
-        cudaMemcpyHostToDevice, *stream);
-  } else {
-    cudaMemcpy((void*) data->numEdges, edges->numedges,
-        numvertices * sizeof(unsigned int), cudaMemcpyHostToDevice);
-    cudaMemcpy((void*) data->edgeTargets, edges->edgeTargets,
-        numvertices * edges->maxedges * sizeof(unsigned int),
-        cudaMemcpyHostToDevice);
-  }
-}
-
-/*!
  * Prepares all memory to run force atlas 2 on the device.
  *
  * \param[in,out] data A valid data object where all pointers should be saved.
@@ -696,11 +664,10 @@ void fa2PrepareEdgeMemory(ForceAtlas2Data* data, Edges* edges,
  * \param[in] numvertices The total number of vertices.
  * \param[in] stream The cuda stream to use while preparing the data.
  */
-void fa2PrepareMemory(ForceAtlas2Data* data, Edges* edges,
-    unsigned int numvertices, cudaStream_t* stream)
+void fa2PrepareMemory(ForceAtlas2Data* data,
+    unsigned int numvertices)
 {
   fa2PrepareGeneralMemory(data, numvertices);
-  fa2PrepareEdgeMemory(data, edges, numvertices, stream);
 }
 
 /*!
@@ -723,18 +690,6 @@ void fa2CleanGeneralMemory(ForceAtlas2Data* data)
 }
 
 /*!
- * Cleans memory on the device that was reserved for graph edges.
- *
- * \param[in] data The data object that contains the edge data.
- * \param[in] numvertices The number of vertices in the graph.
- */
-void fa2CleanEdgeMemory(ForceAtlas2Data* data, unsigned int numvertices)
-{
-  cudaFree(data->edgeTargets);
-  cudaFree(data->numEdges);
-}
-
-/*!
  * Cleans the memory on the device that is required for running force atlas 2.
  *
  * \param[in] data The data that needs to be cleaned.
@@ -743,25 +698,25 @@ void fa2CleanEdgeMemory(ForceAtlas2Data* data, unsigned int numvertices)
 void fa2CleanMemory(ForceAtlas2Data* data, unsigned int numvertices)
 {
   fa2CleanGeneralMemory(data);
-  fa2CleanEdgeMemory(data, numvertices);
 }
 
 void fa2RunOnGraph(Graph* g, unsigned int iterations)
 {
   CudaTimer timerIteration, timer;
 
-  // Allocate data for vertices, edges, and fa2 data.
-  // Also copies edge data to device.
+  // Allocate data for fa2 data.
   ForceAtlas2Data data;
-  fa2PrepareMemory(&data, g->edges, g->vertices->numvertices, NULL);
-  data.vxLocs = g->vertices->vertexXLocs;
-  data.vyLocs = g->vertices->vertexYLocs;
+  fa2PrepareMemory(&data, g->vertices->numvertices);
+
+  float* vxLocs = g->vertices->vertexXLocs;
+  float* vyLocs = g->vertices->vertexYLocs;
+  unsigned int* numEdges = g->edges->numedges;
+  unsigned int* edgeTargets = g->edges->edgeTargets;
 
   unsigned int numblocks = ceil(g->vertices->numvertices / (float) BLOCK_SIZE);
   unsigned int numblocks_reduction = ceil(numblocks / 2.0);
 
   cudaGetLastError();
-
   cudaError_t code = cudaGetLastError();
   if (code != cudaSuccess)
   {
@@ -776,8 +731,8 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
 
     // Compute graph speed, vertex forces, speed and displacement.
     startCudaTimer(&timer);
-    fa2kernel<<<numblocks, BLOCK_SIZE>>>(data.vxLocs, data.vyLocs,
-        g->vertices->numvertices, data.edgeTargets, data.numEdges,
+    fa2kernel<<<numblocks, BLOCK_SIZE>>>(vxLocs, vyLocs,
+        g->vertices->numvertices, edgeTargets, numEdges,
         g->edges->maxedges, data.tra, data.swg, data.forceX, data.forceY,
         data.oldForceX, data.oldForceY);
     stopCudaTimer(&timer);
@@ -802,7 +757,7 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
     // Run reductions on vertex swing and traction.
     startCudaTimer(&timer);
     fa2GraphSwingTract<<<numblocks_reduction, BLOCK_SIZE>>>(
-        g->vertices->numvertices, data.swg, data.tra, data.numEdges,
+        g->vertices->numvertices, data.swg, data.tra, numEdges,
         data.graphSwing, data.graphTract);
     stopCudaTimer(&timer);
     printf("time: graph swing and traction.\n");
@@ -816,135 +771,12 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
       exit(EXIT_FAILURE);
     }
 
-    fa2MoveVertices<<<numblocks, BLOCK_SIZE>>>(data.vxLocs, data.vyLocs,
+    fa2MoveVertices<<<numblocks, BLOCK_SIZE>>>(vxLocs, vyLocs,
         g->vertices->numvertices, data.tra, data.swg, data.forceX, data.forceY,
         data.oldForceX, data.oldForceY, data.graphSwing, data.graphTract,
         data.graphSpeed);
   }
 
   fa2CleanMemory(&data, g->vertices->numvertices);
-}
-
-void fa2RunOnGraphInStream(Vertices* vertices, Edges** edgesIn,
-    unsigned int numgraphs, unsigned int iterations, float** averageSpeedX,
-    float** averageSpeedY)
-{
-  CudaTimer timerMem1, timerMem2, timerIteration, timer;
-  cudaStream_t* streams = createCudaStreams(numgraphs);
-
-  ForceAtlas2Data data;
-  fa2PrepareGeneralMemory(&data, vertices->numvertices);
-
-  // Copy vertices to device.
-  cudaMemcpy((void*) data.vxLocs, vertices->vertexXLocs,
-      vertices->numvertices * sizeof(float), cudaMemcpyHostToDevice);
-  cudaMemcpy((void*) data.vyLocs, vertices->vertexYLocs,
-      vertices->numvertices * sizeof(float), cudaMemcpyHostToDevice);
-
-  // Initializing arrays for average speed vectors.
-  speedVectorInit(averageSpeedX, averageSpeedY, data.vxLocs, data.vyLocs,
-      vertices->numvertices);
-
-  for (unsigned int timestep = 0; timestep < numgraphs; timestep++)
-  {
-    // Allocate data for vertices, edges, and fa2 data.
-    ForceAtlas2Data edgeData;
-    Edges* edges = edgesIn[timestep];
-    cudaStream_t stream = streams[timestep];
-
-    startCudaTimer(&timerMem1);
-    // Prepare memory for edges and copy them to device.
-    fa2PrepareEdgeMemory(&edgeData, edges, vertices->numvertices, &stream);
-    stopCudaTimer(&timerMem1);
-
-    unsigned int numblocks = ceil(vertices->numvertices / (float) BLOCK_SIZE);
-    unsigned int numblocks_reduction = ceil(numblocks / 2.0);
-
-    cudaGetLastError();
-
-    cudaError_t code = cudaGetLastError();
-    if (code != cudaSuccess)
-    {
-      printf("Error calculating node degrees.\n%s\n", cudaGetErrorString(code));
-      exit(EXIT_FAILURE);
-    }
-
-    for (size_t i = 0; i < iterations; i++)
-    {
-      // Run fa2 spring embedding kernel.
-      startCudaTimer(&timerIteration);
-
-      // Compute graph speed, vertex forces, speed and displacement.
-      startCudaTimer(&timer);
-      fa2kernel<<<numblocks, BLOCK_SIZE, 0, stream>>>(data.vxLocs, data.vyLocs,
-          vertices->numvertices, edgeData.edgeTargets, edgeData.numEdges,
-          edges->maxedges, data.tra, data.swg, data.forceX, data.forceY,
-          data.oldForceX, data.oldForceY);
-      stopCudaTimer(&timer);
-      printf("time: all forces and moving vertices.\n");
-      printCudaTimer(&timer);
-      resetCudaTimer(&timer);
-      code = cudaGetLastError();
-      if (code != cudaSuccess)
-      {
-        printf("Error in kernel 2.\n%s\n", cudaGetErrorString(code));
-        exit(EXIT_FAILURE);
-      }
-
-      stopCudaTimer(&timerIteration);
-      printf("time: iteration.\n");
-      printCudaTimer(&timerIteration);
-      resetCudaTimer(&timerIteration);
-
-      cudaMemset(data.graphSwing, 0, sizeof(float));
-      cudaMemset(data.graphTract, 0, sizeof(float));
-
-      // Run reductions on vertex swing and traction.
-      startCudaTimer(&timer);
-      fa2GraphSwingTract<<<numblocks_reduction, BLOCK_SIZE, 0, stream>>>(
-          vertices->numvertices, data.swg, data.tra, edgeData.numEdges,
-          data.graphSwing, data.graphTract);
-      stopCudaTimer(&timer);
-      printf("time: graph swing and traction.\n");
-      printCudaTimer(&timer);
-      resetCudaTimer(&timer);
-
-      code = cudaGetLastError();
-      if (code != cudaSuccess)
-      {
-        printf("Error in kernel 1.\n%s\n", cudaGetErrorString(code));
-        exit(EXIT_FAILURE);
-      }
-
-      fa2MoveVertices<<<numblocks, BLOCK_SIZE, 0, stream>>>(data.vxLocs,
-          data.vyLocs, vertices->numvertices, data.tra, data.swg, data.forceX,
-          data.forceY, data.oldForceX, data.oldForceY, data.graphSwing,
-          data.graphTract, data.graphSpeed);
-    }
-
-    speedVectorUpdate(data.vxLocs, data.vyLocs, *averageSpeedX, *averageSpeedY,
-        vertices->numvertices, &stream);
-
-    startCudaTimer(&timerMem2);
-
-    // Update graph with new vertex positions.
-    cudaMemcpyAsync((void*) vertices->vertexXLocs, data.vxLocs,
-        vertices->numvertices * sizeof(float), cudaMemcpyDeviceToHost, stream);
-    cudaMemcpyAsync((void*) vertices->vertexYLocs, data.vyLocs,
-        vertices->numvertices * sizeof(float), cudaMemcpyDeviceToHost, stream);
-
-    stopCudaTimer(&timerMem2);
-    printf("time: copying data from host to device.\n");
-    printCudaTimer(&timerMem1);
-    printf("time: copying data from device to host.\n");
-    printCudaTimer(&timerMem2);
-    resetCudaTimer(&timerMem1);
-    resetCudaTimer(&timerMem2);
-
-    fa2CleanEdgeMemory(&edgeData, vertices->numvertices);
-  }
-  speedVectorFinish(*averageSpeedX, *averageSpeedY, numgraphs,
-      vertices->numvertices);
-  fa2CleanGeneralMemory(&data);
 }
 
