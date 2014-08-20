@@ -60,16 +60,25 @@ int main(int argc, char* argv[])
   size_t edgesLength;
   Edges** edges = gexfParseFileEdgesAtSteps(inputFile, graph, 0, 199,
       &edgesLength);
+  graph->edges = edges[0];
 
   float numvertices = graph->vertices->numvertices;
+  float sizeEdgeArray = graph->edges->maxedges * numvertices;
 
   // Transfer the vertex data to the gpu.
-  graph->vertices->vertexXLocs =
+  graph->vertices->vertexXLocs = (float*)
    utilDataTransferHostToDevice(graph->vertices->vertexXLocs, numvertices *
        sizeof(float), 1);
-  graph->vertices->vertexYLocs =
+  graph->vertices->vertexYLocs = (float*)
    utilDataTransferHostToDevice(graph->vertices->vertexYLocs, numvertices *
        sizeof(float), 1);
+
+  // Transfer the edge data to the gpu.
+  graph->edges->numedges = (unsigned int*) utilDataTransferHostToDevice(graph->edges->numedges,
+      numvertices * sizeof(unsigned int), 1);
+  graph->edges->edgeTargets = (unsigned int*)
+   utilDataTransferHostToDevice(graph->edges->edgeTargets,
+      sizeEdgeArray * sizeof(unsigned int), 1);
 
   float** window = vectorAverageNewWindow();
 
@@ -91,7 +100,6 @@ int main(int argc, char* argv[])
     utilVectorMultiplyByScalar(speedvectors, -1, graph->vertices->numvertices *
         2);
 
-    graph->edges = edges[0];
     fa2RunOnGraph(graph, numTicks);
 
     // Add the final vertex positions to obtain the displacement.
