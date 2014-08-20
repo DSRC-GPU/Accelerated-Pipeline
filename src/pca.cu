@@ -29,7 +29,7 @@ void pca(float* d_inMatrix, unsigned int inRows, unsigned int inCols,
   // Perform SVD on Y.
   pcaSVD(d_Y, inRows, inCols, d_PC);
 
-  DEBUG_PRINT_DEVICE(d_PC, inCols * inCols);
+  // DEBUG_PRINT_DEVICE(d_PC, inCols * inCols);
 
   // Calculate signals.
   pcaCalculateSignals(d_PC, d_inMatrix, inRows, inCols, d_outMatrix);
@@ -117,7 +117,6 @@ void pcaCalculateSignals(float* d_PC, float* d_inMatrix, unsigned int inRows,
 
   cublasSgemm(handle, CUBLAS_OP_T, CUBLAS_OP_T, m, k, n, &alpha,
       d_PC, lda, d_inMatrix, ldb, &beta, d_Signals, ldc);
-  printf("&&&\n");
 
   cublasDestroy(handle);
 }

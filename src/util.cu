@@ -169,6 +169,7 @@ void utilPrintDeviceArray(float* array, unsigned int numelems)
   printf("Device Array Print\n");
   cudaDeviceSynchronize();
   utilPrintDeviceArrayKernel<<<numblocks, BLOCK_SIZE>>>(array, numelems);
+  cudaDeviceSynchronize();
 }
 
 float* utilDataTransferHostToDevice(float* src, unsigned int
@@ -180,6 +181,13 @@ float* utilDataTransferHostToDevice(float* src, unsigned int
   if (freeHostMem)
     free(src);
   return dst;
+}
+
+float* utilAllocateData(unsigned int numbytes)
+{
+  float* res = NULL;
+  cudaMalloc(&res, numbytes);
+  return res;
 }
 
 void utilFreeDeviceData(float* dptr)

@@ -1,14 +1,16 @@
+
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 #include "force-atlas-2.h"
 #include "gexfparser.h"
 #include "graph.h"
 #include "timer.h"
 #include "vector.h"
-#include "vector-smoothening.h"
+#include "smoothening.h"
 #include "pca.h"
 #include "test-pca.h"
 #include "test-util.h"
@@ -93,11 +95,13 @@ int main(int argc, char* argv[])
     fa2RunOnGraph(graph, numTicks);
 
     // Add the final vertex positions to obtain the displacement.
-    // utilVectorAdd(&speedvectors[0], graph->vertices->vertexXLocs,
-    //     graph->vertices->numvertices);
-    // utilVectorAdd(&speedvectors[graph->vertices->numvertices],
-    //     graph->vertices->vertexYLocs, graph->vertices->numvertices);
-    // vectorAverageShiftAndAdd(window, speedvectors);
+    utilVectorAdd(&speedvectors[0], graph->vertices->vertexXLocs,
+        graph->vertices->numvertices);
+    utilVectorAdd(&speedvectors[graph->vertices->numvertices],
+        graph->vertices->vertexYLocs, graph->vertices->numvertices);
+    vectorAverageShiftAndAdd(window, speedvectors);
+
+    DEBUG_PRINT_DEVICE(speedvectors, numvertices * 2);
   }
 
   float* averageSpeeds =
@@ -105,26 +109,36 @@ int main(int argc, char* argv[])
   vectorAverageComputeAverage(window,
       graph->vertices->numvertices, averageSpeeds);
 
+  DEBUG_PRINT_DEVICE(averageSpeeds, numvertices * 2);
+
   stopTimer(&timer);
-  //printf("time: total.\n");
-  //printTimer(&timer);
+  printf("time: total.\n");
+  printTimer(&timer);
 
-  // unsigned int* smootheningEdges;
-  // unsigned int* smootheningNumEdges;
-  // vectorSmootheningPrepareEdges(edges[edgesLength - 1]->edgeTargets,
-  //     edges[edgesLength - 1]->numedges,
-  //     edges[edgesLength - 1]->maxedges * graph->vertices->numvertices,
-  //     graph->vertices->numvertices, &smootheningEdges, &smootheningNumEdges);
-  // vectorSmootheningPrepareOutput(&smoothSpeedX, &smoothSpeedY,
-  //     graph->vertices->numvertices);
-  // vectorSmootheningRun(averageSpeedX, averageSpeedY,
-  //     graph->vertices->numvertices, smootheningNumEdges, smootheningEdges, 10,
-  //     0.5, smoothSpeedX, smoothSpeedY);
-  // vectorSmootheningCleanEdges(smootheningEdges, smootheningNumEdges);
+  float* projectedData = utilAllocateData(numvertices * 2 * sizeof(float));
+  pca(averageSpeeds, 2, numvertices, projectedData);
 
-  // Printing
-  printGraph(graph);
-  freeGraph(graph);
+  DEBUG_PRINT_DEVICE(projectedData, numvertices * 2);
+
+  float* smoothFineValues = utilAllocateData(numvertices * sizeof(float));
+  float* smoothCoarseValues = utilAllocateData(numvertices * sizeof(float));
+  unsigned int* smootheningEdges;
+  unsigned int* smootheningNumEdges;
+  smootheningPrepareEdges(edges[edgesLength - 1]->edgeTargets,
+      edges[edgesLength - 1]->numedges,
+      edges[edgesLength - 1]->maxedges * graph->vertices->numvertices,
+      graph->vertices->numvertices, &smootheningEdges, &smootheningNumEdges);
+  smootheningPrepareOutput(&smoothFineValues, graph->vertices->numvertices);
+  smootheningPrepareOutput(&smoothCoarseValues, graph->vertices->numvertices);
+  smootheningRun(projectedData,
+      graph->vertices->numvertices, smootheningNumEdges, smootheningEdges, 10,
+      0, smoothFineValues);
+  smootheningRun(projectedData,
+      graph->vertices->numvertices, smootheningNumEdges, smootheningEdges, 10,
+      1, smoothCoarseValues);
+  smootheningCleanEdges(smootheningEdges, smootheningNumEdges);
+
+  // TODO Free memory with the util functions.
 
   printf("Normal program exit.\n");
 }

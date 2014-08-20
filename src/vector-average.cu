@@ -41,11 +41,11 @@ void vectorAverageShiftAndAdd(float** window, float* newEntry)
 void vectorAverageComputeAverage(float** window, unsigned int numelements,
     float* average)
 {
-  utilVectorSetByScalar(average, 0, numelements); 
+  utilVectorSetByScalar(average, 0, numelements * 2); 
   for (size_t i = 0; i < WINDOW_SIZE; i++)
   {
-    utilVectorAdd(average, window[i], numelements);
+    utilVectorAdd(average, window[i], numelements * 2);
   }
-  utilVectorDevideByScalar(average, WINDOW_SIZE, numelements);
+  utilVectorDevideByScalar(average, WINDOW_SIZE, numelements * 2);
 }
 
