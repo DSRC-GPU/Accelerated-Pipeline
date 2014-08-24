@@ -12,7 +12,6 @@
 #include "cuda-timer.h"
 #include "cuda-stream.h"
 #include "vector.h"
-#include "speedvector.h"
 #include "util.h"
 
 /*!
