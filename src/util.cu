@@ -183,6 +183,16 @@ void* utilDataTransferHostToDevice(void* src, unsigned int
   return dst;
 }
 
+void* utilDataTransferDeviceToHost(void* src, unsigned int numbytes,
+    unsigned int freeDeviceMem)
+{
+  void* dst = calloc(1, numbytes);
+  cudaMemcpy(dst, src, numbytes, cudaMemcpyDeviceToHost);
+  if (freeDeviceMem)
+    cudaFree(src);
+  return dst;
+}
+
 void* utilAllocateData(unsigned int numbytes)
 {
   void* res = NULL;
@@ -193,4 +203,13 @@ void* utilAllocateData(unsigned int numbytes)
 void utilFreeDeviceData(float* dptr)
 {
   cudaFree(dptr);
+}
+
+void utilCudaCheckError(void* cudaError_t_ptr, char* msg)
+{
+  cudaError_t* err = (cudaError_t*) cudaError_t_ptr;
+  if (*err != cudaSuccess)
+  {
+    printf("Cuda error:\n%s\n%s\n", msg, cudaGetErrorString(*err));
+  }
 }

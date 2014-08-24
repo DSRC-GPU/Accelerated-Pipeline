@@ -80,5 +80,9 @@ void smootheningRun(float* values,
       exit (EXIT_FAILURE);
     }
   }
+
+  cudaDeviceSynchronize();
+  cudaError_t err = cudaGetLastError();
+  utilCudaCheckError(&err, "Error smoothening edges");
 }
 
