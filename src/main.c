@@ -18,6 +18,7 @@
 #include "vector-average.h"
 #include "util.h"
 #include "break-edges.h"
+#include "connected-component.h"
 
 int main(int argc, char* argv[])
 {
@@ -141,6 +142,19 @@ int main(int argc, char* argv[])
 
   breakEdges(graph->vertices->numvertices, smoothFineValues, smoothCoarseValues,
       graph->edges->numedges, graph->edges->edgeTargets);
+
+  unsigned int* vertexlabels = (unsigned int*) utilAllocateData(numvertices
+      * sizeof(unsigned int));
+  connectedComponent(graph->vertices->numvertices, graph->edges->numedges,
+      graph->edges->edgeTargets, vertexlabels);
+
+  unsigned int* h_vertexlabels = (unsigned int*) utilDataTransferDeviceToHost(vertexlabels,
+      numvertices * sizeof(unsigned int), 1);
+
+  for (size_t i = 0; i < numvertices; i++)
+  {
+    printf("%lu, %u\n", i, h_vertexlabels[i]);
+  }
 
   printf("Normal program exit.\n");
 }

@@ -94,11 +94,16 @@ void utilTreeReduction(float* d_M, unsigned int numelems, float* d_outVal);
 
 void utilPrintDeviceArray(float* array, unsigned int numelems);
 
-void* utilDataTransferHostToDevice(void* src, unsigned int
-    numbytes, unsigned int freeHostMem);
+void* utilDataTransferHostToDevice(void* src, unsigned int numbytes,
+    unsigned int freeHostMem);
+
+void* utilDataTransferDeviceToHost(void* src, unsigned int numbytes,
+    unsigned int freeDeviceMem);
 
 void* utilAllocateData(unsigned int numbytes);
 
 void utilFreeDeviceData(float* dptr);
+
+void utilCudaCheckError(void* cudaError_t_ptr, char* msg);
 
 #endif /* UTIL_H_ */

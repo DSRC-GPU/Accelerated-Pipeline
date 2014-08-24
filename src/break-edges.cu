@@ -11,17 +11,20 @@ __global__ void breakEdgesKernel(unsigned int numVertices, float* fineValues,
     float* coarseValues, unsigned int* numEdges, unsigned int* edgeTargets)
 {
   unsigned int gid = blockIdx.x * BLOCK_SIZE + threadIdx.x;
-  unsigned int localEdges = numEdges[gid];
-  float localValue = fineValues[gid] - coarseValues[gid];
-  for (size_t i = 0; i < localEdges; i++)
+  if (gid < numVertices)
   {
-    unsigned int index = numVertices * i + gid;
-    unsigned int neighbour = edgeTargets[index];
-    float neighbourValue = fineValues[neighbour] - coarseValues[neighbour];
-    if (!sgnCmp(localValue, neighbourValue))
+    unsigned int localEdges = numEdges[gid];
+    float localValue = fineValues[gid] - coarseValues[gid];
+    for (size_t i = 0; i < localEdges; i++)
     {
-      // Removing edge by setting target to itself.
-      edgeTargets[neighbour] = gid;
+      unsigned int index = numVertices * i + gid;
+      unsigned int neighbour = edgeTargets[index];
+      float neighbourValue = fineValues[neighbour] - coarseValues[neighbour];
+      if (!sgnCmp(localValue, neighbourValue))
+      {
+        // Removing edge by setting target to itself.
+        edgeTargets[index] = gid;
+      }
     }
   }
 }
@@ -32,5 +35,9 @@ void breakEdges(unsigned int numVertices, float* fineValues,
   unsigned int numblocks = ceil(numVertices / (float) BLOCK_SIZE);
   breakEdgesKernel<<<numblocks, BLOCK_SIZE>>>(numVertices, fineValues,
       coarseValues, numEdges, edgeTargets);
+
+  cudaDeviceSynchronize();
+  cudaError_t err = cudaGetLastError();
+  utilCudaCheckError(&err, "Error breaking edges");
 }
 
