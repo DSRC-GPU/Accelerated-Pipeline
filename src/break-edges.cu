@@ -23,7 +23,7 @@ __global__ void breakEdgesKernel(unsigned int numVertices, float* fineValues,
       if (!sgnCmp(localValue, neighbourValue))
       {
         // Removing edge by setting target to itself.
-        edgeTargets[neighbour] = gid;
+        edgeTargets[index] = gid;
       }
     }
   }
