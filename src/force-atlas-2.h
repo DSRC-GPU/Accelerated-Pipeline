@@ -87,30 +87,12 @@ typedef struct ForceAtlas2Data
    * Pointer to the graph speed value in the global memory on the device.
    */
   float* graphSpeed;
-
-  /*!
-   * An array that holds the x-location for each vertex.
-   */
-  float* vxLocs;
-  /*!
-   * An array that holds the y-location for each vertex.
-   */
-  float* vyLocs;
-  /*!
-   * An array that holds the number of edges for each vertex.
-   */
-  unsigned int* numEdges;
-  /*!
-   * An array that holds the edge targets for each vertex.
-   */
-  unsigned int* edgeTargets;
 } ForceAtlas2Data;
 
 /*!
  * Allocates memory for force atlas 2 computation.
  */
-void fa2PrepareMemory(ForceAtlas2Data* data, unsigned int numvertices,
-    unsigned int numedges);
+void fa2PrepareMemory(ForceAtlas2Data* data, unsigned int numvertices);
 
 /*!
  * Cleans the memory reserved for the Force Atlas 2 computation.
@@ -119,8 +101,8 @@ void fa2CleanMemory(ForceAtlas2Data* data);
 
 /*!
  * Runs the Force Atlas 2 spring embedding on a graph.
- * \param g The graph on which to run the spring embedding.
- * \param n The number of iterations the algorithm should run.
+ * \param[in,out] g The graph on which to run the spring embedding.
+ * \param[in] n The number of iterations the algorithm should run.
  */
 void fa2RunOnGraph(Graph* g, unsigned int n);
 

@@ -37,12 +37,15 @@ Vertices* gexfParseFileVertices(const char* in);
  * Parses all edges from the gexf file that are valid at some point in the given interval.
  *
  * \param[in] in the gexf file to parse.
+ * \param[in] graph Graph struct is used to decide how much space should be
+ * allocated for the edges. The graph should already contain the valid vertex
+ * data.
  * \param[in] stepstart the begin of the interval.
  * \param[in] stepend the end of the interval
  * \return a new edges struct.
  */
-Edges* gexfParseFileEdgesSomewhereInInterval(const char* in, int stepstart,
-    int stepend);
+Edges* gexfParseFileEdgesSomewhereInInterval(const char* in, Graph* graph,
+    int stepstart, int stepend);
 
 /*!
  * Parses all edges from the gexf file stat are valid within the given interval.
