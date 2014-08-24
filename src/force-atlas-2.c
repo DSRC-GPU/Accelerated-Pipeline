@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <float.h>
+#include <limits.h>
 #include "force-atlas-2.h"
 #include "math.h"
 #include "timer.h"
@@ -158,23 +159,14 @@ void fa2SaveOldForces(Graph*, float*, float*, float*, float*);
  */
 void fa2UpdateLocation(Graph* g, float* xdisp, float* ydisp);
 
-void calcNumNeighbours(Graph* g, unsigned int* deg)
-{
-  for (size_t i = 0; i < g->numedges; i++)
-  {
-    unsigned int node = g->edgeSources[i];
-    deg[node]++;
-  }
-}
-
 void fa2Gravity(Graph* g, float* forceX, float* forceY, unsigned int* deg)
 {
   if (!g)
     return;
-  for (size_t i = 0; i < g->numvertices; i++)
+  for (size_t i = 0; i < g->vertices->numvertices; i++)
   {
-    float vx = g->vertexXLocs[i];
-    float vy = g->vertexYLocs[i];
+    float vx = g->vertices->vertexXLocs[i];
+    float vy = g->vertices->vertexYLocs[i];
     float vlen = vectorGetLength(vx, vy);
     vectorInverse(&vx, &vy);
     vectorMultiply(&vx, &vy, K_G * (deg[i] + 1) / vlen);
@@ -186,16 +178,16 @@ void fa2Repulsion(Graph* g, float* forceX, float* forceY, unsigned int* deg)
 {
   if (!g)
     return;
-  for (size_t i = 0; i < g->numvertices; i++)
+  for (size_t i = 0; i < g->vertices->numvertices; i++)
   {
-    for (size_t j = 0; j < g->numvertices; j++)
+    for (size_t j = 0; j < g->vertices->numvertices; j++)
     {
       if (i == j)
         continue;
-      float vx1 = g->vertexXLocs[i];
-      float vy1 = g->vertexYLocs[i];
-      float vx2 = g->vertexXLocs[j];
-      float vy2 = g->vertexYLocs[j];
+      float vx1 = g->vertices->vertexXLocs[i];
+      float vy1 = g->vertices->vertexYLocs[i];
+      float vx2 = g->vertices->vertexXLocs[j];
+      float vy2 = g->vertices->vertexYLocs[j];
 
       vectorSubtract(&vx1, &vy1, vx2, vy2);
       float dist = vectorGetLength(vx1, vy1);
@@ -217,19 +209,30 @@ void fa2Attraction(Graph* g, float* forceX, float* forceY)
 {
   if (!g)
     return;
-  for (size_t i = 0; i < g->numedges; i++)
+
+  float* vxLocs = g->vertices->vertexXLocs;
+  float* vyLocs = g->vertices->vertexYLocs;
+
+  for (size_t gid = 0; gid < g->vertices->numvertices; gid++)
   {
-    int v1Index = g->edgeSources[i];
-    int v2Index = g->edgeTargets[i];
+    float vx1 = vxLocs[gid];
+    float vy1 = vyLocs[gid];
+    // Each thread goes through its array of edges.
+    unsigned int maxedges = g->edges->numedges[gid];
+    for (size_t i = 0; i < maxedges; i++)
+    {
+      unsigned int index = gid + (g->vertices->numvertices * i);
+      unsigned int target = g->edges->edgeTargets[index];
+      if (target == UINT_MAX)
+        continue;
+      // Compute attraction force.
+      float vx2 = vxLocs[target];
+      float vy2 = vyLocs[target];
 
-    float vx1 = g->vertexXLocs[v1Index];
-    float vy1 = g->vertexYLocs[v1Index];
-    float vx2 = g->vertexXLocs[v2Index];
-    float vy2 = g->vertexYLocs[v2Index];
-
-    vectorSubtract(&vx2, &vy2, vx1, vy1);
-    // vectorMultiply(&vx2, &vy2, 0.5);
-    vectorAdd(&forceX[v1Index], &forceY[v1Index], vx2, vy2);
+      vectorSubtract(&vx2, &vy2, vx1, vy1);
+      // vectorMultiply(&vx2, &vy2, 0.5);
+      vectorAdd(forceX, forceY, vx2, vy2);
+    }
   }
 }
 
@@ -237,7 +240,7 @@ void fa2Attraction(Graph* g, float* forceX, float* forceY)
 void fa2UpdateSwing(Graph* g, float* forceX, float* forceY, float* oldForceX,
     float* oldForceY, float* swg)
 {
-  for (size_t i = 0; i < g->numvertices; i++)
+  for (size_t i = 0; i < g->vertices->numvertices; i++)
   {
     float fx = oldForceX[i];
     float fy = oldForceY[i];
@@ -252,7 +255,7 @@ void fa2UpdateSwing(Graph* g, float* forceX, float* forceY, float* oldForceX,
 void fa2UpdateTract(Graph* g, float* forceX, float* forceY, float* oldForceX,
     float* oldForceY, float* tra)
 {
-  for (size_t i = 0; i < g->numvertices; i++)
+  for (size_t i = 0; i < g->vertices->numvertices; i++)
   {
     float fx = oldForceX[i];
     float fy = oldForceY[i];
@@ -266,7 +269,7 @@ void fa2UpdateTract(Graph* g, float* forceX, float* forceY, float* oldForceX,
 void fa2UpdateSwingGraph(Graph* g, float* swg, unsigned int* deg, float* gswing)
 {
   *gswing = 0;
-  for (size_t i = 0; i < g->numvertices; i++)
+  for (size_t i = 0; i < g->vertices->numvertices; i++)
   {
     *gswing += (deg[i] + 1) * swg[i];
   }
@@ -276,7 +279,7 @@ void fa2UpdateSwingGraph(Graph* g, float* swg, unsigned int* deg, float* gswing)
 void fa2UpdateTractGraph(Graph* g, float* tra, unsigned int* deg, float* gtract)
 {
   *gtract = 0;
-  for (size_t i = 0; i < g->numvertices; i++)
+  for (size_t i = 0; i < g->vertices->numvertices; i++)
   {
     *gtract += (deg[i] + 1) * tra[i];
   }
@@ -297,13 +300,12 @@ void fa2UpdateSpeedGraph(float gswing, float gtract, float* gspeed)
   {
     *gspeed = 1.5 * oldSpeed;
   }
-
 }
 
 void fa2UpdateSpeed(Graph* g, float* speed, float* swg, float* forceX,
     float* forceY, float gs)
 {
-  for (size_t i = 0; i < g->numvertices; i++)
+  for (size_t i = 0; i < g->vertices->numvertices; i++)
   {
     float vSwg = swg[i];
     if (vSwg <= 0)
@@ -320,7 +322,7 @@ void fa2UpdateSpeed(Graph* g, float* speed, float* swg, float* forceX,
 void fa2SaveOldForces(Graph* g, float* forceX, float* forceY, float* oldForceX,
     float* oldForceY)
 {
-  for (size_t i = 0; i < g->numvertices; i++)
+  for (size_t i = 0; i < g->vertices->numvertices; i++)
   {
     oldForceX[i] = forceX[i];
     oldForceY[i] = forceY[i];
@@ -330,7 +332,7 @@ void fa2SaveOldForces(Graph* g, float* forceX, float* forceY, float* oldForceX,
 void fa2UpdateDisplacement(Graph* g, float* speed, float* forceX, float* forceY,
     float* dispX, float* dispY)
 {
-  for (size_t i = 0; i < g->numvertices; i++)
+  for (size_t i = 0; i < g->vertices->numvertices; i++)
   {
     dispX[i] = forceX[i];
     dispY[i] = forceY[i];
@@ -340,10 +342,10 @@ void fa2UpdateDisplacement(Graph* g, float* speed, float* forceX, float* forceY,
 
 void fa2UpdateLocation(Graph* g, float* xdisp, float* ydisp)
 {
-  for (size_t i = 0; i < g->numvertices; i++)
+  for (size_t i = 0; i < g->vertices->numvertices; i++)
   {
-    g->vertexXLocs[i] += xdisp[i];
-    g->vertexYLocs[i] += ydisp[i];
+    g->vertices->vertexXLocs[i] += xdisp[i];
+    g->vertices->vertexYLocs[i] += ydisp[i];
   }
 }
 
@@ -374,25 +376,25 @@ void fa2RunOnce(Graph* g)
 
   if (firstRun)
   {
-    numNeighbours = (unsigned int*) calloc(g->numvertices,
+    numNeighbours = (unsigned int*) calloc(g->vertices->numvertices,
         sizeof(unsigned int));
     calcNumNeighbours(g, numNeighbours);
-    tra = (float*) calloc(g->numvertices, sizeof(float));
-    swg = (float*) calloc(g->numvertices, sizeof(float));
-    speed = (float*) calloc(g->numvertices, sizeof(float));
-    forceX = (float*) calloc(g->numvertices, sizeof(float));
-    forceY = (float*) calloc(g->numvertices, sizeof(float));
-    oldForceX = (float*) calloc(g->numvertices, sizeof(float));
-    oldForceY = (float*) calloc(g->numvertices, sizeof(float));
-    dispX = (float*) calloc(g->numvertices, sizeof(float));
-    dispY = (float*) calloc(g->numvertices, sizeof(float));
+    tra = (float*) calloc(g->vertices->numvertices, sizeof(float));
+    swg = (float*) calloc(g->vertices->numvertices, sizeof(float));
+    speed = (float*) calloc(g->vertices->numvertices, sizeof(float));
+    forceX = (float*) calloc(g->vertices->numvertices, sizeof(float));
+    forceY = (float*) calloc(g->vertices->numvertices, sizeof(float));
+    oldForceX = (float*) calloc(g->vertices->numvertices, sizeof(float));
+    oldForceY = (float*) calloc(g->vertices->numvertices, sizeof(float));
+    dispX = (float*) calloc(g->vertices->numvertices, sizeof(float));
+    dispY = (float*) calloc(g->vertices->numvertices, sizeof(float));
 
     firstRun = 0;
   }
 
   // Reset forces on vertices to 0.
-  memset(forceX, 0, sizeof(float) * g->numvertices);
-  memset(forceY, 0, sizeof(float) * g->numvertices);
+  memset(forceX, 0, sizeof(float) * g->vertices->numvertices);
+  memset(forceY, 0, sizeof(float) * g->vertices->numvertices);
 
   // Gravity force
   startTimer(&timer);
