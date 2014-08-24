@@ -90,6 +90,7 @@ void utilVectorDevide(float* dst, float* src, unsigned int num);
  */
 void utilVectorDevideByScalar(float* dst, float scalar, unsigned int num);
 
+// TODO Rename function.
 void utilTreeReduction(float* d_M, unsigned int numelems, float* d_outVal);
 
 void utilPrintDeviceArray(float* array, unsigned int numelems);
