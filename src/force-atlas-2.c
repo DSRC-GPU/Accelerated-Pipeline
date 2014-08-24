@@ -376,9 +376,6 @@ void fa2RunOnce(Graph* g)
 
   if (firstRun)
   {
-    numNeighbours = (unsigned int*) calloc(g->vertices->numvertices,
-        sizeof(unsigned int));
-    calcNumNeighbours(g, numNeighbours);
     tra = (float*) calloc(g->vertices->numvertices, sizeof(float));
     swg = (float*) calloc(g->vertices->numvertices, sizeof(float));
     speed = (float*) calloc(g->vertices->numvertices, sizeof(float));

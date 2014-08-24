@@ -52,7 +52,7 @@ void utilVectorAddScalar(float* dst, float scalar, unsigned int num);
  * \param[in] stream The cuda stream to use.
  */
 void utilVectorAddInStream(float* dst, float* src, unsigned int num,
-    cudaStream_t* stream);
+    void* stream_ptr);
 
 /*!
  * Simple gpu vector multiply.

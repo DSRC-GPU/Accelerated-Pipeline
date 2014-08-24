@@ -28,7 +28,7 @@ void speedVectorInit(float** averageSpeedX, float** averageSpeedY,
  * \param[in] stream The cuda stream to use for these operations.
  */
 void speedVectorUpdate(float* vxLocs, float* vyLocs, float* averageSpeedX,
-    float* averageSpeedY, unsigned int numvertices, cudaStream_t* stream);
+    float* averageSpeedY, unsigned int numvertices, void* stream_ptr);
 
 /*!
  * Completes the average speed vectors.
