@@ -13,11 +13,11 @@ __global__ void breakEdgesKernel(unsigned int numVertices, float* fineValues,
   unsigned int gid = blockIdx.x * BLOCK_SIZE + threadIdx.x;
   if (gid < numVertices)
   {
-    unsigned int numvertices = numEdges[gid];
+    unsigned int localEdges = numEdges[gid];
     float localValue = fineValues[gid] - coarseValues[gid];
-    for (size_t i = 0; i < numvertices; i++)
+    for (size_t i = 0; i < localEdges; i++)
     {
-      unsigned int index = numvertices * i + gid;
+      unsigned int index = numVertices * i + gid;
       unsigned int neighbour = edgeTargets[index];
       float neighbourValue = fineValues[neighbour] - coarseValues[neighbour];
       if (!sgnCmp(localValue, neighbourValue))
