@@ -13,6 +13,9 @@
 #define DEBUG_PRINT_DEVICE utilPrintDeviceArray
 #else
 #define DEBUG_PRINT(...)
+/*!
+ * Void statement.
+ */
 #define DEBUG_PRINT_DEVICE(...)
 #endif
 

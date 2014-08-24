@@ -659,9 +659,7 @@ void fa2PrepareGeneralMemory(ForceAtlas2Data* data, unsigned int numvertices)
  * Prepares all memory to run force atlas 2 on the device.
  *
  * \param[in,out] data A valid data object where all pointers should be saved.
- * \param[in] edges The edges that need to be copied to the device.
  * \param[in] numvertices The total number of vertices.
- * \param[in] stream The cuda stream to use while preparing the data.
  */
 void fa2PrepareMemory(ForceAtlas2Data* data,
     unsigned int numvertices)
