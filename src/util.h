@@ -97,7 +97,6 @@ void utilVectorDevide(float* dst, float* src, unsigned int num);
  */
 void utilVectorDevideByScalar(float* dst, float scalar, unsigned int num);
 
-// TODO Rename function.
 /*!
  * Sums an array.
  *
@@ -105,7 +104,7 @@ void utilVectorDevideByScalar(float* dst, float scalar, unsigned int num);
  * \param[in] numelems The number of elements in the array.
  * \param[out] d_outVal pointer to where the output should be written.
  */
-void utilTreeReduction(float* d_M, unsigned int numelems, float* d_outVal);
+void utilParallelSum(float* d_M, unsigned int numelems, float* d_outVal);
 
 /*!
  * Prints an array of floats on the device.

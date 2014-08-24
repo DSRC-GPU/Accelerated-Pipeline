@@ -64,7 +64,7 @@ void utilVectorDevideByScalar(float* dst, float scalar, unsigned int num)
   }
 }
 
-void utilTreeReduction(float* d_M, unsigned int numelems, float* d_outVal)
+void utilParallelSum(float* d_M, unsigned int numelems, float* d_outVal)
 {
   for (size_t i = 0; i < numelems; i++)
   {

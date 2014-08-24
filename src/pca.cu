@@ -43,8 +43,8 @@ void pcaUpdateMean(float* d_inMatrix, unsigned int inRows, unsigned int inCols)
   cudaMalloc(&d_averageY, sizeof(float));
 
   // Compute the average X and Y values.
-  utilTreeReduction(&d_inMatrix[0], inCols, d_averageX);
-  utilTreeReduction(&d_inMatrix[inCols], inCols, d_averageY);
+  utilParallelSum(&d_inMatrix[0], inCols, d_averageX);
+  utilParallelSum(&d_inMatrix[inCols], inCols, d_averageY);
 
   float h_averageX, h_averageY;
   cudaMemcpy(&h_averageX, d_averageX, sizeof(float), cudaMemcpyDeviceToHost);
