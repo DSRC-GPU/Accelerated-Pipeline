@@ -30,7 +30,8 @@ __global__ void smootheningRunKernel(float* xvectors,
   __syncthreads();
   if (gid == 0)
     DEBUG_PRINT("change: %f\n", xvectors[gid] - values);
-  valuesOut[gid] = values;
+  if (gid < numvertices)
+    valuesOut[gid] = values;
 }
 
 void smootheningPrepareEdges(unsigned int* hostEdges,
@@ -61,8 +62,7 @@ void smootheningRun(float* values,
     unsigned int numvertices, unsigned int* numedges, unsigned int* edges,
     unsigned int numiterations, float phi, float* valuesOut)
 {
-  // Copy vectors. These will be the constant vectors used for smoothening. The
-  // input array will be used for the smoothened values.
+  // Initialize the smoothened values as the input.
   cudaMemcpy(valuesOut, values, numvertices * sizeof(float),
       cudaMemcpyDeviceToDevice);
 
