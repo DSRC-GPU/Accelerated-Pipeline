@@ -2,7 +2,7 @@
 CC = g++-4.7
 CPPFLAGS = -I/usr/include/libxml2 -O0
 CFLAGS = -DDEBUG -Wall -Wextra -pedantic -g -ffloat-store
-LDFLAGS = -lm -lxml2 -lpthread
+LDFLAGS = -lm -lxml2 -lpthread -lalglib
 
 NVCC = nvcc
 CUDA_LINK = link.o
@@ -17,13 +17,16 @@ TARGETS = ap
 
 OBJECTS = main.c.o graph.c.o gexfparser.c.o timer.c.o
 OBJECTS_SEQ = vector.c.o force-atlas-2.c.o util.c.o \
-	smoothening.c.o pca.c.o vector-average.c.o break-edges.c.o \
+	smoothening.c.o pca.cpp.o vector-average.c.o break-edges.c.o \
   connected-component.c.o
 OBJECTS_PAR = vector.o force-atlas-2.o cuda-timer.o cuda-stream.o util.o \
 	smoothening.o pca.o test-pca.o test-util.o \
   vector-average.o break-edges.o connected-component.o
 
 %.c.o: %.c
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+
+%.cpp.o: %.cpp
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
 %.o: %.cu

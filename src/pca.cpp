@@ -1,4 +1,9 @@
 
+#include "pca.h"
+#include "dataanalysis.h"
+
+using namespace alglib;
+
 void pca(float* d_inMatrix, unsigned int inRows, unsigned int inCols,
     float* d_outMatrix)
 {
