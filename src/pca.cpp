@@ -6,12 +6,12 @@
 using namespace alglib;
 
 void projectData(real_2d_array inMatrix, real_2d_array v, unsigned int rows,
-    unsigned int cols, real_2d_array outMatrix)
+    unsigned int cols, real_2d_array& outMatrix)
 {
   ae_int_t m = rows;
   ae_int_t n = cols;
   ae_int_t k = cols;
-  double alpha = 0.0;
+  double alpha = 1.0;
   ae_int_t ia = 0;
   ae_int_t ja = 0;
   ae_int_t optypea = 0;
@@ -29,6 +29,8 @@ void projectData(real_2d_array inMatrix, real_2d_array v, unsigned int rows,
 void pca(float* d_inMatrix, unsigned int inRows, unsigned int inCols,
     float* d_outMatrix)
 {
+  pcaUpdateMean(d_inMatrix, inRows, inCols);
+
   real_2d_array inMatrix;
   double* inMatrixDouble = (double*) calloc(inRows * inCols, sizeof(double)); 
 
@@ -46,7 +48,6 @@ void pca(float* d_inMatrix, unsigned int inRows, unsigned int inCols,
     unsigned int index = row_i * inRows + col_i;
 
     inMatrixDouble[index] = d_inMatrix[i];
-    printf("Index %u\n", index);
   }
   inMatrix.setcontent(inCols, inRows, inMatrixDouble);  
 
@@ -79,7 +80,24 @@ void pca(float* d_inMatrix, unsigned int inRows, unsigned int inCols,
 
 void pcaUpdateMean(float* d_inMatrix, unsigned int inRows, unsigned int inCols)
 {
+  float* averages = (float*) calloc(inRows, sizeof(float));
+  for (size_t i = 0; i < inRows; i++)
+  {
+    for (size_t j = 0; j < inCols; j++)
+    {
+      averages[i] += d_inMatrix[j + i * inCols];
+    }
+    averages[i] /= inCols;
+  }
 
+  for (size_t i = 0; i < inRows; i++)
+  {
+    for (size_t j = 0; j < inCols; j++)
+    {
+      d_inMatrix[j + i * inCols] -= averages[i];
+    }
+  }
+  free(averages);
 }
 
 void pcaCalculateYMatrix(float* d_inMatrix, unsigned int inRows, unsigned int
