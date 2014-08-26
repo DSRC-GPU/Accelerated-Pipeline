@@ -108,7 +108,7 @@ int main(int argc, char* argv[])
         graph->vertices->vertexYLocs, graph->vertices->numvertices);
     vectorAverageShiftAndAdd(window, speedvectors);
 
-    DEBUG_PRINT_DEVICE(speedvectors, numvertices * 2);
+    // DEBUG_PRINT_DEVICE(speedvectors, numvertices * 2);
   }
 
   float* averageSpeeds =
@@ -116,7 +116,7 @@ int main(int argc, char* argv[])
   vectorAverageComputeAverage(window,
       graph->vertices->numvertices, averageSpeeds);
 
-  DEBUG_PRINT_DEVICE(averageSpeeds, numvertices * 2);
+  // DEBUG_PRINT_DEVICE(averageSpeeds, numvertices * 2);
 
   stopTimer(&timer);
   printf("time: total.\n");
