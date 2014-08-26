@@ -743,6 +743,8 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
       exit(EXIT_FAILURE);
     }
 
+    DEBUG_PRINT_DEVICE(data.forceX, g->vertices->numvertices);
+
     stopCudaTimer(&timerIteration);
     printf("time: iteration.\n");
     printCudaTimer(&timerIteration);
