@@ -357,7 +357,6 @@ void fa2UpdateLocation(Graph* g, float* xdisp, float* ydisp)
 void fa2RunOnce(Graph* g)
 {
   static int firstRun = 1;
-  static unsigned int* numNeighbours = NULL;
   static float* tra = NULL;
   static float* swg = NULL;
   static float* speed = NULL;
@@ -395,13 +394,13 @@ void fa2RunOnce(Graph* g)
 
   // Gravity force
   startTimer(&timer);
-  fa2Gravity(g, forceX, forceY, numNeighbours);
+  fa2Gravity(g, forceX, forceY, g->edges->numedges);
   stopTimer(&timer);
   //printf("time: gravity.\n");
   //printTimer(&timer);
   // Repulsion between vertices
   startTimer(&timer);
-  fa2Repulsion(g, forceX, forceY, numNeighbours);
+  fa2Repulsion(g, forceX, forceY, g->edges->numedges);
   stopTimer(&timer);
   //printf("time: repulsion.\n");
   //printTimer(&timer);
@@ -420,10 +419,10 @@ void fa2RunOnce(Graph* g)
   fa2UpdateTract(g, forceX, forceY, oldForceX, oldForceY, tra);
 
   // Update swing of Graph.
-  fa2UpdateSwingGraph(g, swg, numNeighbours, &graphSwing);
+  fa2UpdateSwingGraph(g, swg, g->edges->numedges, &graphSwing);
 
   // Update traction of Graph.
-  fa2UpdateTractGraph(g, tra, numNeighbours, &graphTract);
+  fa2UpdateTractGraph(g, tra, g->edges->numedges, &graphTract);
 
   // Update speed of Graph.
   fa2UpdateSpeedGraph(graphSwing, graphTract, &graphSpeed);

@@ -76,7 +76,7 @@ void utilPrintDeviceArray(float* array, unsigned int numelems)
 {
   for (size_t i = 0; i < numelems; i++)
   {
-    printf("%lu, %u\n", i, array[i]);
+    printf("%lu, %f\n", i, array[i]);
   }
 }
 
