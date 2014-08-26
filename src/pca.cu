@@ -27,9 +27,10 @@ void pca(float* d_inMatrix, unsigned int inRows, unsigned int inCols,
   pcaCalculateYMatrix(d_inMatrix, inRows, inCols, d_Y);
 
   // Perform SVD on Y.
-  pcaSVD(d_Y, inRows, inCols, d_PC);
+  pcaSVD(d_Y, inCols, inRows, d_PC);
 
-  // DEBUG_PRINT_DEVICE(d_PC, inCols * inCols);
+  DEBUG_PRINT_DEVICE(d_PC, inRows * inRows);
+  DEBUG_PRINT_DEVICE(d_inMatrix, inRows * inCols);
 
   // Calculate signals.
   pcaCalculateSignals(d_PC, d_inMatrix, inRows, inCols, d_outMatrix);
@@ -49,6 +50,8 @@ void pcaUpdateMean(float* d_inMatrix, unsigned int inRows, unsigned int inCols)
   float h_averageX, h_averageY;
   cudaMemcpy(&h_averageX, d_averageX, sizeof(float), cudaMemcpyDeviceToHost);
   cudaMemcpy(&h_averageY, d_averageY, sizeof(float), cudaMemcpyDeviceToHost);
+  h_averageX /= inCols;
+  h_averageY /= inCols;
 
   utilVectorAddScalar(&d_inMatrix[0], -1 * h_averageX, inCols);
   utilVectorAddScalar(&d_inMatrix[inCols], -1 * h_averageY, inCols);
@@ -105,14 +108,14 @@ void pcaCalculateSignals(float* d_PC, float* d_inMatrix, unsigned int inRows,
   cublasHandle_t handle;
   cublasCreate(&handle);
 
-  float m = inCols;
-  float n = inRows;
-  float k = inCols;
-  float lda = k;
+  float m = inRows;
+  float n = inCols;
+  float k = inRows;
+  float lda = inRows;
   float ldb = inCols;
-  float ldc = m;
+  float ldc = inRows;
 
-  cublasSgemm(handle, CUBLAS_OP_T, CUBLAS_OP_T, m, k, n, &alpha,
+  cublasSgemm(handle, CUBLAS_OP_T, CUBLAS_OP_T, m, n, k, &alpha,
       d_PC, lda, d_inMatrix, ldb, &beta, d_Signals, ldc);
 
   cublasDestroy(handle);
