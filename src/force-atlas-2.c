@@ -12,6 +12,7 @@
 #include "math.h"
 #include "timer.h"
 #include "vector.h"
+#include "util.h"
 
 /*!
  * Calculates the number of neighbours for every node.
@@ -170,6 +171,8 @@ void fa2Gravity(Graph* g, float* forceX, float* forceY, unsigned int* deg)
     float vlen = vectorGetLength(vx, vy);
     vectorInverse(&vx, &vy);
     vectorMultiply(&vx, &vy, K_G * (deg[i] + 1) / vlen);
+    if (i == 0)
+      DEBUG_PRINT("g:%f\n", vx);
     vectorAdd(&forceX[i], &forceY[i], vx, vy);
   }
 }
@@ -231,7 +234,9 @@ void fa2Attraction(Graph* g, float* forceX, float* forceY)
 
       vectorSubtract(&vx2, &vy2, vx1, vy1);
       // vectorMultiply(&vx2, &vy2, 0.5);
-      vectorAdd(forceX, forceY, vx2, vy2);
+      vectorAdd(&forceX[gid], &forceY[gid], vx2, vy2);
+      if (gid == 0)
+        DEBUG_PRINT("a:%f\t%u\n", vx2, target);
     }
   }
 }
@@ -396,18 +401,24 @@ void fa2RunOnce(Graph* g)
   startTimer(&timer);
   fa2Gravity(g, forceX, forceY, g->edges->numedges);
   stopTimer(&timer);
+  DEBUG_PRINT_DEVICE(forceX, g->vertices->numvertices);
+
   //printf("time: gravity.\n");
   //printTimer(&timer);
   // Repulsion between vertices
   startTimer(&timer);
   fa2Repulsion(g, forceX, forceY, g->edges->numedges);
   stopTimer(&timer);
+  DEBUG_PRINT_DEVICE(forceX, g->vertices->numvertices);
+
   //printf("time: repulsion.\n");
   //printTimer(&timer);
   // Attraction on edges
   startTimer(&timer);
   fa2Attraction(g, forceX, forceY);
   stopTimer(&timer);
+  DEBUG_PRINT_DEVICE(forceX, g->vertices->numvertices);
+
   //printf("time: attraction.\n");
   //printTimer(&timer);
 
@@ -417,6 +428,8 @@ void fa2RunOnce(Graph* g)
 
   // Update traction of vertices.
   fa2UpdateTract(g, forceX, forceY, oldForceX, oldForceY, tra);
+
+  DEBUG_PRINT_DEVICE(forceX, g->vertices->numvertices);
 
   // Update swing of Graph.
   fa2UpdateSwingGraph(g, swg, g->edges->numedges, &graphSwing);
