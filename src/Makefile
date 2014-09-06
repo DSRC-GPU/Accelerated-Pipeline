@@ -2,26 +2,31 @@
 CC = g++-4.7
 CPPFLAGS = -I/usr/include/libxml2 -O0
 CFLAGS = -DDEBUG -Wall -Wextra -pedantic -g -ffloat-store
-LDFLAGS = -lm -lxml2 -lpthread -lcula_lapack -lcublas
+LDFLAGS = -lm -lxml2 -lpthread -lalglib
 
 NVCC = nvcc
 CUDA_LINK = link.o
 CUDA_ARCH = -arch=sm_20
 NVCCFLAGS	= $(CUDA_ARCH) -dc --ptxas-options=-v -prec-sqrt=true -prec-div=true \
             -ccbin=`which g++-4.7` -DDEBUG  -I$(CULA_INC_PATH)
-CUDA_LDFLAGS	:= $(LDFLAGS) -lcudart
+CUDA_LDFLAGS	:= $(LDFLAGS) -lcudart -lcula_lapack -lcublas
 LIBS = 
 CUDA_LIBS	= $(LIBS) -L"$(CUDA_INSTALL_PATH)/lib64" -L"$(CULA_LIB_PATH_64)"
 
 TARGETS = ap
 
 OBJECTS = main.c.o graph.c.o gexfparser.c.o timer.c.o
-OBJECTS_SEQ = vector.c.o force-atlas-2.c.o
+OBJECTS_SEQ = vector.c.o force-atlas-2.c.o util.c.o \
+	smoothening.c.o pca.cpp.o vector-average.c.o break-edges.c.o \
+  connected-component.c.o
 OBJECTS_PAR = vector.o force-atlas-2.o cuda-timer.o cuda-stream.o util.o \
-	speedvector.o smoothening.o pca.o test-pca.o test-util.o \
+	smoothening.o pca.o test-pca.o test-util.o \
   vector-average.o break-edges.o connected-component.o
 
 %.c.o: %.c
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+
+%.cpp.o: %.cpp
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
 %.o: %.cu

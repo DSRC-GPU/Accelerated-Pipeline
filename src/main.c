@@ -107,8 +107,6 @@ int main(int argc, char* argv[])
     utilVectorAdd(&speedvectors[graph->vertices->numvertices],
         graph->vertices->vertexYLocs, graph->vertices->numvertices);
     vectorAverageShiftAndAdd(window, speedvectors);
-
-    DEBUG_PRINT_DEVICE(speedvectors, numvertices * 2);
   }
 
   float* averageSpeeds =
@@ -116,16 +114,12 @@ int main(int argc, char* argv[])
   vectorAverageComputeAverage(window,
       graph->vertices->numvertices, averageSpeeds);
 
-  DEBUG_PRINT_DEVICE(averageSpeeds, numvertices * 2);
-
   stopTimer(&timer);
   printf("time: total.\n");
   printTimer(&timer);
 
   float* projectedData = (float*) utilAllocateData(numvertices * 2 * sizeof(float));
   pca(averageSpeeds, 2, numvertices, projectedData);
-
-  DEBUG_PRINT_DEVICE(projectedData, numvertices * 2);
 
   float* smoothFineValues = (float*) utilAllocateData(numvertices * sizeof(float));
   float* smoothCoarseValues = (float*) utilAllocateData(numvertices * sizeof(float));

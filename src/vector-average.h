@@ -5,6 +5,10 @@
 #ifndef VECTOR_AVERAGE_H_
 #define VECTOR_AVERAGE_H_
 
+/*!
+ * The number of spring embedding runs that will be used to compute the average
+ * vectors.
+ */
 #define WINDOW_SIZE 10
 
 /*!

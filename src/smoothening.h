@@ -23,8 +23,8 @@ void smootheningPrepareEdges(unsigned int* hostEdges,
  *  Prepares the memory on the device for the output vectors which are
  *  smoothened.
  *
- *  \param[out] Pointer to where the smoothened values will be stored.
- *  \param[in] The number of elements for each of the array.
+ *  \param[out] output Pointer to where the smoothened values will be stored.
+ *  \param[in] numvertices The number of elements for each of the array.
  */
 void smootheningPrepareOutput(float** output, unsigned int numvertices);
 

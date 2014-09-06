@@ -20,7 +20,7 @@ void testUtil()
   float* d_outVal = NULL;
   cudaMalloc(&d_outVal, sizeof(float));
 
-  utilTreeReduction(d_M, numelems, d_outVal);
+  utilParallelSum(d_M, numelems, d_outVal);
 
   float h_outVal = -1;
   cudaMemcpy(&h_outVal, d_outVal, sizeof(float), cudaMemcpyDeviceToHost);

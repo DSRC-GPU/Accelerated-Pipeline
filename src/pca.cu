@@ -27,9 +27,10 @@ void pca(float* d_inMatrix, unsigned int inRows, unsigned int inCols,
   pcaCalculateYMatrix(d_inMatrix, inRows, inCols, d_Y);
 
   // Perform SVD on Y.
-  pcaSVD(d_Y, inRows, inCols, d_PC);
+  pcaSVD(d_Y, inCols, inRows, d_PC);
 
-  // DEBUG_PRINT_DEVICE(d_PC, inCols * inCols);
+  DEBUG_PRINT_DEVICE(d_PC, inRows * inRows);
+  DEBUG_PRINT_DEVICE(d_inMatrix, inRows * inCols);
 
   // Calculate signals.
   pcaCalculateSignals(d_PC, d_inMatrix, inRows, inCols, d_outMatrix);
@@ -43,12 +44,14 @@ void pcaUpdateMean(float* d_inMatrix, unsigned int inRows, unsigned int inCols)
   cudaMalloc(&d_averageY, sizeof(float));
 
   // Compute the average X and Y values.
-  utilTreeReduction(&d_inMatrix[0], inCols, d_averageX);
-  utilTreeReduction(&d_inMatrix[inCols], inCols, d_averageY);
+  utilParallelSum(&d_inMatrix[0], inCols, d_averageX);
+  utilParallelSum(&d_inMatrix[inCols], inCols, d_averageY);
 
   float h_averageX, h_averageY;
   cudaMemcpy(&h_averageX, d_averageX, sizeof(float), cudaMemcpyDeviceToHost);
   cudaMemcpy(&h_averageY, d_averageY, sizeof(float), cudaMemcpyDeviceToHost);
+  h_averageX /= inCols;
+  h_averageY /= inCols;
 
   utilVectorAddScalar(&d_inMatrix[0], -1 * h_averageX, inCols);
   utilVectorAddScalar(&d_inMatrix[inCols], -1 * h_averageY, inCols);
@@ -107,13 +110,13 @@ void pcaCalculateSignals(float* d_PC, float* d_inMatrix, unsigned int inRows,
 
   float m = inCols;
   float n = inRows;
-  float k = inCols;
-  float lda = k;
-  float ldb = inCols;
-  float ldc = m;
+  float k = inRows;
+  float lda = inCols;
+  float ldb = inRows;
+  float ldc = inCols;
 
-  cublasSgemm(handle, CUBLAS_OP_T, CUBLAS_OP_T, m, k, n, &alpha,
-      d_PC, lda, d_inMatrix, ldb, &beta, d_Signals, ldc);
+  cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, m, n, k, &alpha,
+      d_inMatrix, lda, d_PC, ldb, &beta, d_Signals, ldc);
 
   cublasDestroy(handle);
 }

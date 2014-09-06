@@ -12,7 +12,6 @@
 #include "cuda-timer.h"
 #include "cuda-stream.h"
 #include "vector.h"
-#include "speedvector.h"
 #include "util.h"
 
 /*!
@@ -660,9 +659,7 @@ void fa2PrepareGeneralMemory(ForceAtlas2Data* data, unsigned int numvertices)
  * Prepares all memory to run force atlas 2 on the device.
  *
  * \param[in,out] data A valid data object where all pointers should be saved.
- * \param[in] edges The edges that need to be copied to the device.
  * \param[in] numvertices The total number of vertices.
- * \param[in] stream The cuda stream to use while preparing the data.
  */
 void fa2PrepareMemory(ForceAtlas2Data* data,
     unsigned int numvertices)
@@ -745,6 +742,8 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
       printf("Error in kernel 2.\n%s\n", cudaGetErrorString(code));
       exit(EXIT_FAILURE);
     }
+
+    DEBUG_PRINT_DEVICE(data.forceX, g->vertices->numvertices);
 
     stopCudaTimer(&timerIteration);
     printf("time: iteration.\n");
