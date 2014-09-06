@@ -114,9 +114,6 @@ int main(int argc, char* argv[])
   vectorAverageComputeAverage(window,
       graph->vertices->numvertices, averageSpeeds);
 
-  DEBUG_PRINT_DEVICE(averageSpeeds, numvertices * 2);
-  exit(EXIT_SUCCESS);
-
   stopTimer(&timer);
   printf("time: total.\n");
   printTimer(&timer);
