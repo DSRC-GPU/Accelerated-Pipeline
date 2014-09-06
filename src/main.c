@@ -121,9 +121,6 @@ int main(int argc, char* argv[])
   float* projectedData = (float*) utilAllocateData(numvertices * 2 * sizeof(float));
   pca(averageSpeeds, 2, numvertices, projectedData);
 
-  DEBUG_PRINT_DEVICE(projectedData, numvertices * 2);
-  exit(EXIT_SUCCESS);
-
   float* smoothFineValues = (float*) utilAllocateData(numvertices * sizeof(float));
   float* smoothCoarseValues = (float*) utilAllocateData(numvertices * sizeof(float));
   smootheningPrepareOutput(&smoothFineValues, graph->vertices->numvertices);

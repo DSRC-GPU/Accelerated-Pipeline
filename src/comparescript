@@ -3,7 +3,7 @@
 RUN="optirun ./ap -i lanes.gexf -n $1"
 SEQREF="seqref"
 PARREF="parref"
-CMD="${RUN} | tail -n 120 | sort -n"
+CMD="${RUN} | tail -n $2 | sort -n"
 
 make clean
 make par -j9
