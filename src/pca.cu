@@ -108,15 +108,15 @@ void pcaCalculateSignals(float* d_PC, float* d_inMatrix, unsigned int inRows,
   cublasHandle_t handle;
   cublasCreate(&handle);
 
-  float m = inRows;
-  float n = inCols;
+  float m = inCols;
+  float n = inRows;
   float k = inRows;
-  float lda = inRows;
-  float ldb = inCols;
-  float ldc = inRows;
+  float lda = inCols;
+  float ldb = inRows;
+  float ldc = inCols;
 
-  cublasSgemm(handle, CUBLAS_OP_T, CUBLAS_OP_T, m, n, k, &alpha,
-      d_PC, lda, d_inMatrix, ldb, &beta, d_Signals, ldc);
+  cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, m, n, k, &alpha,
+      d_inMatrix, lda, d_PC, ldb, &beta, d_Signals, ldc);
 
   cublasDestroy(handle);
 }
