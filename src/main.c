@@ -20,6 +20,12 @@
 #include "break-edges.h"
 #include "connected-component.h"
 
+const char* argPhiFine = "--phi-fine";
+const char* argPhiCoarse = "--phi-coarse";
+const char* argPhiFineRounds = "--phi-fine-rounds";
+const char* argPhiCoarseRounds = "--phi-coarse-rounds";
+const char* argWindowSize = "--window-size";
+
 int main(int argc, char* argv[])
 {
   srand(time(NULL ));
@@ -27,6 +33,11 @@ int main(int argc, char* argv[])
   // Input parsing.
   const char* inputFile = NULL;
   unsigned int numTicks = 100;
+  float phiFine = 0.01;
+  float phiCoarse = 0.3;
+  unsigned int phiFineRounds = 200;
+  unsigned int phiCoarseRounds = 40;
+  unsigned int windowSize = 30;
 
   for (int i = 1; i < argc; i++)
   {
@@ -38,6 +49,26 @@ int main(int argc, char* argv[])
     else if (!strcmp(argv[i], "-n"))
     {
       numTicks = atoi(argv[++i]);
+    }
+    else if (!strcmp(argv[i], argPhiFine))
+    {
+      phiFine = atof(argv[++i]);
+    }
+    else if (!strcmp(argv[i], argPhiCoarse))
+    {
+      phiCoarse = atof(argv[++i]);
+    }
+    else if (!strcmp(argv[i], argPhiFineRounds))
+    {
+      phiFineRounds = atoi(argv[++i]);
+    }
+    else if (!strcmp(argv[i], argPhiCoarseRounds))
+    {
+      phiCoarseRounds = atoi(argv[++i]);
+    }
+    else if (!strcmp(argv[i], argWindowSize))
+    {
+      windowSize = atoi(argv[++i]);
     }
     else
     {
@@ -127,10 +158,10 @@ int main(int argc, char* argv[])
   smootheningPrepareOutput(&smoothCoarseValues, graph->vertices->numvertices);
   smootheningRun(projectedData,
       graph->vertices->numvertices, graph->edges->numedges,
-      graph->edges->edgeTargets, 10, 0, smoothFineValues);
+      graph->edges->edgeTargets, phiFineRounds, phiFine, smoothFineValues);
   smootheningRun(projectedData,
       graph->vertices->numvertices, graph->edges->numedges,
-      graph->edges->edgeTargets, 10, 1, smoothCoarseValues);
+      graph->edges->edgeTargets, phiCoarseRounds, phiCoarse, smoothCoarseValues);
 
   // TODO Free memory with the util functions.
 
