@@ -200,7 +200,7 @@ void* utilAllocateData(unsigned int numbytes)
   return res;
 }
 
-void utilFreeDeviceData(float* dptr)
+void utilFreeDeviceData(void* dptr)
 {
   cudaFree(dptr);
 }
