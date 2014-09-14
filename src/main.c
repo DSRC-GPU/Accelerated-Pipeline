@@ -83,6 +83,7 @@ int main(int argc, char* argv[])
     printf("No input file specified. Exit.\n");
     exit(EXIT_FAILURE);
   }
+  FILE* outputFile = fopen("out", "w");
 
   Graph* graph = (Graph*) calloc(1, sizeof(Graph));
 
@@ -116,7 +117,8 @@ int main(int argc, char* argv[])
   Timer timer;
   startTimer(&timer);
 
-  for (size_t i = 0; i < WINDOW_SIZE; i++)
+  // Never stop. Break manually when end of file is reached.
+  for (size_t graphIteration = 0; graphIteration >= 0; graphIteration++)
   {
     // Create new speed vectors and set them to the negative value of the vertex
     // stars positions.
@@ -138,49 +140,72 @@ int main(int argc, char* argv[])
     utilVectorAdd(&speedvectors[graph->vertices->numvertices],
         graph->vertices->vertexYLocs, graph->vertices->numvertices);
     vectorAverageShiftAndAdd(window, speedvectors);
+    float* averageSpeeds =
+     vectorAverageNewVectorArray(graph->vertices->numvertices);
+    vectorAverageComputeAverage(window,
+        graph->vertices->numvertices, averageSpeeds);
+
+    stopTimer(&timer);
+    printf("time: total.\n");
+    printTimer(&timer);
+
+    float* projectedData = (float*) utilAllocateData(numvertices * 2 * sizeof(float));
+    pca(averageSpeeds, 2, numvertices, projectedData);
+
+    float* smoothFineValues = (float*) utilAllocateData(numvertices * sizeof(float));
+    float* smoothCoarseValues = (float*) utilAllocateData(numvertices * sizeof(float));
+    smootheningPrepareOutput(&smoothFineValues, graph->vertices->numvertices);
+    smootheningPrepareOutput(&smoothCoarseValues, graph->vertices->numvertices);
+    smootheningRun(projectedData,
+        graph->vertices->numvertices, graph->edges->numedges,
+        graph->edges->edgeTargets, phiFineRounds, phiFine, smoothFineValues);
+    smootheningRun(projectedData,
+        graph->vertices->numvertices, graph->edges->numedges,
+        graph->edges->edgeTargets, phiCoarseRounds, phiCoarse, smoothCoarseValues);
+
+    // TODO Free memory with the util functions.
+
+    breakEdges(graph->vertices->numvertices, smoothFineValues, smoothCoarseValues,
+        graph->edges->numedges, graph->edges->edgeTargets);
+
+    unsigned int* vertexlabels = (unsigned int*) utilAllocateData(numvertices
+        * sizeof(unsigned int));
+    connectedComponent(graph->vertices->numvertices, graph->edges->numedges,
+        graph->edges->edgeTargets, vertexlabels);
+
+    unsigned int* h_vertexlabels = (unsigned int*) utilDataTransferDeviceToHost(vertexlabels,
+        numvertices * sizeof(unsigned int), 1);
+
+    for (size_t i = 0; i < numvertices; i++)
+    {
+      fprintf(outputFile, "%u ", h_vertexlabels[i]);
+    }
+    fprintf(outputFile, "\n");
+
+    // Load the next set of edges.
+    utilFreeDeviceData(edges->numedges);
+    utilFreeDeviceData(edges->edgeTargets);
+    edges = gexfParseFileEdgesSomewhereInInterval(inputFile, graph,
+        graphIteration, graphIteration + WINDOW_SIZE);
+    if (!edges->maxedges)
+    {
+      utilFreeDeviceData(graph->vertices->vertexXLocs);
+      utilFreeDeviceData(graph->vertices->vertexYLocs);
+      break;
+    } else {
+      printf("Window is at %lu to %lu, maxedges: %u\n", graphIteration,
+          graphIteration + WINDOW_SIZE, edges->maxedges);
+      graph->edges = edges;
+      // Transfer the edge data to the gpu.
+      graph->edges->numedges = (unsigned int*) utilDataTransferHostToDevice(graph->edges->numedges,
+          numvertices * sizeof(unsigned int), 1);
+      graph->edges->edgeTargets = (unsigned int*)
+       utilDataTransferHostToDevice(graph->edges->edgeTargets,
+          sizeEdgeArray * sizeof(unsigned int), 1);
+    }
   }
 
-  float* averageSpeeds =
-   vectorAverageNewVectorArray(graph->vertices->numvertices);
-  vectorAverageComputeAverage(window,
-      graph->vertices->numvertices, averageSpeeds);
-
-  stopTimer(&timer);
-  printf("time: total.\n");
-  printTimer(&timer);
-
-  float* projectedData = (float*) utilAllocateData(numvertices * 2 * sizeof(float));
-  pca(averageSpeeds, 2, numvertices, projectedData);
-
-  float* smoothFineValues = (float*) utilAllocateData(numvertices * sizeof(float));
-  float* smoothCoarseValues = (float*) utilAllocateData(numvertices * sizeof(float));
-  smootheningPrepareOutput(&smoothFineValues, graph->vertices->numvertices);
-  smootheningPrepareOutput(&smoothCoarseValues, graph->vertices->numvertices);
-  smootheningRun(projectedData,
-      graph->vertices->numvertices, graph->edges->numedges,
-      graph->edges->edgeTargets, phiFineRounds, phiFine, smoothFineValues);
-  smootheningRun(projectedData,
-      graph->vertices->numvertices, graph->edges->numedges,
-      graph->edges->edgeTargets, phiCoarseRounds, phiCoarse, smoothCoarseValues);
-
-  // TODO Free memory with the util functions.
-
-  breakEdges(graph->vertices->numvertices, smoothFineValues, smoothCoarseValues,
-      graph->edges->numedges, graph->edges->edgeTargets);
-
-  unsigned int* vertexlabels = (unsigned int*) utilAllocateData(numvertices
-      * sizeof(unsigned int));
-  connectedComponent(graph->vertices->numvertices, graph->edges->numedges,
-      graph->edges->edgeTargets, vertexlabels);
-
-  unsigned int* h_vertexlabels = (unsigned int*) utilDataTransferDeviceToHost(vertexlabels,
-      numvertices * sizeof(unsigned int), 1);
-
-  for (size_t i = 0; i < numvertices; i++)
-  {
-    printf("%lu, %u\n", i, h_vertexlabels[i]);
-  }
-
+  fclose(outputFile);
   printf("Normal program exit.\n");
 }
 
