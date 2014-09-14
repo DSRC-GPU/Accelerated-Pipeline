@@ -49,7 +49,24 @@ unsigned int xmlwGetNumEdges(xmlNode* gexf)
   return atoi((const char*) xmlGetProp(edges, (const xmlChar*) "count"));
 }
 
-unsigned int xmlwGetMaxEdges(xmlNode* gexf, unsigned int numvertices)
+int edgeValidAt(xmlNode* node, int stepstart, int stepend)
+{
+  xmlNode* spells = xmlwGetChild(node, "spells");
+  if (!spells)
+    return 0;
+  xmlNode* spell = xmlwGetChild(spells, "spell");
+  if (!spell)
+    return 0;
+  int start = atoi((const char*) xmlGetProp(spell, (const xmlChar*) "start"));
+  int end = atoi((const char*) xmlGetProp(spell, (const xmlChar*) "end"));
+  if (start > stepend || stepstart > end)
+    return 0;
+  else
+    return 1;
+}
+
+unsigned int xmlwGetMaxEdges(xmlNode* gexf, unsigned int numvertices, 
+    int stepstart, int stepend)
 {
   if (!gexf)
     return -1;
@@ -64,12 +81,16 @@ unsigned int xmlwGetMaxEdges(xmlNode* gexf, unsigned int numvertices)
   xmlNode* node = xmlwGetChild(edges, "edge");
   while (node)
   {
-    unsigned int source = atoi(
-        (const char*) xmlGetProp(node, (const xmlChar*) "source"));
-    unsigned int target = atoi(
-        (const char*) xmlGetProp(node, (const xmlChar*) "target"));
-    numedges[source]++;
-    numedges[target]++;
+    if ((stepstart == -1 && stepend == -1)
+        || edgeValidAt(node, stepstart, stepend))
+    {
+      unsigned int source = atoi(
+          (const char*) xmlGetProp(node, (const xmlChar*) "source"));
+      unsigned int target = atoi(
+          (const char*) xmlGetProp(node, (const xmlChar*) "target"));
+      numedges[source]++;
+      numedges[target]++;
+    }
     node = node->next;
   }
   unsigned int max = 0;
@@ -126,22 +147,6 @@ void gexfParseVertices(xmlNode* gexf, float* vertexXLocs, float* vertexYLocs,
     i++;
     node = node->next;
   }
-}
-
-int edgeValidAt(xmlNode* node, int stepstart, int stepend)
-{
-  xmlNode* spells = xmlwGetChild(node, "spells");
-  if (!spells)
-    return 0;
-  xmlNode* spell = xmlwGetChild(spells, "spell");
-  if (!spell)
-    return 0;
-  int start = atoi((const char*) xmlGetProp(spell, (const xmlChar*) "start"));
-  int end = atoi((const char*) xmlGetProp(spell, (const xmlChar*) "end"));
-  if (start > stepend || stepstart > end)
-    return 0;
-  else
-    return 1;
 }
 
 unsigned int gexfParseEdges(xmlNode* gexf, Graph* graph, int stepstart,
@@ -246,7 +251,7 @@ Graph* gexfParseFile(const char* in)
   Graph* g = newGraph(0);
 
   unsigned int numvertices = xmlwGetNumNodes(root_element);
-  unsigned int maxEdges = xmlwGetMaxEdges(root_element, numvertices);
+  unsigned int maxEdges = xmlwGetMaxEdges(root_element, numvertices, -1, -1);
   g->vertices = gexfParseVerticesFromRoot(root_element);
   g->edges = gexfParseEdgesFromRoot(root_element, g, maxEdges);
 
@@ -282,7 +287,8 @@ Edges* gexfParseFileEdgesSomewhereInInterval(const char* in, Graph* graph,
   xmlNode* rootelem;
   gexfParseSetup(in, &doc, &rootelem);
   unsigned int numvertices = xmlwGetNumNodes(rootelem);
-  unsigned int maxedges = xmlwGetMaxEdges(rootelem, numvertices);
+  unsigned int maxedges = xmlwGetMaxEdges(rootelem, numvertices, stepstart,
+      stepend);
   Edges* edges = gexfParseEdgesFromRootInInterval(rootelem, graph, maxedges, stepstart,
       stepend);
   gexfParseCleanup(doc);
