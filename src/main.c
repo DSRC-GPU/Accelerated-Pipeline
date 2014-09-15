@@ -117,6 +117,15 @@ int main(int argc, char* argv[])
   Timer timer;
   startTimer(&timer);
 
+  // Declare variables for loop.
+  float* smoothFineValues = (float*) utilAllocateData(numvertices * sizeof(float));
+  float* smoothCoarseValues = (float*) utilAllocateData(numvertices * sizeof(float));
+  unsigned int* vertexlabels = (unsigned int*) utilAllocateData(numvertices
+      * sizeof(unsigned int));
+  float* projectedData = (float*) utilAllocateData(numvertices * 2 * sizeof(float));
+  float* averageSpeeds =
+   vectorAverageNewVectorArray(graph->vertices->numvertices);
+
   // Never stop. Break manually when end of file is reached.
   for (size_t graphIteration = 0; graphIteration >= 0; graphIteration++)
   {
@@ -140,8 +149,6 @@ int main(int argc, char* argv[])
     utilVectorAdd(&speedvectors[graph->vertices->numvertices],
         graph->vertices->vertexYLocs, graph->vertices->numvertices);
     vectorAverageShiftAndAdd(window, speedvectors);
-    float* averageSpeeds =
-     vectorAverageNewVectorArray(graph->vertices->numvertices);
     vectorAverageComputeAverage(window,
         graph->vertices->numvertices, averageSpeeds);
 
@@ -149,13 +156,8 @@ int main(int argc, char* argv[])
     printf("time: total.\n");
     printTimer(&timer);
 
-    float* projectedData = (float*) utilAllocateData(numvertices * 2 * sizeof(float));
     pca(averageSpeeds, 2, numvertices, projectedData);
 
-    float* smoothFineValues = (float*) utilAllocateData(numvertices * sizeof(float));
-    float* smoothCoarseValues = (float*) utilAllocateData(numvertices * sizeof(float));
-    smootheningPrepareOutput(&smoothFineValues, graph->vertices->numvertices);
-    smootheningPrepareOutput(&smoothCoarseValues, graph->vertices->numvertices);
     smootheningRun(projectedData,
         graph->vertices->numvertices, graph->edges->numedges,
         graph->edges->edgeTargets, phiFineRounds, phiFine, smoothFineValues);
@@ -168,8 +170,6 @@ int main(int argc, char* argv[])
     breakEdges(graph->vertices->numvertices, smoothFineValues, smoothCoarseValues,
         graph->edges->numedges, graph->edges->edgeTargets);
 
-    unsigned int* vertexlabels = (unsigned int*) utilAllocateData(numvertices
-        * sizeof(unsigned int));
     connectedComponent(graph->vertices->numvertices, graph->edges->numedges,
         graph->edges->edgeTargets, vertexlabels);
 
@@ -189,13 +189,15 @@ int main(int argc, char* argv[])
         graphIteration, graphIteration + WINDOW_SIZE);
     if (!edges->maxedges)
     {
-      utilFreeDeviceData(graph->vertices->vertexXLocs);
-      utilFreeDeviceData(graph->vertices->vertexYLocs);
       break;
     } else {
       printf("Window is at %lu to %lu, maxedges: %u\n", graphIteration,
           graphIteration + WINDOW_SIZE, edges->maxedges);
+
+      // Clean previous edges
+      free(graph->edges);
       graph->edges = edges;
+      
       // Transfer the edge data to the gpu.
       graph->edges->numedges = (unsigned int*) utilDataTransferHostToDevice(graph->edges->numedges,
           numvertices * sizeof(unsigned int), 1);
@@ -205,6 +207,22 @@ int main(int argc, char* argv[])
     }
   }
 
+  // Clean up
+  utilFreeDeviceData(graph->vertices->vertexXLocs);
+  utilFreeDeviceData(graph->vertices->vertexYLocs);
+  utilFreeDeviceData(edges->numedges);
+  utilFreeDeviceData(edges->edgeTargets);
+  free(graph->vertices);
+  free(edges);
+
+  free(graph);
+  utilFreeDeviceData(smoothFineValues);
+  utilFreeDeviceData(smoothCoarseValues);
+  utilFreeDeviceData(projectedData);
+  utilFreeDeviceData(vertexlabels);
+  vectorAverageFreeVectorArray(averageSpeeds);
+  vectorAverageFreeWindow(window);
+  
   fclose(outputFile);
   printf("Normal program exit.\n");
 }
