@@ -7,7 +7,8 @@ LDFLAGS = -lm -lxml2 -lpthread -lalglib
 NVCC = nvcc
 CUDA_LINK = link.o
 CUDA_ARCH = -arch=sm_20
-NVCCFLAGS	= $(CUDA_ARCH) -dc --ptxas-options=-v -prec-sqrt=true -prec-div=true \
+NVCCFLAGS	= -G -Xcompiler -rdynamic $(CUDA_ARCH) -dc \
+            --ptxas-options=-v -prec-sqrt=true -prec-div=true \
             -ccbin=`which g++-4.7` -DDEBUG  -I$(CULA_INC_PATH)
 CUDA_LDFLAGS	:= $(LDFLAGS) -lcudart -lcula_lapack -lcublas
 LIBS = 
