@@ -46,12 +46,6 @@ void smootheningPrepareEdges(unsigned int* hostEdges,
       cudaMemcpyHostToDevice);
 }
 
-void smootheningPrepareOutput(float** values,
-    unsigned int numvertices)
-{
-  cudaMalloc(values, numvertices * sizeof(float));
-}
-
 void smootheningCleanEdges(unsigned int* edges, unsigned int* numedges)
 {
   cudaFree(edges);
