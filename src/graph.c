@@ -16,7 +16,6 @@ Edges* newEdges(unsigned int numvertices)
 Vertices* newVertices(unsigned int num)
 {
   Vertices* vertices = (Vertices*) calloc(1, sizeof(Vertices));
-  vertices->vertexIds = (int*) calloc(num, sizeof(int));
   vertices->vertexXLocs = (float*) calloc(num, sizeof(float));
   vertices->vertexYLocs = (float*) calloc(num, sizeof(float));
   vertices->numvertices = 0;
@@ -33,6 +32,9 @@ Graph* newGraph(unsigned int numvertices)
 
 void graphSetEdgeSpaceForAllVertices(Graph* graph)
 {
+  unsigned int* targets = graph->edges->edgeTargets;
+  if (targets)
+    free(targets);
   graph->edges->edgeTargets = (unsigned int*) calloc(
       graph->vertices->numvertices * graph->edges->maxedges,
       sizeof(unsigned int));
@@ -57,7 +59,7 @@ void printGraph(Graph* g)
     return;
   for (size_t i = 0; i < g->vertices->numvertices; i++)
   {
-    printf("%d %.15f %.15f\n", g->vertices->vertexIds[i],
+    printf("%d %.15f %.15f\n", i,
         g->vertices->vertexXLocs[i], g->vertices->vertexYLocs[i]);
   }
 }
@@ -76,7 +78,6 @@ void freeVertices(Vertices* vertices)
 {
   if (vertices)
   {
-    free(vertices->vertexIds);
     free(vertices->vertexXLocs);
     free(vertices->vertexYLocs);
     free(vertices);
