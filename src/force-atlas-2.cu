@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <float.h>
+#include <assert.h>
 #include "force-atlas-2.h"
 #include "math.h"
 #include "cuda-timer.h"
@@ -218,6 +219,7 @@ __device__ void fa2Gravity(unsigned int gid, unsigned int numvertices,
     float vx = vxLocs[gid];
     float vy = vyLocs[gid];
     float vlen = vectorGetLength(vx, vy);
+    assert(vlen != 0);
     vectorInverse(&vx, &vy);
     vectorMultiply(&vx, &vy, K_G * (deg[gid] + 1) / vlen);
     if (gid == 0)
@@ -697,6 +699,17 @@ void fa2CleanMemory(ForceAtlas2Data* data, unsigned int numvertices)
   fa2CleanGeneralMemory(data);
 }
 
+void checkErrors(unsigned int num)
+{
+  cudaDeviceSynchronize();
+  cudaError_t code = cudaGetLastError();
+  if (code != cudaSuccess)
+  {
+    printf("Error in kernel %u.\n%s\n", num, cudaGetErrorString(code));
+    exit(EXIT_FAILURE);
+  }
+}
+
 void fa2RunOnGraph(Graph* g, unsigned int iterations)
 {
   CudaTimer timerIteration, timer;
@@ -713,13 +726,7 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
   unsigned int numblocks = ceil(g->vertices->numvertices / (float) BLOCK_SIZE);
   unsigned int numblocks_reduction = ceil(numblocks / 2.0);
 
-  cudaGetLastError();
-  cudaError_t code = cudaGetLastError();
-  if (code != cudaSuccess)
-  {
-    printf("Error calculating node degrees.\n%s\n", cudaGetErrorString(code));
-    exit(EXIT_FAILURE);
-  }
+  checkErrors(0);
 
   for (size_t i = 0; i < iterations; i++)
   {
@@ -733,15 +740,12 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
         g->edges->maxedges, data.tra, data.swg, data.forceX, data.forceY,
         data.oldForceX, data.oldForceY);
     stopCudaTimer(&timer);
+
+    checkErrors(1);
+
     printf("time: all forces and moving vertices.\n");
     printCudaTimer(&timer);
     resetCudaTimer(&timer);
-    code = cudaGetLastError();
-    if (code != cudaSuccess)
-    {
-      printf("Error in kernel 2.\n%s\n", cudaGetErrorString(code));
-      exit(EXIT_FAILURE);
-    }
 
     DEBUG_PRINT_DEVICE(data.forceX, g->vertices->numvertices);
 
@@ -763,17 +767,14 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
     printCudaTimer(&timer);
     resetCudaTimer(&timer);
 
-    code = cudaGetLastError();
-    if (code != cudaSuccess)
-    {
-      printf("Error in kernel 1.\n%s\n", cudaGetErrorString(code));
-      exit(EXIT_FAILURE);
-    }
+    checkErrors(2);
 
     fa2MoveVertices<<<numblocks, BLOCK_SIZE>>>(vxLocs, vyLocs,
         g->vertices->numvertices, data.tra, data.swg, data.forceX, data.forceY,
         data.oldForceX, data.oldForceY, data.graphSwing, data.graphTract,
         data.graphSpeed);
+
+    checkErrors(3);
   }
 
   fa2CleanMemory(&data, g->vertices->numvertices);

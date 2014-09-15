@@ -169,6 +169,7 @@ void fa2Gravity(Graph* g, float* forceX, float* forceY, unsigned int* deg)
     float vx = g->vertices->vertexXLocs[i];
     float vy = g->vertices->vertexYLocs[i];
     float vlen = vectorGetLength(vx, vy);
+    assert(vlen != 0);
     vectorInverse(&vx, &vy);
     vectorMultiply(&vx, &vy, K_G * (deg[i] + 1) / vlen);
     if (i == 0)
