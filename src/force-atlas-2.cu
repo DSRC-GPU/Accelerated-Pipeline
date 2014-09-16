@@ -266,17 +266,15 @@ __device__ void fa2Attraction(unsigned int gid, unsigned int numvertices,
 {
   if (gid < numvertices)
   {
-    if (gid == 0)
-      DEBUG_PRINT("numedges:%u\n", numedges[gid]);
     float vx1 = vxLocs[gid];
     float vy1 = vyLocs[gid];
     // Each thread goes through its array of edges.
-    for (size_t i = 0; i < maxedges; i++)
+    for (size_t i = 0; i < numedges[gid]; i++)
     {
       unsigned int index = gid + (numvertices * i);
+      assert(index < numvertices + (numvertices * maxedges));
       unsigned int target = edgeTargets[index];
-      if (target == UINT_MAX)
-        continue;
+      assert(target < numvertices);
       // Compute attraction force.
       float vx2 = vxLocs[target];
       float vy2 = vyLocs[target];
@@ -747,7 +745,7 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
     printCudaTimer(&timer);
     resetCudaTimer(&timer);
 
-    DEBUG_PRINT_DEVICE(data.forceX, g->vertices->numvertices);
+    // DEBUG_PRINT_DEVICE(data.forceX, g->vertices->numvertices);
 
     stopCudaTimer(&timerIteration);
     printf("time: iteration.\n");
