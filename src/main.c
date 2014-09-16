@@ -151,6 +151,7 @@ int main(int argc, char* argv[])
     vectorAverageShiftAndAdd(window, speedvectors);
     vectorAverageComputeAverage(window,
         graph->vertices->numvertices, averageSpeeds);
+    DEBUG_PRINT("Graph iteration: %lu\n", graphIteration);
 
     stopTimer(&timer);
     printf("time: total.\n");
@@ -199,6 +200,7 @@ int main(int argc, char* argv[])
       graph->edges = edges;
       
       // Transfer the edge data to the gpu.
+      sizeEdgeArray = graph->edges->maxedges * numvertices;
       graph->edges->numedges = (unsigned int*) utilDataTransferHostToDevice(graph->edges->numedges,
           numvertices * sizeof(unsigned int), 1);
       graph->edges->edgeTargets = (unsigned int*)
