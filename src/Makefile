@@ -7,7 +7,7 @@ LDFLAGS = -lm -lxml2 -lpthread -lalglib
 NVCC = nvcc
 CUDA_LINK = link.o
 CUDA_ARCH = -arch=sm_20
-NVCCFLAGS	= -G -Xcompiler -rdynamic $(CUDA_ARCH) -dc \
+NVCCFLAGS	= -G -g -lineinfo -Xcompiler -rdynamic $(CUDA_ARCH) -dc \
             --ptxas-options=-v -prec-sqrt=true -prec-div=true \
             -ccbin=`which g++-4.7` -DDEBUG  -I$(CULA_INC_PATH)
 CUDA_LDFLAGS	:= $(LDFLAGS) -lcudart -lcula_lapack -lcublas
@@ -40,7 +40,7 @@ seq: $(OBJECTS) $(OBJECTS_SEQ)
 
 par: $(OBJECTS_PAR) $(OBJECTS)
 	$(NVCC) $(CUDA_ARCH) $(OBJECTS_PAR) -dlink -o $(CUDA_LINK)
-	$(CC) -o $(TARGETS) $(CUDA_LINK) $^ $(CUDA_LIBS) $(CUDA_LDFLAGS)
+	$(CC) -rdynamic -o $(TARGETS) $(CUDA_LINK) $^ $(CUDA_LIBS) $(CUDA_LDFLAGS)
 	
 
 clean:
