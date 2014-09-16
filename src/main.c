@@ -127,10 +127,12 @@ int main(int argc, char* argv[])
    vectorAverageNewVectorArray(graph->vertices->numvertices);
 
   // Never stop. Break manually when end of file is reached.
-  for (size_t graphIteration = 0; graphIteration >= 0; graphIteration++)
+  unsigned int graphIteration = 0;
+  while (1)
   {
     // Create new speed vectors and set them to the negative value of the vertex
     // stars positions.
+
     float* speedvectors =
      vectorAverageNewVectorArray(graph->vertices->numvertices);
     utilVectorSetByScalar(speedvectors, 0, graph->vertices->numvertices * 2);
@@ -175,7 +177,7 @@ int main(int argc, char* argv[])
         graph->edges->edgeTargets, vertexlabels);
 
     unsigned int* h_vertexlabels = (unsigned int*) utilDataTransferDeviceToHost(vertexlabels,
-        numvertices * sizeof(unsigned int), 1);
+        numvertices * sizeof(unsigned int), 0);
 
     for (size_t i = 0; i < numvertices; i++)
     {
@@ -184,8 +186,8 @@ int main(int argc, char* argv[])
     fprintf(outputFile, "\n");
 
     // Load the next set of edges.
-    utilFreeDeviceData(edges->numedges);
-    utilFreeDeviceData(edges->edgeTargets);
+    utilFreeDeviceData(graph->edges->numedges);
+    utilFreeDeviceData(graph->edges->edgeTargets);
     edges = gexfParseFileEdgesSomewhereInInterval(inputFile, graph,
         graphIteration, graphIteration + WINDOW_SIZE);
     if (!edges->maxedges)
@@ -206,6 +208,7 @@ int main(int argc, char* argv[])
       graph->edges->edgeTargets = (unsigned int*)
        utilDataTransferHostToDevice(graph->edges->edgeTargets,
           sizeEdgeArray * sizeof(unsigned int), 1);
+      graphIteration++;
     }
   }
 
