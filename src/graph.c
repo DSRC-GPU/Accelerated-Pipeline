@@ -7,7 +7,7 @@
 Edges* newEdges(unsigned int numvertices)
 {
   Edges* edges = (Edges*) calloc(1, sizeof(Edges));
-  edges->numedges = (unsigned int*) calloc(numvertices, sizeof(float));
+  edges->numedges = (unsigned int*) calloc(numvertices, sizeof(unsigned int));
   edges->edgeTargets = (unsigned int*) calloc(numvertices,
       sizeof(unsigned int));
   return edges;
