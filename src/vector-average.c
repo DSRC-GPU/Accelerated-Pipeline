@@ -1,6 +1,7 @@
 
 #include "vector-average.h"
 #include "util.h"
+#include <assert.h>
 #include <stdlib.h>
 
 float* vectorAverageNewVectorArray(unsigned int numelements)
@@ -49,6 +50,7 @@ void vectorAverageComputeAverage(float** window, unsigned int numelements,
     else
       total--;
   }
+  assert(total != 0);
   utilVectorDevideByScalar(average, total, numelements * 2);
 }
 

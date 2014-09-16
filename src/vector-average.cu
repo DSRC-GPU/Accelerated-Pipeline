@@ -1,11 +1,14 @@
 
 #include "vector-average.h"
 #include "util.h"
+#include <assert.h>
+#include <stdio.h>
 
 float* vectorAverageNewVectorArray(unsigned int numelements)
 {
   float* array = NULL;
-  cudaMalloc(&array, 2 * numelements * sizeof(float));
+  cudaError_t err = cudaMalloc(&array, 2 * numelements * sizeof(float));
+  assert(err != cudaErrorMemoryAllocation);
   return array;
 }
 
@@ -36,6 +39,10 @@ void vectorAverageShiftAndAdd(float** window, float* newEntry)
     window[i - 1] = window[i];
   }
   window[WINDOW_SIZE - 1] = newEntry;
+  for (size_t i = 0; i < WINDOW_SIZE; i++)
+  {
+    DEBUG_PRINT("Window [%lu]: %p\n", i, window[i]);
+  }
 }
 
 void vectorAverageComputeAverage(float** window, unsigned int numelements,
@@ -50,6 +57,7 @@ void vectorAverageComputeAverage(float** window, unsigned int numelements,
     else
       total--;
   }
+  assert(total != 0);
   utilVectorDevideByScalar(average, total, numelements * 2);
 }
 
