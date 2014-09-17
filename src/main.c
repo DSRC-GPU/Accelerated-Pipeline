@@ -132,6 +132,11 @@ int main(int argc, char* argv[])
   {
     // Create new speed vectors and set them to the negative value of the vertex
     // stars positions.
+#ifdef DEBUG
+    DEBUG_PRINT("LOCATIONS\n");
+    utilPrintDeviceArray(graph->vertices->vertexXLocs,
+        graph->vertices->numvertices);
+#endif
 
     float* speedvectors =
      vectorAverageNewVectorArray(graph->vertices->numvertices);
