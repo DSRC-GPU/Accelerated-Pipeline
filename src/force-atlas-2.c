@@ -8,6 +8,7 @@
 #include <string.h>
 #include <float.h>
 #include <limits.h>
+#include <assert.h>
 #include "force-atlas-2.h"
 #include "math.h"
 #include "timer.h"

@@ -29,6 +29,7 @@ void pca(float* d_inMatrix, unsigned int inRows, unsigned int inCols,
   // Perform SVD on Y.
   pcaSVD(d_Y, inCols, inRows, d_PC);
 
+  DEBUG_PRINT("PC ARRAY\n");
   DEBUG_PRINT_DEVICE(d_PC, inRows * inRows);
   DEBUG_PRINT_DEVICE(d_inMatrix, inRows * inCols);
 

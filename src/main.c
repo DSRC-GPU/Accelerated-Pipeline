@@ -32,7 +32,7 @@ int main(int argc, char* argv[])
 
   // Input parsing.
   const char* inputFile = NULL;
-  unsigned int numTicks = 100;
+  unsigned int numTicks = 300;
   float phiFine = 0.01;
   float phiCoarse = 0.3;
   unsigned int phiFineRounds = 200;
