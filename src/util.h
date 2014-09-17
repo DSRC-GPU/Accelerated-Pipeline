@@ -152,7 +152,7 @@ void* utilAllocateData(unsigned int numbytes);
  *
  * \param[in] dptr Pointer to device memory to free.
  */
-void utilFreeDeviceData(float* dptr);
+void utilFreeDeviceData(void* dptr);
 
 /*!
  * Checks and prints cuda errors.

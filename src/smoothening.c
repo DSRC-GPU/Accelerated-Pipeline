@@ -10,11 +10,6 @@ void smootheningPrepareEdges(unsigned int* hostEdges,
   *numedges = hostNumEdges;
 }
 
-void smootheningPrepareOutput(float** output, unsigned int numvertices)
-{
-  *output = (float*) calloc(numvertices, sizeof(float));
-}
-
 void smootheningCleanEdges(unsigned int* edges, unsigned int* numedges)
 {
   free(edges);

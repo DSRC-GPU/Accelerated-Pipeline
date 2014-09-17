@@ -56,5 +56,7 @@ void connectedComponent(unsigned int numvertices, unsigned int* numedges,
       }
     }
   }
+  free(f1);
+  free(f2);
 }
 

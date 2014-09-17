@@ -9,7 +9,7 @@
  * The number of spring embedding runs that will be used to compute the average
  * vectors.
  */
-#define WINDOW_SIZE 10
+#define WINDOW_SIZE 30
 
 /*!
  * Allocates a new array on the device to store the speed vectors.

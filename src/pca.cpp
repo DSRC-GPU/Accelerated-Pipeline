@@ -76,6 +76,8 @@ void pca(float* d_inMatrix, unsigned int inRows, unsigned int inCols,
       d_outMatrix[j + i * inCols] = outMatrix[j][i];
     }
   }
+
+  free(inMatrixDouble);
 }
 
 void pcaUpdateMean(float* d_inMatrix, unsigned int inRows, unsigned int inCols)

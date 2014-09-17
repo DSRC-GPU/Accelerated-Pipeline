@@ -38,10 +38,6 @@ typedef struct Vertices
    */
   unsigned int numvertices;
   /*!
-   * The IDs of all vertices. The device assumes that the vertices are in order.
-   */
-  int* vertexIds;
-  /*!
    * An array specifying the x location of each vertex.
    */
   float* vertexXLocs;
@@ -96,7 +92,7 @@ void graphShrinkEdgeSpaceToNumberOfEdges(Graph* graph);
 /*!
  * Frees the memory allocated for the edges struct.
  */
-void freeEdges(Edges* edges, unsigned int numvertices);
+void freeEdges(Edges* edges);
 
 /*!
  * Create a new Vertices struct with place for the specified number of vertices.

@@ -95,5 +95,8 @@ void connectedComponent(unsigned int numvertices, unsigned int* numedges,
 
     cudaMemcpy(h_m, d_m, sizeof(unsigned int), cudaMemcpyDeviceToHost);
   }
+
+  cudaFree(d_F1);
+  cudaFree(d_F2);
 }
 
