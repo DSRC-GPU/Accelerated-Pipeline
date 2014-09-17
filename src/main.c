@@ -220,8 +220,8 @@ int main(int argc, char* argv[])
   // Clean up
   utilFreeDeviceData(graph->vertices->vertexXLocs);
   utilFreeDeviceData(graph->vertices->vertexYLocs);
-  utilFreeDeviceData(edges->numedges);
-  utilFreeDeviceData(edges->edgeTargets);
+  free(edges->numedges);
+  free(edges->edgeTargets);
   free(graph->vertices);
   free(edges);
 
