@@ -2,6 +2,8 @@
 #ifndef PIPELINE_H_
 #define PIPELINE_H_
 
+#include "graph.h"
+
 typedef struct PipelineData
 {
   unsigned int numSpringEmbeddingIters;
@@ -12,7 +14,7 @@ typedef struct PipelineData
   unsigned int windowSize;
 } PipelineData;
 
-void pipeline(Graph* graph, PipelineData* data);
+void pipeline(const char* inputFile, PipelineData* data);
 
 void pipelineSingleStep(Graph* graph, PipelineData* data);
 
