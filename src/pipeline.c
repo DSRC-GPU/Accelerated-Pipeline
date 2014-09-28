@@ -84,10 +84,11 @@ void pipelineSingleStep(Graph* graph, PipelineData* data)
     static float* projectedData = (float*) utilAllocateData(numvertices * 2 * sizeof(float));
     static float* averageSpeeds =
      vectorAverageNewVectorArray(graph->vertices->numvertices);
-    static float* speedvectors =
-     vectorAverageNewVectorArray(graph->vertices->numvertices);
 
     static FILE* outputFile = fopen("out", "w");
+
+    float* speedvectors =
+     vectorAverageNewVectorArray(graph->vertices->numvertices);
 
     utilVectorSetByScalar(speedvectors, 0, graph->vertices->numvertices * 2);
     utilVectorAdd(&speedvectors[0], graph->vertices->vertexXLocs,
