@@ -2,4 +2,4 @@
 
 TITAN=GTX-Titan
 
-prun -native '-l fat,gpu=K20' ./ap 1 -i $1 -n $2
+prun -no-panda -native '-l fat,gpu=K20' ./ap 1 -i $1 -n $2
