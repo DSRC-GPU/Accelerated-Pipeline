@@ -2,7 +2,7 @@
 CC = g++
 CPPFLAGS = -I/usr/include/libxml2 -O0
 CFLAGS = -Wall -Wextra -pedantic -ffloat-store -std=c++0x
-LDFLAGS = -lm -lxml2 -lpthread #-lalglib
+LDFLAGS = -lm -lxml2 -lpthread -lalglib
 
 NVCC = nvcc
 CUDA_LINK = link.o
@@ -17,13 +17,13 @@ CUDA_LIBS	= $(LIBS) -L"$(CUDA_INSTALL_PATH)/lib64" -L"$(CULA_LIB_PATH_64)"
 
 TARGETS = ap
 
-OBJECTS = main.c.o graph.c.o gexfparser.c.o timer.c.o pipeline.c.o
+OBJECTS = main.c.o graph.c.o gexfparser.c.o pipeline.c.o
 OBJECTS_SEQ = vector.c.o force-atlas-2.c.o util.c.o \
 	smoothening.c.o pca.cpp.o vector-average.c.o break-edges.c.o \
-  connected-component.c.o pipeline.c.o
+  connected-component.c.o pipeline.c.o timer.c.o
 OBJECTS_PAR = vector.o force-atlas-2.o cuda-timer.o cuda-stream.o util.o \
 	smoothening.o pca.o test-pca.o test-util.o \
-  vector-average.o break-edges.o connected-component.o
+  vector-average.o break-edges.o connected-component.o timer.o
 
 %.c.o: %.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
