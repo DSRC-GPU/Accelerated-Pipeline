@@ -39,6 +39,6 @@ void resetCudaTimer(CudaTimer* cTimer);
 /*!
  * Prints the elapsed time between timer start and timer stop.
  */
-void printCudaTimer(CudaTimer* cTimer);
+void printCudaTimer(CudaTimer* cTimer, char* msg);
 
 #endif

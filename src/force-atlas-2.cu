@@ -741,15 +741,13 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
 
     checkErrors(1);
 
-    printf("time: all forces and moving vertices.\n");
-    printCudaTimer(&timer);
+    printCudaTimer(&timer, "time: all forces and moving vertices.");
     resetCudaTimer(&timer);
 
     // DEBUG_PRINT_DEVICE(data.forceX, g->vertices->numvertices);
 
     stopCudaTimer(&timerIteration);
-    printf("time: iteration.\n");
-    printCudaTimer(&timerIteration);
+    printCudaTimer(&timerIteration, "time: iteration.");
     resetCudaTimer(&timerIteration);
 
     cudaMemset(data.graphSwing, 0, sizeof(float));
@@ -761,8 +759,7 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
         g->vertices->numvertices, data.swg, data.tra, numEdges,
         data.graphSwing, data.graphTract);
     stopCudaTimer(&timer);
-    printf("time: graph swing and traction.\n");
-    printCudaTimer(&timer);
+    printCudaTimer(&timer, "time: graph swing and traction.");
     resetCudaTimer(&timer);
 
     checkErrors(2);

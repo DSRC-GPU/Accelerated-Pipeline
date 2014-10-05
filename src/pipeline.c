@@ -12,6 +12,7 @@
 #include "smoothening.h"
 #include "break-edges.h"
 #include "connected-component.h"
+#include "cuda-timer.h"
 
 void pipeline(const char* inputFile, PipelineData* data)
 {
@@ -22,6 +23,9 @@ void pipeline(const char* inputFile, PipelineData* data)
 
   float numvertices = graph->vertices->numvertices;
 
+  CudaTimer datatransferTimer;
+  startCudaTimer(&datatransferTimer);
+
   // Transfer the vertex data to the gpu.
   graph->vertices->vertexXLocs = (float*)
    utilDataTransferHostToDevice(graph->vertices->vertexXLocs, numvertices *
@@ -30,10 +34,18 @@ void pipeline(const char* inputFile, PipelineData* data)
    utilDataTransferHostToDevice(graph->vertices->vertexYLocs, numvertices *
        sizeof(float), 1);
 
+  stopCudaTimer(&datatransferTimer);
+  printCudaTimer(&datatransferTimer, "copying vertices to device.");
+
+  CudaTimer iterationTimer, edgesToDeviceTimer;
+
   unsigned int iter = 1;
   while (graph->edges->maxedges > 0)
   {
+
     float sizeEdgeArray = graph->edges->maxedges * numvertices;
+
+    startCudaTimer(&edgesToDeviceTimer);
 
     // Transfer the edge data to the gpu.
     graph->edges->numedges = (unsigned int*) utilDataTransferHostToDevice(graph->edges->numedges,
@@ -42,7 +54,15 @@ void pipeline(const char* inputFile, PipelineData* data)
      utilDataTransferHostToDevice(graph->edges->edgeTargets,
         sizeEdgeArray * sizeof(unsigned int), 1);
 
+    stopCudaTimer(&edgesToDeviceTimer);
+    printCudaTimer(&edgesToDeviceTimer, "copying edges to device.");
+
+    startCudaTimer(&iterationTimer);
+
     pipelineSingleStep(graph, data);
+
+    stopCudaTimer(&iterationTimer);
+    printCudaTimer(&iterationTimer, "pipeline iteration.");
 
     utilFreeDeviceData(graph->edges->numedges);
     utilFreeDeviceData(graph->edges->edgeTargets);
@@ -87,8 +107,15 @@ void pipelineSingleStep(Graph* graph, PipelineData* data)
 
     static FILE* outputFile = fopen("out", "w");
 
+    static CudaTimer speedvectorInitTimer, springEmbeddingTimer,
+                     speedvectorFinishTimer, pcaTimer, smootheningFineTimer,
+                     smootheningCoarseTimer, breakEdgesTimer,
+                     connectedComponentTimer, verticesToHostTimer;
+
     float* speedvectors =
      vectorAverageNewVectorArray(graph->vertices->numvertices);
+
+    startCudaTimer(&speedvectorInitTimer);
 
     utilVectorSetByScalar(speedvectors, 0, graph->vertices->numvertices * 2);
     utilVectorAdd(&speedvectors[0], graph->vertices->vertexXLocs,
@@ -98,7 +125,15 @@ void pipelineSingleStep(Graph* graph, PipelineData* data)
     utilVectorMultiplyByScalar(speedvectors, -1, graph->vertices->numvertices *
         2);
 
+    stopCudaTimer(&speedvectorInitTimer);
+    printCudaTimer(&speedvectorInitTimer, "setting up speed vectors");
+    startCudaTimer(&springEmbeddingTimer);
+
     fa2RunOnGraph(graph, data->numSpringEmbeddingIters);
+
+    stopCudaTimer(&springEmbeddingTimer);
+    printCudaTimer(&springEmbeddingTimer, "running spring-embedding");
+    startCudaTimer(&speedvectorFinishTimer);
 
     // Add the final vertex positions to obtain the displacement.
     utilVectorAdd(&speedvectors[0], graph->vertices->vertexXLocs,
@@ -109,23 +144,51 @@ void pipelineSingleStep(Graph* graph, PipelineData* data)
     vectorAverageComputeAverage(window,
         graph->vertices->numvertices, averageSpeeds);
 
+    stopCudaTimer(&speedvectorFinishTimer);
+    printCudaTimer(&speedvectorFinishTimer, "finishing speed vectors");
+    startCudaTimer(&pcaTimer);
+
     pca(averageSpeeds, 2, numvertices, projectedData);
+
+    stopCudaTimer(&pcaTimer);
+    printCudaTimer(&pcaTimer, "pca");
+    startCudaTimer(&smootheningFineTimer);
 
     smootheningRun(projectedData,
         graph->vertices->numvertices, graph->edges->numedges,
         graph->edges->edgeTargets, data->phiFineRounds, data->phiFine, smoothFineValues);
+
+    stopCudaTimer(&smootheningFineTimer);
+    printCudaTimer(&smootheningFineTimer, "smoothening fine");
+    startCudaTimer(&smootheningCoarseTimer);
+
     smootheningRun(projectedData,
         graph->vertices->numvertices, graph->edges->numedges,
         graph->edges->edgeTargets, data->phiCoarseRounds, data->phiCoarse, smoothCoarseValues);
 
+    stopCudaTimer(&smootheningCoarseTimer);
+    printCudaTimer(&smootheningCoarseTimer, "smoothening coarse");
+    startCudaTimer(&breakEdgesTimer);
+
     breakEdges(graph->vertices->numvertices, smoothFineValues, smoothCoarseValues,
         graph->edges->numedges, graph->edges->edgeTargets);
+
+    stopCudaTimer(&breakEdgesTimer);
+    printCudaTimer(&breakEdgesTimer, "breaking edges");
+    startCudaTimer(&connectedComponentTimer);
 
     connectedComponent(graph->vertices->numvertices, graph->edges->numedges,
         graph->edges->edgeTargets, vertexlabels);
 
+    stopCudaTimer(&connectedComponentTimer);
+    printCudaTimer(&connectedComponentTimer, "connected component");
+    startCudaTimer(&verticesToHostTimer);
+
     unsigned int* h_vertexlabels = (unsigned int*) utilDataTransferDeviceToHost(vertexlabels,
         numvertices * sizeof(unsigned int), 0);
+
+    stopCudaTimer(&verticesToHostTimer);
+    printCudaTimer(&verticesToHostTimer, "copying vertex labels to host");
 
     for (size_t i = 0; i < numvertices; i++)
     {

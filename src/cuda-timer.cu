@@ -20,10 +20,10 @@ void resetCudaTimer(CudaTimer* cTimer)
   cudaEventDestroy(cTimer->stop);
 }
 
-void printCudaTimer(CudaTimer* cTimer)
+void printCudaTimer(CudaTimer* cTimer, char* msg)
 {
   float time;
   cudaEventElapsedTime(&time, cTimer->start, cTimer->stop);
-  printf("kernel time (ms): %f.\n", time);
+  printf("timer: %s\nkernel time (ms): %f.\n", msg, time);
 }
 
