@@ -19,8 +19,6 @@
 #define DEBUG_PRINT_DEVICE(...)
 #endif
 
-#include <cuda_runtime.h>
-
 /*!
  * Default block size of all cuda kernels.
  */
