@@ -378,7 +378,7 @@ void fa2RunOnce(Graph* g)
   static float* dispX = NULL;
   static float* dispY = NULL;
 
-  static Timer timer;
+  Timer* timer = timerNew();
 
   float graphSwing = 0.0;
   float graphTract = 0.0;
@@ -404,29 +404,26 @@ void fa2RunOnce(Graph* g)
   memset(forceY, 0, sizeof(float) * g->vertices->numvertices);
 
   // Gravity force
-  startTimer(&timer);
+  startTimer(timer);
   fa2Gravity(g, forceX, forceY, g->edges->numedges);
-  stopTimer(&timer);
+  stopTimer(timer);
   DEBUG_PRINT_DEVICE(forceX, g->vertices->numvertices);
 
-  //printf("time: gravity.\n");
-  //printTimer(&timer);
+  printTimer(timer, "force: gravity");
   // Repulsion between vertices
-  startTimer(&timer);
+  startTimer(timer);
   fa2Repulsion(g, forceX, forceY, g->edges->numedges);
-  stopTimer(&timer);
+  stopTimer(timer);
   DEBUG_PRINT_DEVICE(forceX, g->vertices->numvertices);
 
-  //printf("time: repulsion.\n");
-  //printTimer(&timer);
+  printTimer(timer, "force: repulsion");
   // Attraction on edges
-  startTimer(&timer);
+  startTimer(timer);
   fa2Attraction(g, forceX, forceY);
-  stopTimer(&timer);
+  stopTimer(timer);
   DEBUG_PRINT_DEVICE(forceX, g->vertices->numvertices);
 
-  //printf("time: attraction.\n");
-  //printTimer(&timer);
+  printTimer(timer, "force: attraction");
 
   // Calculate speed of vertices.
   // Update swing of vertices.
@@ -453,27 +450,28 @@ void fa2RunOnce(Graph* g)
   fa2UpdateDisplacement(g, speed, forceX, forceY, dispX, dispY);
 
   // Update vertex locations based on speed.
-  startTimer(&timer);
+  startTimer(timer);
   fa2UpdateLocation(g, dispX, dispY);
 
-  stopTimer(&timer);
-  //printf("time: moving vertices.\n");
-  //printTimer(&timer);
+  stopTimer(timer);
+  printTimer(timer, "moving vertices");
 
   // Set current forces as old forces in vertex data.
   fa2SaveOldForces(g, forceX, forceY, oldForceX, oldForceY);
+
+  timerClean(timer);
 }
 
 void fa2RunOnGraph(Graph* g, unsigned int n)
 {
-  Timer timer;
+  Timer* timer = timerNew();
   for (size_t i = 0; i < n; i++)
   {
-    startTimer(&timer);
+    startTimer(timer);
     fa2RunOnce(g);
-    stopTimer(&timer);
-    //printf("time: iteration.\n");
-    //printTimer(&timer);
+    stopTimer(timer);
+    printTimer(timer, "pipeline iteration");
   }
+  timerClean(timer);
 }
 
