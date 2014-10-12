@@ -59,7 +59,7 @@ void printGraph(Graph* g)
     return;
   for (size_t i = 0; i < g->vertices->numvertices; i++)
   {
-    printf("%d %.15f %.15f\n", i,
+    printf("%zu %.15f %.15f\n", i,
         g->vertices->vertexXLocs[i], g->vertices->vertexYLocs[i]);
   }
 }
