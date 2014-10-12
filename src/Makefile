@@ -1,8 +1,8 @@
 
 CC = g++
-CPPFLAGS = -I/usr/include/libxml2 -Ialglib/cpp/src -O0
+CPPFLAGS = -I/usr/include/libxml2 -I../alglib/cpp/src -O0
 CFLAGS = -Wall -Wextra -pedantic -ffloat-store -std=c++0x
-LDFLAGS = -lm -lxml2 -lpthread -Llibalglib/cpp/src -lalglib
+LDFLAGS = -lm -lxml2 -lpthread -L../alglib/cpp/lib -lalglib
 
 NVCC = nvcc
 CUDA_LINK = link.o
