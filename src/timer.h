@@ -10,23 +10,18 @@
  */
 typedef struct Timer
 {
-  /*!
-   * Struct to save wall time start.
-   */
-  time_t wallTimerStart;
-  /*!
-   * Struct to save wall time end.
-   */
-  time_t wallTimerEnd;
-  /*!
-   * Struct to save cpu time start.
-   */
-  clock_t cpuTimerStart;
-  /*!
-   * Struct to save cpu time end.
-   */
-  clock_t cpuTimerEnd;
+  void* internals;
 } Timer;
+
+/*!
+ * Create a new timer.
+ */
+Timer* timerNew();
+
+/*!
+ * Clean up the timer.
+ */
+void timerClean(Timer* timer);
 
 /*!
  * Starts the timer.
@@ -51,7 +46,8 @@ void resetTimer(Timer* t);
  * and stop. If the timer was not stopped, prints the time between start and
  * now.
  * \param t Timer to print.
+ * \param msg The message to print with the time.
  */
-void printTimer(Timer* t);
+void printTimer(Timer* t, char* msg);
 
 #endif

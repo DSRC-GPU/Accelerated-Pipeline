@@ -1,27 +1,29 @@
 
-CC = g++-4.7
-CPPFLAGS = -I/usr/include/libxml2 -O0
-CFLAGS = -DDEBUG -Wall -Wextra -pedantic -g -ffloat-store
-LDFLAGS = -lm -lxml2 -lpthread -lalglib
+CC = g++
+CPPFLAGS = -I/usr/include/libxml2 -Ialglib/cpp/src -O0
+CFLAGS = -Wall -Wextra -pedantic -ffloat-store -std=c++0x
+LDFLAGS = -lm -lxml2 -lpthread -Llibalglib/cpp/src -lalglib
 
 NVCC = nvcc
 CUDA_LINK = link.o
-CUDA_ARCH = -arch=sm_20
-NVCCFLAGS	= $(CUDA_ARCH) -dc --ptxas-options=-v -prec-sqrt=true -prec-div=true \
-            -ccbin=`which g++-4.7` -DDEBUG  -I$(CULA_INC_PATH)
+CUDA_ARCH = -arch=sm_35
+NVCCFLAGS	= -lineinfo -Xcompiler -rdynamic $(CUDA_ARCH) -dc \
+            --ptxas-options=-v -prec-sqrt=true -prec-div=true \
+            -ccbin=`which g++`  -I$(CULA_INC_PATH)
 CUDA_LDFLAGS	:= $(LDFLAGS) -lcudart -lcula_lapack -lcublas
 LIBS = 
 CUDA_LIBS	= $(LIBS) -L"$(CUDA_INSTALL_PATH)/lib64" -L"$(CULA_LIB_PATH_64)"
 
+
 TARGETS = ap
 
-OBJECTS = main.c.o graph.c.o gexfparser.c.o timer.c.o
+OBJECTS = main.c.o graph.c.o gexfparser.c.o pipeline.c.o
 OBJECTS_SEQ = vector.c.o force-atlas-2.c.o util.c.o \
 	smoothening.c.o pca.cpp.o vector-average.c.o break-edges.c.o \
-  connected-component.c.o
+  connected-component.c.o pipeline.c.o timer.c.o
 OBJECTS_PAR = vector.o force-atlas-2.o cuda-timer.o cuda-stream.o util.o \
 	smoothening.o pca.o test-pca.o test-util.o \
-  vector-average.o break-edges.o connected-component.o
+  vector-average.o break-edges.o connected-component.o timer.o
 
 %.c.o: %.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
@@ -34,12 +36,19 @@ OBJECTS_PAR = vector.o force-atlas-2.o cuda-timer.o cuda-stream.o util.o \
 
 all: seq
 
+seq-debug: CFLAGS += -DDEBUG -g
+seq-debug: seq
+
 seq: $(OBJECTS) $(OBJECTS_SEQ)
 	$(CC) -o $(TARGETS) $(CFLAGS) $^ $(LDFLAGS) 
 
+par-debug: NVCCFLAGS += -DDEBUG -G -g
+par-debug: CFLAGS += -DDEBUG -g
+par-debug: par
+
 par: $(OBJECTS_PAR) $(OBJECTS)
 	$(NVCC) $(CUDA_ARCH) $(OBJECTS_PAR) -dlink -o $(CUDA_LINK)
-	$(CC) -o $(TARGETS) $(CUDA_LINK) $^ $(CUDA_LIBS) $(CUDA_LDFLAGS)
+	$(CC) -rdynamic -o $(TARGETS) $(CUDA_LINK) $^ $(CUDA_LIBS) $(CUDA_LDFLAGS)
 	
 
 clean:

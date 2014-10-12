@@ -97,7 +97,7 @@ void* utilAllocateData(unsigned int numbytes)
   return calloc(1, numbytes);
 }
 
-void utilFreeDeviceData(float* dptr)
+void utilFreeDeviceData(void* dptr)
 {
   free(dptr);
 }

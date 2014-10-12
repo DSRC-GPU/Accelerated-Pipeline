@@ -4,6 +4,7 @@
 
 #include "util.h"
 #include "stdio.h"
+#include <assert.h>
 
 __global__ void utilVectorSetByScalarKernel(float* dst, float scalar,
     unsigned int num)
@@ -196,11 +197,12 @@ void* utilDataTransferDeviceToHost(void* src, unsigned int numbytes,
 void* utilAllocateData(unsigned int numbytes)
 {
   void* res = NULL;
-  cudaMalloc(&res, numbytes);
+  cudaError_t err = cudaMalloc(&res, numbytes);
+  assert(err != cudaErrorMemoryAllocation);
   return res;
 }
 
-void utilFreeDeviceData(float* dptr)
+void utilFreeDeviceData(void* dptr)
 {
   cudaFree(dptr);
 }

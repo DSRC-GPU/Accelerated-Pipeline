@@ -8,6 +8,7 @@
 #include <string.h>
 #include <float.h>
 #include <limits.h>
+#include <assert.h>
 #include "force-atlas-2.h"
 #include "math.h"
 #include "timer.h"
@@ -169,10 +170,13 @@ void fa2Gravity(Graph* g, float* forceX, float* forceY, unsigned int* deg)
     float vx = g->vertices->vertexXLocs[i];
     float vy = g->vertices->vertexYLocs[i];
     float vlen = vectorGetLength(vx, vy);
+    assert(vlen != 0);
     vectorInverse(&vx, &vy);
     vectorMultiply(&vx, &vy, K_G * (deg[i] + 1) / vlen);
     if (i == 0)
+    {
       DEBUG_PRINT("g:%f\n", vx);
+    }
     vectorAdd(&forceX[i], &forceY[i], vx, vy);
   }
 }
@@ -236,7 +240,9 @@ void fa2Attraction(Graph* g, float* forceX, float* forceY)
       // vectorMultiply(&vx2, &vy2, 0.5);
       vectorAdd(&forceX[gid], &forceY[gid], vx2, vy2);
       if (gid == 0)
+      {
         DEBUG_PRINT("a:%f\t%u\n", vx2, target);
+      }
     }
   }
 }
