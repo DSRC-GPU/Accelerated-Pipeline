@@ -26,6 +26,28 @@ void projectData(real_2d_array inMatrix, real_2d_array v, unsigned int rows,
       outMatrix, ic, jc);
 }
 
+void pcaUpdateMean(float* d_inMatrix, unsigned int inRows, unsigned int inCols)
+{
+  float* averages = (float*) calloc(inRows, sizeof(float));
+  for (size_t i = 0; i < inRows; i++)
+  {
+    for (size_t j = 0; j < inCols; j++)
+    {
+      averages[i] += d_inMatrix[j + i * inCols];
+    }
+    averages[i] /= inCols;
+  }
+
+  for (size_t i = 0; i < inRows; i++)
+  {
+    for (size_t j = 0; j < inCols; j++)
+    {
+      d_inMatrix[j + i * inCols] -= averages[i];
+    }
+  }
+  free(averages);
+}
+
 void pca(float* d_inMatrix, unsigned int inRows, unsigned int inCols,
     float* d_outMatrix)
 {
@@ -78,44 +100,5 @@ void pca(float* d_inMatrix, unsigned int inRows, unsigned int inCols,
   }
 
   free(inMatrixDouble);
-}
-
-void pcaUpdateMean(float* d_inMatrix, unsigned int inRows, unsigned int inCols)
-{
-  float* averages = (float*) calloc(inRows, sizeof(float));
-  for (size_t i = 0; i < inRows; i++)
-  {
-    for (size_t j = 0; j < inCols; j++)
-    {
-      averages[i] += d_inMatrix[j + i * inCols];
-    }
-    averages[i] /= inCols;
-  }
-
-  for (size_t i = 0; i < inRows; i++)
-  {
-    for (size_t j = 0; j < inCols; j++)
-    {
-      d_inMatrix[j + i * inCols] -= averages[i];
-    }
-  }
-  free(averages);
-}
-
-void pcaCalculateYMatrix(float* d_inMatrix, unsigned int inRows, unsigned int
-    inCols, float* d_Y)
-{
-
-}
-
-void pcaSVD(float* d_Y, unsigned int inRows, unsigned int inCols, float* d_PC)
-{
-
-}
-
-void pcaCalculateSignals(float* d_PC, float* d_inMatrix, unsigned int inRows,
-    unsigned int inCols, float* d_Signals)
-{
-
 }
 
