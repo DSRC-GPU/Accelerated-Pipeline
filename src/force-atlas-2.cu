@@ -747,7 +747,7 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
     // DEBUG_PRINT_DEVICE(data.forceX, g->vertices->numvertices);
 
     stopCudaTimer(&timerIteration);
-    printCudaTimer(&timerIteration, "time: iteration.");
+    printCudaTimer(&timerIteration, "time: embedding iteration.");
     resetCudaTimer(&timerIteration);
 
     cudaMemset(data.graphSwing, 0, sizeof(float));

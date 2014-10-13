@@ -470,7 +470,7 @@ void fa2RunOnGraph(Graph* g, unsigned int n)
     startTimer(timer);
     fa2RunOnce(g);
     stopTimer(timer);
-    printTimer(timer, "pipeline iteration");
+    printTimer(timer, "embedding iteration");
   }
   timerClean(timer);
 }
