@@ -24,7 +24,31 @@ func GetOutName (outdir, file string, iterations int) string {
   return filepath.Join(absout, outname) + "-" + strconv.Itoa(iterations)
 }
 
+func ReserveNode() int {
+  command := exec.Command("preserve", "-t", "30:00", "-#", "1")
+  command.Run()
+  getId := exec.Command("preserve", "-list")
+  out, _ := getId.Output()
+  outputString := string(out[:])
+  lines := strings.Split(outputString, "\n")
+  for _, line := range lines {
+    if strings.Contains(line, "jdonkerv") {
+      res, _ := strconv.Atoi(strings.Fields(line)[0])
+      return res
+    }
+  }
+  return -1
+}
+
+func CleanNode(nodeid int) {
+  command := exec.Command("preserve", "-c", strconv.Itoa(nodeid))
+  command.Run()
+}
+
 func main () {
+  CleanNode(ReserveNode())
+  return
+
   inputDirPtr := flag.String("indir", "", "The directory with the gexf files to run")
   outputDirPtr := flag.String("outdir", "", "The directory where the run time files will be placed.")
   
@@ -37,7 +61,12 @@ func main () {
     outfilename := GetOutName(*outputDirPtr, filepath.Base(fin), iterations)
     fmt.Println(outfilename)
 
-    command := exec.Command("./run", fin, strconv.Itoa(iterations))
+    nodeid := ReserveNode()
+
+    command := exec.Command("prun", "-no-panda", "-reserve", strconv.Itoa(nodeid),
+    "-native", "'-l fat,gpu=K20'", "./ap", "1", "-i", fin,
+    "-n", strconv.Itoa(iterations))
+
     grep := exec.Command("grep", "time", "-A", "1")
     commandOut, _ := command.StdoutPipe()
     grep.Stdin = commandOut
@@ -54,5 +83,7 @@ func main () {
     io.Copy(writer, grepOut)
     grep.Wait()
     command.Wait()
+
+    CleanNode(nodeid)
   }
 }
