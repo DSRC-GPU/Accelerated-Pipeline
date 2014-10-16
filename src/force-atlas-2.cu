@@ -10,7 +10,7 @@
 #include <assert.h>
 #include "force-atlas-2.h"
 #include "math.h"
-#include "cuda-timer.h"
+#include "timer.h"
 #include "cuda-stream.h"
 #include "vector.h"
 #include "util.h"
@@ -710,7 +710,8 @@ void checkErrors(unsigned int num)
 
 void fa2RunOnGraph(Graph* g, unsigned int iterations)
 {
-  CudaTimer timerIteration, timer;
+  Timer* timerIteration = timerNew();
+  Timer* timer = timerNew();
 
   // Allocate data for fa2 data.
   ForceAtlas2Data data;
@@ -729,38 +730,34 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
   for (size_t i = 0; i < iterations; i++)
   {
     // Run fa2 spring embedding kernel.
-    startCudaTimer(&timerIteration);
+    startTimer(timerIteration);
 
     // Compute graph speed, vertex forces, speed and displacement.
-    startCudaTimer(&timer);
+    startTimer(timer);
     fa2kernel<<<numblocks, BLOCK_SIZE>>>(vxLocs, vyLocs,
         g->vertices->numvertices, edgeTargets, numEdges,
         g->edges->maxedges, data.tra, data.swg, data.forceX, data.forceY,
         data.oldForceX, data.oldForceY);
-    stopCudaTimer(&timer);
+    stopTimer(timer);
 
     checkErrors(1);
 
-    printCudaTimer(&timer, "time: all forces and moving vertices.");
-    resetCudaTimer(&timer);
+    printTimer(timer, "time: all forces and moving vertices.");
+    resetTimer(timer);
 
     // DEBUG_PRINT_DEVICE(data.forceX, g->vertices->numvertices);
-
-    stopCudaTimer(&timerIteration);
-    printCudaTimer(&timerIteration, "time: embedding iteration.");
-    resetCudaTimer(&timerIteration);
 
     cudaMemset(data.graphSwing, 0, sizeof(float));
     cudaMemset(data.graphTract, 0, sizeof(float));
 
     // Run reductions on vertex swing and traction.
-    startCudaTimer(&timer);
+    startTimer(timer);
     fa2GraphSwingTract<<<numblocks_reduction, BLOCK_SIZE>>>(
         g->vertices->numvertices, data.swg, data.tra, numEdges,
         data.graphSwing, data.graphTract);
-    stopCudaTimer(&timer);
-    printCudaTimer(&timer, "time: graph swing and traction.");
-    resetCudaTimer(&timer);
+    stopTimer(timer);
+    printTimer(timer, "time: graph swing and traction.");
+    resetTimer(timer);
 
     checkErrors(2);
 
@@ -770,6 +767,10 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
         data.graphSpeed);
 
     checkErrors(3);
+
+    stopTimer(timerIteration);
+    printTimer(timerIteration, "time: embedding iteration.");
+    resetTimer(timerIteration);
   }
 
   fa2CleanMemory(&data, g->vertices->numvertices);
