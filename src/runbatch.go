@@ -14,7 +14,7 @@ import (
   "time"
 )
 
-var resource = "-l fat,gpu=K20"
+var resource = "-l fat,gpu=gtx680"
 
 func GetFiles(inputdir string) []string {
   files, _ := filepath.Glob(inputdir + "/*.gexf")
@@ -65,7 +65,7 @@ func main () {
   files := GetFiles(*inputDirPtr)
 
   for _, fin := range files {
-    iterations := 100
+    iterations := 10
     outfilename := GetOutName(*outputDirPtr, filepath.Base(fin), iterations)
     fmt.Println(outfilename)
 
