@@ -1,12 +1,12 @@
 
 CC = g++
-CPPFLAGS = -I/usr/include/libxml2 -I../alglib/cpp/src -O0
+CPPFLAGS = -I/usr/include/libxml2 -I../alglib/cpp/src
 CFLAGS = -Wall -Wextra -pedantic -ffloat-store -std=c++0x
 LDFLAGS = -lm -lxml2 -lpthread -L../alglib/cpp/lib -lalglib
 
 NVCC = nvcc
 CUDA_LINK = link.o
-CUDA_ARCH = -arch=sm_35
+CUDA_ARCH = -arch=sm_30
 NVCCFLAGS	= -lineinfo -Xcompiler -rdynamic $(CUDA_ARCH) -dc \
             --ptxas-options=-v -prec-sqrt=true -prec-div=true \
             -ccbin=`which g++`  -I$(CULA_INC_PATH)
