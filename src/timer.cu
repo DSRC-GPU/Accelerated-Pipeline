@@ -17,7 +17,7 @@ typedef struct ParTimer {
 
 Timer* timerNew()
 {
-  Timer* timer = calloc(1, sizeof(Timer));
+  Timer* timer = (Timer*) calloc(1, sizeof(Timer));
   timer->internals = calloc(1, sizeof(ParTimer));
   return timer;
 }
