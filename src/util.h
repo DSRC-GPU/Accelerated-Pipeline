@@ -22,7 +22,7 @@
 /*!
  * Default block size of all cuda kernels.
  */
-#define BLOCK_SIZE 64
+#define BLOCK_SIZE 512
 
 /*!
  * Sets all values in an array to a scalar value.
