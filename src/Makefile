@@ -17,7 +17,9 @@ CUDA_LIBS	= $(LIBS) -L"$(CUDA_INSTALL_PATH)/lib64" -L"$(CULA_LIB_PATH_64)"
 
 TARGETS = ap
 
-OBJECTS = main.c.o graph.c.o gexfparser.c.o pipeline.c.o
+MAIN = main.c.o
+SEP_MAIN = se-performance.c.o
+OBJECTS = graph.c.o gexfparser.c.o pipeline.c.o
 OBJECTS_SEQ = vector.c.o force-atlas-2.c.o util.c.o \
 	smoothening.c.o pca.cpp.o vector-average.c.o break-edges.c.o \
   connected-component.c.o pipeline.c.o timer.c.o
@@ -39,17 +41,20 @@ all: seq
 seq-debug: CFLAGS += -DDEBUG -g
 seq-debug: seq
 
-seq: $(OBJECTS) $(OBJECTS_SEQ)
+seq: $(MAIN) $(OBJECTS) $(OBJECTS_SEQ)
 	$(CC) -o $(TARGETS) $(CFLAGS) $^ $(LDFLAGS) 
 
 par-debug: NVCCFLAGS += -DDEBUG -G -g
 par-debug: CFLAGS += -DDEBUG -g
 par-debug: par
 
-par: $(OBJECTS_PAR) $(OBJECTS)
+par: $(MAIN) $(OBJECTS_PAR) $(OBJECTS)
 	$(NVCC) $(CUDA_ARCH) $(OBJECTS_PAR) -dlink -o $(CUDA_LINK)
 	$(CC) -rdynamic -o $(TARGETS) $(CUDA_LINK) $^ $(CUDA_LIBS) $(CUDA_LDFLAGS)
-	
+
+sep: $(SEP_MAIN) $(OBJECTS_PAR) $(OBJECTS)
+	$(NVCC) $(CUDA_ARCH) $(OBJECTS_PAR) -dlink -o $(CUDA_LINK)
+	$(CC) -rdynamic -o $(TARGETS) $(CUDA_LINK) $^ $(CUDA_LIBS) $(CUDA_LDFLAGS)
 
 clean:
 	rm -rf *.o
