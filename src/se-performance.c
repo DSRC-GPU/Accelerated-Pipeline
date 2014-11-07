@@ -14,7 +14,12 @@
 #include <unistd.h>
 #include <stdio.h>
 
+#include "gexfparser.h"
 #include "pipeline.h"
+#include "timer.h"
+#include "util.h"
+#include "force-atlas-2.h"
+#include "vector-average.h"
 
 const char* argPhiFine = "--phi-fine";
 const char* argPhiCoarse = "--phi-coarse";
@@ -29,13 +34,7 @@ int main(int argc, char* argv[])
   // Input parsing.
   const char* inputFile = NULL;
 
-  PipelineData data;
-  data.numSpringEmbeddingIters = 300;
-  data.phiFine = 0.01;
-  data.phiCoarse = 0.3;
-  data.phiFineRounds = 200;
-  data.phiCoarseRounds = 40;
-  data.windowSize = 30;
+  unsigned int numSpringEmbeddingIters = 300;
 
   for (int i = 1; i < argc; i++)
   {
@@ -46,27 +45,7 @@ int main(int argc, char* argv[])
     }
     else if (!strcmp(argv[i], "-n"))
     {
-      data.numSpringEmbeddingIters = atoi(argv[++i]);
-    }
-    else if (!strcmp(argv[i], argPhiFine))
-    {
-      data.phiFine = atof(argv[++i]);
-    }
-    else if (!strcmp(argv[i], argPhiCoarse))
-    {
-      data.phiCoarse = atof(argv[++i]);
-    }
-    else if (!strcmp(argv[i], argPhiFineRounds))
-    {
-      data.phiFineRounds = atoi(argv[++i]);
-    }
-    else if (!strcmp(argv[i], argPhiCoarseRounds))
-    {
-      data.phiCoarseRounds = atoi(argv[++i]);
-    }
-    else if (!strcmp(argv[i], argWindowSize))
-    {
-      data.windowSize = atoi(argv[++i]);
+      numSpringEmbeddingIters = atoi(argv[++i]);
     }
     else
     {
@@ -109,7 +88,7 @@ int main(int argc, char* argv[])
    utilDataTransferHostToDevice(graph->edges->edgeTargets,
       sizeEdgeArray * sizeof(unsigned int), 1);
 
-  fa2RunOnGraph(graph, data->numSpringEmbeddingIters);
+  fa2RunOnGraph(graph, numSpringEmbeddingIters);
 
   // Clean up edges.
   utilFreeDeviceData(graph->edges->numedges);
