@@ -14,7 +14,7 @@ import (
   "time"
 )
 
-var resource = "-l fat,gpu=gtx680"
+var resource = "-l gpu=GTX680"
 
 func GetFiles(inputdir string) []string {
   files, _ := filepath.Glob(inputdir + "/*.gexf")
@@ -30,12 +30,12 @@ func GetOutName (outdir, file string, iterations int) string {
 func ReserveNode() int {
   //"-native", resource, 
   command := exec.Command("preserve","-native", resource, 
-  "-t", "30:00", "-#", "1")
+  "-t", "02:00:00", "-#", "1")
   fmt.Println(command.Args)
   cmdout, _ := command.Output()
 
   fmt.Println("Reserve output:", string(cmdout[:]))
-  time.Sleep(2 * time.Second)
+  time.Sleep(5 * time.Second)
   
   getId := exec.Command("preserve", "-list")
   out, _ := getId.Output()
@@ -65,7 +65,7 @@ func main () {
   files := GetFiles(*inputDirPtr)
 
   for _, fin := range files {
-    iterations := 10
+    iterations := 100
     outfilename := GetOutName(*outputDirPtr, filepath.Base(fin), iterations)
     fmt.Println(outfilename)
 
