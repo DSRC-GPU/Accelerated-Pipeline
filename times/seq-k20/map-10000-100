@@ -1,0 +1,796 @@
+timer: copying vertices to device.
+cpu time (ms):  0.000000
+timer: copying edges to device.
+cpu time (ms):  0.000000
+timer: setting up speed vectors
+cpu time (ms):  0.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17330.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18340.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17380.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18390.000000
+timer: force: gravity
+cpu time (ms):  10.000000
+timer: force: repulsion
+cpu time (ms):  17230.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18250.000000
+timer: force: gravity
+cpu time (ms):  10.000000
+timer: force: repulsion
+cpu time (ms):  17390.000000
+timer: force: attraction
+cpu time (ms):  1000.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18410.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17320.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18330.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17240.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18250.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17270.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18280.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17380.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18390.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17370.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18380.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17380.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18390.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17240.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18250.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17370.000000
+timer: force: attraction
+cpu time (ms):  1000.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18380.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17320.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18330.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17280.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18290.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17320.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18330.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17350.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18360.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17310.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18319.998047
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17300.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18310.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17359.998047
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18370.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17240.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18250.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17320.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18330.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17240.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18250.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17330.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18340.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17240.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18250.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17310.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18330.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17380.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18390.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17340.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18350.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17400.000000
+timer: force: attraction
+cpu time (ms):  1000.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18410.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17300.000000
+timer: force: attraction
+cpu time (ms):  1000.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18310.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17350.000000
+timer: force: attraction
+cpu time (ms):  1000.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18360.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17380.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18390.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17330.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18340.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17280.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18290.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17270.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18280.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17320.000000
+timer: force: attraction
+cpu time (ms):  1000.000000
+timer: moving vertices
+cpu time (ms):  10.000000
+timer: embedding iteration
+cpu time (ms):  18330.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17260.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18270.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17300.000000
+timer: force: attraction
+cpu time (ms):  1000.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18310.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17370.000000
+timer: force: attraction
+cpu time (ms):  1000.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18380.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17300.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18310.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17340.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18350.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17370.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18380.000000
+timer: force: gravity
+cpu time (ms):  10.000000
+timer: force: repulsion
+cpu time (ms):  17240.000000
+timer: force: attraction
+cpu time (ms):  1000.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18260.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17240.000000
+timer: force: attraction
+cpu time (ms):  1000.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18250.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17240.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18250.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17290.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18300.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17370.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18380.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17270.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18280.000000
+timer: force: gravity
+cpu time (ms):  10.000000
+timer: force: repulsion
+cpu time (ms):  17380.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18400.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17330.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18340.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17400.000000
+timer: force: attraction
+cpu time (ms):  1000.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18410.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17300.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18310.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17300.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18310.000000
+timer: force: gravity
+cpu time (ms):  10.000000
+timer: force: repulsion
+cpu time (ms):  17240.000000
+timer: force: attraction
+cpu time (ms):  1000.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18260.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17300.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18310.000000
+timer: force: gravity
+cpu time (ms):  10.000000
+timer: force: repulsion
+cpu time (ms):  17310.000000
+timer: force: attraction
+cpu time (ms):  1000.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18330.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17240.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18250.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17290.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18300.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17240.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18250.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17359.998047
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18370.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17300.000000
+timer: force: attraction
+cpu time (ms):  1000.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18310.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17240.000000
+timer: force: attraction
+cpu time (ms):  1000.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18250.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17380.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18390.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17280.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18290.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17240.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18250.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17380.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18390.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17250.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18260.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17240.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18250.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17290.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18300.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17370.000000
+timer: force: attraction
+cpu time (ms):  1000.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18380.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17359.998047
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18370.000000
+timer: force: gravity
+cpu time (ms):  10.000000
+timer: force: repulsion
+cpu time (ms):  17250.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18270.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17240.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18250.000000
+timer: force: gravity
+cpu time (ms):  10.000000
+timer: force: repulsion
+cpu time (ms):  17270.000000
+timer: force: attraction
+cpu time (ms):  1000.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18290.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17320.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18330.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17310.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18319.998047
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17310.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18319.998047
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17240.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18250.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17270.000000
+timer: force: attraction
+cpu time (ms):  1000.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18280.000000
+timer: force: gravity
+cpu time (ms):  0.000000
+timer: force: repulsion
+cpu time (ms):  17260.000000
+timer: force: attraction
+cpu time (ms):  1010.000000
+timer: moving vertices
+cpu time (ms):  0.000000
+timer: embedding iteration
+cpu time (ms):  18270.0

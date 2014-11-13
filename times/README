@@ -1,0 +1,9 @@
+
+All time files have names in the following format:
+
+time-x-y-z
+
+where:
+x = The number of time steps in the gexf file.
+y = The number of nodes in the gexf file.
+z = The number of spring embedding iterations that were run in the pipeline.
