@@ -234,6 +234,8 @@ __device__ void fa2Repulsion(unsigned int gid, unsigned int numvertices,
 {
   if (gid < numvertices)
   {
+    float tempVectorX = 0;
+    float tempVectorY = 0;
     for (size_t j = 0; j < numvertices; j++)
     {
       if (gid == j)
@@ -253,9 +255,10 @@ __device__ void fa2Repulsion(unsigned int gid, unsigned int numvertices,
             K_R * (((deg[gid] + 1) * (deg[j] + 1)) / dist));
         // vectorMultiply(&vx1, &vy1, 0.5);
 
-        vectorAdd(forceX, forceY, vx1, vy1);
+        vectorAdd(&tempVectorX, &tempVectorY, vx1, vy1);
       }
     }
+    vectorAdd(forceX, forceY, tempVectorX, tempVectorY);
   }
 }
 
