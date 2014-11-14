@@ -57,19 +57,8 @@ func ReserveNode() int {
   nodeId = nodeId[:len(nodeId)-1]
   fmt.Println(nodeId)
   WaitForNode(nodeId)
-  
-  getId := exec.Command("preserve", "-list")
-  out, _ := getId.Output()
-  outputString := string(out[:])
-  fmt.Println(outputString)
-  lines := strings.Split(outputString, "\n")
-  for _, line := range lines {
-    if strings.Contains(line, "jdonkerv") {
-      res, _ := strconv.Atoi(strings.Fields(line)[0])
-      return res
-    }
-  }
-  return -1
+  res, _ := strconv.Atoi(nodeId)
+  return res
 }
 
 func CleanNode(nodeid int) {
