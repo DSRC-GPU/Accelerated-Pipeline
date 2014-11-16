@@ -16,6 +16,13 @@ import (
 
 var resource = "-l gpu=GTX680"
 
+func GetUserName() string {
+  cmd := exec.Command("whoami")
+  out, _ := cmd.Output()
+  username := string(out[:])
+  return strings.TrimSpace(username)
+}
+
 func GetFiles(inputdir string) []string {
   files, _ := filepath.Glob(inputdir + "/*.gexf")
   return files
@@ -36,7 +43,7 @@ func WaitForNode(nodeId string) {
     outputString := string(output[:])
     lines := strings.Split(outputString, "\n")
     for _, line := range lines {
-      if strings.Contains(line, "jdonkerv") {
+      if strings.Contains(line, GetUserName()) {
         if strings.Fields(line)[0] == nodeId {
           nodeStatus = strings.Fields(line)[4]
           time.Sleep(1 * time.Second)
