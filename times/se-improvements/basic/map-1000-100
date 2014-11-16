@@ -1,0 +1,600 @@
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.897312
+timer: time: graph swing and traction.
+kernel time (ms): 0.020256
+timer: time: embedding iteration.
+kernel time (ms): 5.037056
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.200032
+timer: time: graph swing and traction.
+kernel time (ms): 0.008672
+timer: time: embedding iteration.
+kernel time (ms): 4.284032
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.199744
+timer: time: graph swing and traction.
+kernel time (ms): 0.012096
+timer: time: embedding iteration.
+kernel time (ms): 4.280064
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.199008
+timer: time: graph swing and traction.
+kernel time (ms): 0.012192
+timer: time: embedding iteration.
+kernel time (ms): 4.278720
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.198560
+timer: time: graph swing and traction.
+kernel time (ms): 0.012160
+timer: time: embedding iteration.
+kernel time (ms): 4.278688
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.199744
+timer: time: graph swing and traction.
+kernel time (ms): 0.012128
+timer: time: embedding iteration.
+kernel time (ms): 4.280224
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.203360
+timer: time: graph swing and traction.
+kernel time (ms): 0.012128
+timer: time: embedding iteration.
+kernel time (ms): 4.282784
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.198336
+timer: time: graph swing and traction.
+kernel time (ms): 0.011968
+timer: time: embedding iteration.
+kernel time (ms): 4.277952
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.201536
+timer: time: graph swing and traction.
+kernel time (ms): 0.012128
+timer: time: embedding iteration.
+kernel time (ms): 4.281888
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.200832
+timer: time: graph swing and traction.
+kernel time (ms): 0.012128
+timer: time: embedding iteration.
+kernel time (ms): 4.280608
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.200256
+timer: time: graph swing and traction.
+kernel time (ms): 0.012192
+timer: time: embedding iteration.
+kernel time (ms): 4.279840
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.204544
+timer: time: graph swing and traction.
+kernel time (ms): 0.012064
+timer: time: embedding iteration.
+kernel time (ms): 4.284224
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.198176
+timer: time: graph swing and traction.
+kernel time (ms): 0.011904
+timer: time: embedding iteration.
+kernel time (ms): 4.277472
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.198880
+timer: time: graph swing and traction.
+kernel time (ms): 0.012128
+timer: time: embedding iteration.
+kernel time (ms): 4.278592
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.199360
+timer: time: graph swing and traction.
+kernel time (ms): 0.012096
+timer: time: embedding iteration.
+kernel time (ms): 4.279200
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.198752
+timer: time: graph swing and traction.
+kernel time (ms): 0.012160
+timer: time: embedding iteration.
+kernel time (ms): 4.278656
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.200992
+timer: time: graph swing and traction.
+kernel time (ms): 0.012192
+timer: time: embedding iteration.
+kernel time (ms): 4.279776
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.186432
+timer: time: graph swing and traction.
+kernel time (ms): 0.012128
+timer: time: embedding iteration.
+kernel time (ms): 4.272288
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.200576
+timer: time: graph swing and traction.
+kernel time (ms): 0.012128
+timer: time: embedding iteration.
+kernel time (ms): 4.281536
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.199456
+timer: time: graph swing and traction.
+kernel time (ms): 0.012032
+timer: time: embedding iteration.
+kernel time (ms): 4.279968
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.198208
+timer: time: graph swing and traction.
+kernel time (ms): 0.012192
+timer: time: embedding iteration.
+kernel time (ms): 4.277824
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.205216
+timer: time: graph swing and traction.
+kernel time (ms): 0.012128
+timer: time: embedding iteration.
+kernel time (ms): 4.284608
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.202656
+timer: time: graph swing and traction.
+kernel time (ms): 0.012224
+timer: time: embedding iteration.
+kernel time (ms): 4.283104
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.199040
+timer: time: graph swing and traction.
+kernel time (ms): 0.012128
+timer: time: embedding iteration.
+kernel time (ms): 4.276480
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.201984
+timer: time: graph swing and traction.
+kernel time (ms): 0.012160
+timer: time: embedding iteration.
+kernel time (ms): 4.289344
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.199296
+timer: time: graph swing and traction.
+kernel time (ms): 0.012096
+timer: time: embedding iteration.
+kernel time (ms): 4.283808
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.199360
+timer: time: graph swing and traction.
+kernel time (ms): 0.012128
+timer: time: embedding iteration.
+kernel time (ms): 4.279200
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.197760
+timer: time: graph swing and traction.
+kernel time (ms): 0.012160
+timer: time: embedding iteration.
+kernel time (ms): 4.277600
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.202848
+timer: time: graph swing and traction.
+kernel time (ms): 0.012032
+timer: time: embedding iteration.
+kernel time (ms): 4.282976
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.200000
+timer: time: graph swing and traction.
+kernel time (ms): 0.011968
+timer: time: embedding iteration.
+kernel time (ms): 4.280096
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.202080
+timer: time: graph swing and traction.
+kernel time (ms): 0.012160
+timer: time: embedding iteration.
+kernel time (ms): 4.279776
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.187392
+timer: time: graph swing and traction.
+kernel time (ms): 0.011968
+timer: time: embedding iteration.
+kernel time (ms): 4.274304
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.200320
+timer: time: graph swing and traction.
+kernel time (ms): 0.012160
+timer: time: embedding iteration.
+kernel time (ms): 4.280384
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.199200
+timer: time: graph swing and traction.
+kernel time (ms): 0.012032
+timer: time: embedding iteration.
+kernel time (ms): 4.279008
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.202464
+timer: time: graph swing and traction.
+kernel time (ms): 0.012064
+timer: time: embedding iteration.
+kernel time (ms): 4.282112
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.200064
+timer: time: graph swing and traction.
+kernel time (ms): 0.012096
+timer: time: embedding iteration.
+kernel time (ms): 4.279744
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.198528
+timer: time: graph swing and traction.
+kernel time (ms): 0.011936
+timer: time: embedding iteration.
+kernel time (ms): 4.278272
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.201760
+timer: time: graph swing and traction.
+kernel time (ms): 0.012032
+timer: time: embedding iteration.
+kernel time (ms): 4.278368
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.201536
+timer: time: graph swing and traction.
+kernel time (ms): 0.012096
+timer: time: embedding iteration.
+kernel time (ms): 4.281856
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.202496
+timer: time: graph swing and traction.
+kernel time (ms): 0.012128
+timer: time: embedding iteration.
+kernel time (ms): 4.283200
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.198912
+timer: time: graph swing and traction.
+kernel time (ms): 0.012096
+timer: time: embedding iteration.
+kernel time (ms): 4.279584
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.199648
+timer: time: graph swing and traction.
+kernel time (ms): 0.012096
+timer: time: embedding iteration.
+kernel time (ms): 4.279648
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.199712
+timer: time: graph swing and traction.
+kernel time (ms): 0.012096
+timer: time: embedding iteration.
+kernel time (ms): 4.284544
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.139936
+timer: time: graph swing and traction.
+kernel time (ms): 0.019968
+timer: time: embedding iteration.
+kernel time (ms): 4.240736
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.994592
+timer: time: graph swing and traction.
+kernel time (ms): 0.011744
+timer: time: embedding iteration.
+kernel time (ms): 4.075136
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.994112
+timer: time: graph swing and traction.
+kernel time (ms): 0.011936
+timer: time: embedding iteration.
+kernel time (ms): 4.073824
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.992640
+timer: time: graph swing and traction.
+kernel time (ms): 0.011936
+timer: time: embedding iteration.
+kernel time (ms): 4.071552
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.994400
+timer: time: graph swing and traction.
+kernel time (ms): 0.012032
+timer: time: embedding iteration.
+kernel time (ms): 4.074688
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.992480
+timer: time: graph swing and traction.
+kernel time (ms): 0.011872
+timer: time: embedding iteration.
+kernel time (ms): 4.069024
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.983840
+timer: time: graph swing and traction.
+kernel time (ms): 0.011968
+timer: time: embedding iteration.
+kernel time (ms): 4.068384
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.996032
+timer: time: graph swing and traction.
+kernel time (ms): 0.011904
+timer: time: embedding iteration.
+kernel time (ms): 4.075392
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.998304
+timer: time: graph swing and traction.
+kernel time (ms): 0.011968
+timer: time: embedding iteration.
+kernel time (ms): 4.078208
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.993760
+timer: time: graph swing and traction.
+kernel time (ms): 0.011872
+timer: time: embedding iteration.
+kernel time (ms): 4.074304
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.996608
+timer: time: graph swing and traction.
+kernel time (ms): 0.011808
+timer: time: embedding iteration.
+kernel time (ms): 4.075392
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.995072
+timer: time: graph swing and traction.
+kernel time (ms): 0.011936
+timer: time: embedding iteration.
+kernel time (ms): 4.075072
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.999200
+timer: time: graph swing and traction.
+kernel time (ms): 0.011936
+timer: time: embedding iteration.
+kernel time (ms): 4.078560
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.995616
+timer: time: graph swing and traction.
+kernel time (ms): 0.012000
+timer: time: embedding iteration.
+kernel time (ms): 4.074720
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.993088
+timer: time: graph swing and traction.
+kernel time (ms): 0.012000
+timer: time: embedding iteration.
+kernel time (ms): 4.072064
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.992512
+timer: time: graph swing and traction.
+kernel time (ms): 0.011936
+timer: time: embedding iteration.
+kernel time (ms): 4.072032
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.993920
+timer: time: graph swing and traction.
+kernel time (ms): 0.011968
+timer: time: embedding iteration.
+kernel time (ms): 4.073184
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.993888
+timer: time: graph swing and traction.
+kernel time (ms): 0.011936
+timer: time: embedding iteration.
+kernel time (ms): 4.603936
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.990688
+timer: time: graph swing and traction.
+kernel time (ms): 0.011904
+timer: time: embedding iteration.
+kernel time (ms): 4.077632
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.999360
+timer: time: graph swing and traction.
+kernel time (ms): 0.011840
+timer: time: embedding iteration.
+kernel time (ms): 4.076288
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.984576
+timer: time: graph swing and traction.
+kernel time (ms): 0.012128
+timer: time: embedding iteration.
+kernel time (ms): 4.067840
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.982208
+timer: time: graph swing and traction.
+kernel time (ms): 0.011968
+timer: time: embedding iteration.
+kernel time (ms): 4.068640
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.994848
+timer: time: graph swing and traction.
+kernel time (ms): 0.011712
+timer: time: embedding iteration.
+kernel time (ms): 4.074112
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.996320
+timer: time: graph swing and traction.
+kernel time (ms): 0.011936
+timer: time: embedding iteration.
+kernel time (ms): 4.076416
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.994368
+timer: time: graph swing and traction.
+kernel time (ms): 0.011776
+timer: time: embedding iteration.
+kernel time (ms): 4.073792
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.993248
+timer: time: graph swing and traction.
+kernel time (ms): 0.011968
+timer: time: embedding iteration.
+kernel time (ms): 4.073120
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.993568
+timer: time: graph swing and traction.
+kernel time (ms): 0.012000
+timer: time: embedding iteration.
+kernel time (ms): 4.078656
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.994752
+timer: time: graph swing and traction.
+kernel time (ms): 0.011776
+timer: time: embedding iteration.
+kernel time (ms): 4.074080
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.998208
+timer: time: graph swing and traction.
+kernel time (ms): 0.011744
+timer: time: embedding iteration.
+kernel time (ms): 4.077600
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.993504
+timer: time: graph swing and traction.
+kernel time (ms): 0.023168
+timer: time: embedding iteration.
+kernel time (ms): 4.150784
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.995136
+timer: time: graph swing and traction.
+kernel time (ms): 0.011936
+timer: time: embedding iteration.
+kernel time (ms): 4.076384
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.996608
+timer: time: graph swing and traction.
+kernel time (ms): 0.012000
+timer: time: embedding iteration.
+kernel time (ms): 4.077408
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.993600
+timer: time: graph swing and traction.
+kernel time (ms): 0.011936
+timer: time: embedding iteration.
+kernel time (ms): 4.074944
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.996768
+timer: time: graph swing and traction.
+kernel time (ms): 0.012096
+timer: time: embedding iteration.
+kernel time (ms): 4.078176
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.995200
+timer: time: graph swing and traction.
+kernel time (ms): 0.011744
+timer: time: embedding iteration.
+kernel time (ms): 4.076224
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.995008
+timer: time: graph swing and traction.
+kernel time (ms): 0.011936
+timer: time: embedding iteration.
+kernel time (ms): 4.075872
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.994368
+timer: time: graph swing and traction.
+kernel time (ms): 0.012000
+timer: time: embedding iteration.
+kernel time (ms): 4.075808
+timer: time: all forces and moving vertices.
+kernel time (ms): 4.000320
+timer: time: graph swing and traction.
+kernel time (ms): 0.012000
+timer: time: embedding iteration.
+kernel time (ms): 4.081792
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.999808
+timer: time: graph swing and traction.
+kernel time (ms): 0.011968
+timer: time: embedding iteration.
+kernel time (ms): 4.080480
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.996128
+timer: time: graph swing and traction.
+kernel time (ms): 0.011872
+timer: time: embedding iteration.
+kernel time (ms): 4.076736
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.994784
+timer: time: graph swing and traction.
+kernel time (ms): 0.012000
+timer: time: embedding iteration.
+kernel time (ms): 4.076032
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.994624
+timer: time: graph swing and traction.
+kernel time (ms): 0.011744
+timer: time: embedding iteration.
+kernel time (ms): 4.073216
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.996384
+timer: time: graph swing and traction.
+kernel time (ms): 0.013504
+timer: time: embedding iteration.
+kernel time (ms): 4.076032
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.993632
+timer: time: graph swing and traction.
+kernel time (ms): 0.011936
+timer: time: embedding iteration.
+kernel time (ms): 4.075904
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.994368
+timer: time: graph swing and traction.
+kernel time (ms): 0.012000
+timer: time: embedding iteration.
+kernel time (ms): 4.076480
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.993184
+timer: time: graph swing and traction.
+kernel time (ms): 0.011904
+timer: time: embedding iteration.
+kernel time (ms): 4.074560
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.994240
+timer: time: graph swing and traction.
+kernel time (ms): 0.011872
+timer: time: embedding iteration.
+kernel time (ms): 4.076064
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.994624
+timer: time: graph swing and traction.
+kernel time (ms): 0.011904
+timer: time: embedding iteration.
+kernel time (ms): 4.076416
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.997632
+timer: time: graph swing and traction.
+kernel time (ms): 0.011648
+timer: time: embedding iteration.
+kernel time (ms): 4.078528
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.995360
+timer: time: graph swing and traction.
+kernel time (ms): 0.011936
+timer: time: embedding iteration.
+kernel time (ms): 4.077216
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.996608
+timer: time: graph swing and traction.
+kernel time (ms): 0.011904
+timer: time: embedding iteration.
+kernel time (ms): 4.077600
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.992512
+timer: time: graph swing and traction.
+kernel time (ms): 0.011744
+timer: time: embedding iteration.
+kernel time (ms): 4.073760
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.993568
+timer: time: graph swing and traction.
+kernel time (ms): 0.013120
+timer: time: embedding iteration.
+kernel time (ms): 4.072320
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.992896
+timer: time: graph swing and traction.
+kernel time (ms): 0.011808
+timer: time: embedding iteration.
+kernel time (ms): 4.072064
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.990752
+timer: time: graph swing and traction.
+kernel time (ms): 0.011936
+timer: time: embedding iteration.
+kernel time (ms): 4.078272
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.994272
+timer: time: graph swing and traction.
+kernel time (ms): 0.011936
+timer: time: embedding iteration.
+kernel time (ms): 4.074976
+timer: time: all forces and moving vertices.
+kernel time (ms): 3.994912
+timer: time: graph swing and traction.
+kernel time (ms): 0.011936
+timer: time: embedding iteration.
+kernel time (ms): 4.075648

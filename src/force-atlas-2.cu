@@ -234,14 +234,17 @@ __device__ void fa2Repulsion(unsigned int gid, unsigned int numvertices,
 {
   if (gid < numvertices)
   {
+    float tempVectorX = 0;
+    float tempVectorY = 0;
+    float vx1 = vxLocs[gid];
+    float vy1 = vyLocs[gid];
     for (size_t j = 0; j < numvertices; j++)
     {
-      if (gid == j)
+      size_t index = (gid + j) % numvertices;
+      if (gid == index)
         continue;
-      float vx1 = vxLocs[gid];
-      float vy1 = vyLocs[gid];
-      float vx2 = vxLocs[j];
-      float vy2 = vyLocs[j];
+      float vx2 = vxLocs[index];
+      float vy2 = vyLocs[index];
 
       vectorSubtract(&vx1, &vy1, vx2, vy2);
       float dist = vectorGetLength(vx1, vy1);
@@ -250,12 +253,13 @@ __device__ void fa2Repulsion(unsigned int gid, unsigned int numvertices,
       {
         vectorNormalize(&vx1, &vy1);
         vectorMultiply(&vx1, &vy1,
-            K_R * (((deg[gid] + 1) * (deg[j] + 1)) / dist));
+            K_R * (((deg[gid] + 1) * (deg[index] + 1)) / dist));
         // vectorMultiply(&vx1, &vy1, 0.5);
 
-        vectorAdd(forceX, forceY, vx1, vy1);
+        vectorAdd(&tempVectorX, &tempVectorY, vx1, vy1);
       }
     }
+    vectorAdd(forceX, forceY, tempVectorX, tempVectorY);
   }
 }
 

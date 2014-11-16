@@ -16,6 +16,13 @@ import (
 
 var resource = "-l gpu=GTX680"
 
+func GetUserName() string {
+  cmd := exec.Command("whoami")
+  out, _ := cmd.Output()
+  username := string(out[:])
+  return strings.TrimSpace(username)
+}
+
 func GetFiles(inputdir string) []string {
   files, _ := filepath.Glob(inputdir + "/*.gexf")
   return files
@@ -27,6 +34,25 @@ func GetOutName (outdir, file string, iterations int) string {
   return filepath.Join(absout, outname) + "-" + strconv.Itoa(iterations)
 }
 
+func WaitForNode(nodeId string) {
+  nodeStatus := ""
+  for nodeStatus != "r" {
+    fmt.Println("Waiting for node", nodeId)
+    command := exec.Command("preserve", "-list")
+    output, _ := command.Output()
+    outputString := string(output[:])
+    lines := strings.Split(outputString, "\n")
+    for _, line := range lines {
+      if strings.Contains(line, GetUserName()) {
+        if strings.Fields(line)[0] == nodeId {
+          nodeStatus = strings.Fields(line)[4]
+          time.Sleep(1 * time.Second)
+        }
+      }
+    }
+  }
+}
+
 func ReserveNode() int {
   //"-native", resource, 
   command := exec.Command("preserve","-native", resource, 
@@ -34,21 +60,12 @@ func ReserveNode() int {
   fmt.Println(command.Args)
   cmdout, _ := command.Output()
 
-  fmt.Println("Reserve output:", string(cmdout[:]))
-  time.Sleep(5 * time.Second)
-  
-  getId := exec.Command("preserve", "-list")
-  out, _ := getId.Output()
-  outputString := string(out[:])
-  fmt.Println(outputString)
-  lines := strings.Split(outputString, "\n")
-  for _, line := range lines {
-    if strings.Contains(line, "jdonkerv") {
-      res, _ := strconv.Atoi(strings.Fields(line)[0])
-      return res
-    }
-  }
-  return -1
+  nodeId := strings.Split(strings.Split(string(cmdout[:]), "\n")[0], " ")[2]
+  nodeId = nodeId[:len(nodeId)-1]
+  fmt.Println(nodeId)
+  WaitForNode(nodeId)
+  res, _ := strconv.Atoi(nodeId)
+  return res
 }
 
 func CleanNode(nodeid int) {
