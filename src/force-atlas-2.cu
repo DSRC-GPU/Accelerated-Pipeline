@@ -236,13 +236,13 @@ __device__ void fa2Repulsion(unsigned int gid, unsigned int numvertices,
   {
     float tempVectorX = 0;
     float tempVectorY = 0;
+    float vx1 = vxLocs[gid];
+    float vy1 = vyLocs[gid];
     for (size_t j = 0; j < numvertices; j++)
     {
       size_t index = (gid + j) % numvertices;
       if (gid == index)
         continue;
-      float vx1 = vxLocs[gid];
-      float vy1 = vyLocs[gid];
       float vx2 = vxLocs[index];
       float vy2 = vyLocs[index];
 
