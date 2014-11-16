@@ -1,6 +1,10 @@
 # The application
 ap
 
+# Scripts
+runtest
+runbatch
+
 # Compiled Object files
 *.slo
 *.lo

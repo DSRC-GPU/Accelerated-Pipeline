@@ -4,6 +4,7 @@
 
 #include "util.h"
 #include "stdio.h"
+#include <assert.h>
 
 __global__ void utilVectorSetByScalarKernel(float* dst, float scalar,
     unsigned int num)
@@ -58,7 +59,7 @@ __global__ void utilVectorDevideByScalarKernel(float* dst, float denumerator,
     dst[gid] /= denumerator;
 }
 
-__global__ void utilTreeReductionKernel(float* d_inM, unsigned int numelems,
+__global__ void utilParallelSumKernel(float* d_inM, unsigned int numelems,
     float* d_outVal)
 {
   __shared__ float scratch[BLOCK_SIZE * 2];
@@ -156,11 +157,11 @@ void utilVectorDevideByScalar(float* dst, float scalar, unsigned int num)
   utilVectorDevideByScalarKernel<<<numblocks, BLOCK_SIZE>>>(dst, scalar, num);
 }
 
-void utilTreeReduction(float* d_M, unsigned int numelems, float* d_outVal)
+void utilParallelSum(float* d_M, unsigned int numelems, float* d_outVal)
 {
   unsigned int numblocks = ceil(numelems / ((float) BLOCK_SIZE * 2));
   cudaMemset(d_outVal, 0, sizeof(float));
-  utilTreeReductionKernel<<<numblocks, BLOCK_SIZE>>>(d_M, numelems, d_outVal);
+  utilParallelSumKernel<<<numblocks, BLOCK_SIZE>>>(d_M, numelems, d_outVal);
 }
 
 void utilPrintDeviceArray(float* array, unsigned int numelems)
@@ -196,11 +197,12 @@ void* utilDataTransferDeviceToHost(void* src, unsigned int numbytes,
 void* utilAllocateData(unsigned int numbytes)
 {
   void* res = NULL;
-  cudaMalloc(&res, numbytes);
+  cudaError_t err = cudaMalloc(&res, numbytes);
+  assert(err != cudaErrorMemoryAllocation);
   return res;
 }
 
-void utilFreeDeviceData(float* dptr)
+void utilFreeDeviceData(void* dptr)
 {
   cudaFree(dptr);
 }

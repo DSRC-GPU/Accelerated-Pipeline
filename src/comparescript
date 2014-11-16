@@ -1,0 +1,16 @@
+#!/bin/bash
+
+RUN="optirun ./ap -i lanes.gexf -n $1"
+SEQREF="seqref"
+PARREF="parref"
+CMD="${RUN} | tail -n $2 | sort -n"
+
+make clean
+make par -j9
+eval ${CMD} > ${PARREF}
+make clean
+make -j9
+eval ${CMD} > ${SEQREF}
+
+clear
+./printdiff.py ${SEQREF} ${PARREF}

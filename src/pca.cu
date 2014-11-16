@@ -8,33 +8,13 @@
 #include <stdio.h>
 #include "util.h"
 
-void pca(float* d_inMatrix, unsigned int inRows, unsigned int inCols,
-    float* d_outMatrix)
-{
-  float* d_Y = NULL;
-  float* d_PC = NULL;
-
-  cudaMalloc(&d_PC, inCols * inCols * sizeof(float));
-  utilVectorSetByScalar(d_PC, 0, inCols * inCols);
-
-  cudaMalloc(&d_Y, inRows * inCols * sizeof(float));
-  utilVectorSetByScalar(d_Y, 0, inRows * inCols);
-
-  // Subtract mean for each dimension.
-  pcaUpdateMean(d_inMatrix, inRows, inCols);
-
-  // Calculate matrix Y.
-  pcaCalculateYMatrix(d_inMatrix, inRows, inCols, d_Y);
-
-  // Perform SVD on Y.
-  pcaSVD(d_Y, inRows, inCols, d_PC);
-
-  // DEBUG_PRINT_DEVICE(d_PC, inCols * inCols);
-
-  // Calculate signals.
-  pcaCalculateSignals(d_PC, d_inMatrix, inRows, inCols, d_outMatrix);
-}
-
+/*!
+ * Normalizes the input matrix. Used internally by the pca function.
+ *
+ * \param[in,out] d_inMatrix The matrix whose values to normalize.
+ * \param[in] inRows The number of rows of the matrix.
+ * \param[in] inCols The number of columns of the matrix.
+ */
 void pcaUpdateMean(float* d_inMatrix, unsigned int inRows, unsigned int inCols)
 {
   float* d_averageX = NULL;
@@ -43,17 +23,27 @@ void pcaUpdateMean(float* d_inMatrix, unsigned int inRows, unsigned int inCols)
   cudaMalloc(&d_averageY, sizeof(float));
 
   // Compute the average X and Y values.
-  utilTreeReduction(&d_inMatrix[0], inCols, d_averageX);
-  utilTreeReduction(&d_inMatrix[inCols], inCols, d_averageY);
+  utilParallelSum(&d_inMatrix[0], inCols, d_averageX);
+  utilParallelSum(&d_inMatrix[inCols], inCols, d_averageY);
 
   float h_averageX, h_averageY;
   cudaMemcpy(&h_averageX, d_averageX, sizeof(float), cudaMemcpyDeviceToHost);
   cudaMemcpy(&h_averageY, d_averageY, sizeof(float), cudaMemcpyDeviceToHost);
+  h_averageX /= inCols;
+  h_averageY /= inCols;
 
   utilVectorAddScalar(&d_inMatrix[0], -1 * h_averageX, inCols);
   utilVectorAddScalar(&d_inMatrix[inCols], -1 * h_averageY, inCols);
 }
 
+/*!
+ * Calculates the Y matrix. Used iternally by the pca function.
+ *
+ * \param[in] d_inMatrix The input matrix.
+ * \param[in] inRows The number of rows in the input matrix.
+ * \param[in] inCols The number of columns in the input matrix.
+ * \param[out] d_Y The output Y matrix.
+ */
 void pcaCalculateYMatrix(float* d_inMatrix, unsigned int inRows, unsigned int
     inCols, float* d_Y)
 {
@@ -75,6 +65,14 @@ void pcaCalculateYMatrix(float* d_inMatrix, unsigned int inRows, unsigned int
   utilVectorDevideByScalar(d_Y, sqrtN, inRows * inCols); 
 }
 
+/*!
+ * Single Value Decomposition used by the pca function.
+ *
+ * \param[in] d_Y The Y matrix.
+ * \param[in] inRows The number of rows in the Y matrix.
+ * \param[in] inCols The number of columns in the Y matrix.
+ * \param[out] d_PC The principal component matrix.
+ */
 void pcaSVD(float* d_Y, unsigned int inRows, unsigned int inCols, float* d_PC)
 {
   char jobu = 'N';
@@ -97,6 +95,15 @@ void pcaSVD(float* d_Y, unsigned int inRows, unsigned int inCols, float* d_PC)
   cudaFree(d_U);
 }
 
+/*!
+ * Calculates the signals, or 'projected data'.
+ *
+ * \param[in] d_PC The principal component matrix.
+ * \param[in] d_inMatrix The input matrix.
+ * \param[in] inRows The number of rows in the PC and input matrix.
+ * \param[in] inCols The number of columns in the PC and input matrix.
+ * \param[out] d_Signals The projected data.
+ */
 void pcaCalculateSignals(float* d_PC, float* d_inMatrix, unsigned int inRows,
     unsigned int inCols, float* d_Signals)
 {
@@ -107,14 +114,42 @@ void pcaCalculateSignals(float* d_PC, float* d_inMatrix, unsigned int inRows,
 
   float m = inCols;
   float n = inRows;
-  float k = inCols;
-  float lda = k;
-  float ldb = inCols;
-  float ldc = m;
+  float k = inRows;
+  float lda = inCols;
+  float ldb = inRows;
+  float ldc = inCols;
 
-  cublasSgemm(handle, CUBLAS_OP_T, CUBLAS_OP_T, m, k, n, &alpha,
-      d_PC, lda, d_inMatrix, ldb, &beta, d_Signals, ldc);
+  cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, m, n, k, &alpha,
+      d_inMatrix, lda, d_PC, ldb, &beta, d_Signals, ldc);
 
   cublasDestroy(handle);
 }
 
+void pca(float* d_inMatrix, unsigned int inRows, unsigned int inCols,
+    float* d_outMatrix)
+{
+  float* d_Y = NULL;
+  float* d_PC = NULL;
+
+  cudaMalloc(&d_PC, inCols * inCols * sizeof(float));
+  utilVectorSetByScalar(d_PC, 0, inCols * inCols);
+
+  cudaMalloc(&d_Y, inRows * inCols * sizeof(float));
+  utilVectorSetByScalar(d_Y, 0, inRows * inCols);
+
+  // Subtract mean for each dimension.
+  pcaUpdateMean(d_inMatrix, inRows, inCols);
+
+  // Calculate matrix Y.
+  pcaCalculateYMatrix(d_inMatrix, inRows, inCols, d_Y);
+
+  // Perform SVD on Y.
+  pcaSVD(d_Y, inCols, inRows, d_PC);
+
+  DEBUG_PRINT("PC ARRAY\n");
+  DEBUG_PRINT_DEVICE(d_PC, inRows * inRows);
+  DEBUG_PRINT_DEVICE(d_inMatrix, inRows * inCols);
+
+  // Calculate signals.
+  pcaCalculateSignals(d_PC, d_inMatrix, inRows, inCols, d_outMatrix);
+}

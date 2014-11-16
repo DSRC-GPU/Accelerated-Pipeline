@@ -7,12 +7,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <float.h>
+#include <assert.h>
 #include "force-atlas-2.h"
 #include "math.h"
-#include "cuda-timer.h"
+#include "timer.h"
 #include "cuda-stream.h"
 #include "vector.h"
-#include "speedvector.h"
 #include "util.h"
 
 /*!
@@ -219,6 +219,7 @@ __device__ void fa2Gravity(unsigned int gid, unsigned int numvertices,
     float vx = vxLocs[gid];
     float vy = vyLocs[gid];
     float vlen = vectorGetLength(vx, vy);
+    assert(vlen != 0);
     vectorInverse(&vx, &vy);
     vectorMultiply(&vx, &vy, K_G * (deg[gid] + 1) / vlen);
     if (gid == 0)
@@ -233,14 +234,17 @@ __device__ void fa2Repulsion(unsigned int gid, unsigned int numvertices,
 {
   if (gid < numvertices)
   {
+    float tempVectorX = 0;
+    float tempVectorY = 0;
+    float vx1 = vxLocs[gid];
+    float vy1 = vyLocs[gid];
     for (size_t j = 0; j < numvertices; j++)
     {
-      if (gid == j)
+      size_t index = (gid + j) % numvertices;
+      if (gid == index)
         continue;
-      float vx1 = vxLocs[gid];
-      float vy1 = vyLocs[gid];
-      float vx2 = vxLocs[j];
-      float vy2 = vyLocs[j];
+      float vx2 = vxLocs[index];
+      float vy2 = vyLocs[index];
 
       vectorSubtract(&vx1, &vy1, vx2, vy2);
       float dist = vectorGetLength(vx1, vy1);
@@ -249,12 +253,13 @@ __device__ void fa2Repulsion(unsigned int gid, unsigned int numvertices,
       {
         vectorNormalize(&vx1, &vy1);
         vectorMultiply(&vx1, &vy1,
-            K_R * (((deg[gid] + 1) * (deg[j] + 1)) / dist));
+            K_R * (((deg[gid] + 1) * (deg[index] + 1)) / dist));
         // vectorMultiply(&vx1, &vy1, 0.5);
 
-        vectorAdd(forceX, forceY, vx1, vy1);
+        vectorAdd(&tempVectorX, &tempVectorY, vx1, vy1);
       }
     }
+    vectorAdd(forceX, forceY, tempVectorX, tempVectorY);
   }
 }
 
@@ -265,17 +270,15 @@ __device__ void fa2Attraction(unsigned int gid, unsigned int numvertices,
 {
   if (gid < numvertices)
   {
-    if (gid == 0)
-      DEBUG_PRINT("numedges:%u\n", numedges[gid]);
     float vx1 = vxLocs[gid];
     float vy1 = vyLocs[gid];
     // Each thread goes through its array of edges.
-    for (size_t i = 0; i < maxedges; i++)
+    for (size_t i = 0; i < numedges[gid]; i++)
     {
       unsigned int index = gid + (numvertices * i);
+      assert(index < numvertices + (numvertices * maxedges));
       unsigned int target = edgeTargets[index];
-      if (target == UINT_MAX)
-        continue;
+      assert(target < numvertices);
       // Compute attraction force.
       float vx2 = vxLocs[target];
       float vy2 = vyLocs[target];
@@ -660,9 +663,7 @@ void fa2PrepareGeneralMemory(ForceAtlas2Data* data, unsigned int numvertices)
  * Prepares all memory to run force atlas 2 on the device.
  *
  * \param[in,out] data A valid data object where all pointers should be saved.
- * \param[in] edges The edges that need to be copied to the device.
  * \param[in] numvertices The total number of vertices.
- * \param[in] stream The cuda stream to use while preparing the data.
  */
 void fa2PrepareMemory(ForceAtlas2Data* data,
     unsigned int numvertices)
@@ -700,9 +701,21 @@ void fa2CleanMemory(ForceAtlas2Data* data, unsigned int numvertices)
   fa2CleanGeneralMemory(data);
 }
 
+void checkErrors(unsigned int num)
+{
+  cudaDeviceSynchronize();
+  cudaError_t code = cudaGetLastError();
+  if (code != cudaSuccess)
+  {
+    printf("Error in kernel %u.\n%s\n", num, cudaGetErrorString(code));
+    exit(EXIT_FAILURE);
+  }
+}
+
 void fa2RunOnGraph(Graph* g, unsigned int iterations)
 {
-  CudaTimer timerIteration, timer;
+  Timer* timerIteration = timerNew();
+  Timer* timer = timerNew();
 
   // Allocate data for fa2 data.
   ForceAtlas2Data data;
@@ -716,65 +729,52 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
   unsigned int numblocks = ceil(g->vertices->numvertices / (float) BLOCK_SIZE);
   unsigned int numblocks_reduction = ceil(numblocks / 2.0);
 
-  cudaGetLastError();
-  cudaError_t code = cudaGetLastError();
-  if (code != cudaSuccess)
-  {
-    printf("Error calculating node degrees.\n%s\n", cudaGetErrorString(code));
-    exit(EXIT_FAILURE);
-  }
+  checkErrors(0);
 
   for (size_t i = 0; i < iterations; i++)
   {
     // Run fa2 spring embedding kernel.
-    startCudaTimer(&timerIteration);
+    startTimer(timerIteration);
 
     // Compute graph speed, vertex forces, speed and displacement.
-    startCudaTimer(&timer);
+    startTimer(timer);
     fa2kernel<<<numblocks, BLOCK_SIZE>>>(vxLocs, vyLocs,
         g->vertices->numvertices, edgeTargets, numEdges,
         g->edges->maxedges, data.tra, data.swg, data.forceX, data.forceY,
         data.oldForceX, data.oldForceY);
-    stopCudaTimer(&timer);
-    printf("time: all forces and moving vertices.\n");
-    printCudaTimer(&timer);
-    resetCudaTimer(&timer);
-    code = cudaGetLastError();
-    if (code != cudaSuccess)
-    {
-      printf("Error in kernel 2.\n%s\n", cudaGetErrorString(code));
-      exit(EXIT_FAILURE);
-    }
+    stopTimer(timer);
 
-    stopCudaTimer(&timerIteration);
-    printf("time: iteration.\n");
-    printCudaTimer(&timerIteration);
-    resetCudaTimer(&timerIteration);
+    checkErrors(1);
+
+    printTimer(timer, "time: all forces and moving vertices.");
+    resetTimer(timer);
+
+    // DEBUG_PRINT_DEVICE(data.forceX, g->vertices->numvertices);
 
     cudaMemset(data.graphSwing, 0, sizeof(float));
     cudaMemset(data.graphTract, 0, sizeof(float));
 
     // Run reductions on vertex swing and traction.
-    startCudaTimer(&timer);
+    startTimer(timer);
     fa2GraphSwingTract<<<numblocks_reduction, BLOCK_SIZE>>>(
         g->vertices->numvertices, data.swg, data.tra, numEdges,
         data.graphSwing, data.graphTract);
-    stopCudaTimer(&timer);
-    printf("time: graph swing and traction.\n");
-    printCudaTimer(&timer);
-    resetCudaTimer(&timer);
+    stopTimer(timer);
+    printTimer(timer, "time: graph swing and traction.");
+    resetTimer(timer);
 
-    code = cudaGetLastError();
-    if (code != cudaSuccess)
-    {
-      printf("Error in kernel 1.\n%s\n", cudaGetErrorString(code));
-      exit(EXIT_FAILURE);
-    }
+    checkErrors(2);
 
     fa2MoveVertices<<<numblocks, BLOCK_SIZE>>>(vxLocs, vyLocs,
         g->vertices->numvertices, data.tra, data.swg, data.forceX, data.forceY,
         data.oldForceX, data.oldForceY, data.graphSwing, data.graphTract,
         data.graphSpeed);
+
+    checkErrors(3);
+
+    stopTimer(timerIteration);
+    printTimer(timerIteration, "time: embedding iteration.");
+    resetTimer(timerIteration);
   }
 
   fa2CleanMemory(&data, g->vertices->numvertices);

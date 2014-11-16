@@ -5,7 +5,11 @@
 #ifndef VECTOR_AVERAGE_H_
 #define VECTOR_AVERAGE_H_
 
-#define WINDOW_SIZE 10
+/*!
+ * The number of spring embedding runs that will be used to compute the average
+ * vectors.
+ */
+#define WINDOW_SIZE 30
 
 /*!
  * Allocates a new array on the device to store the speed vectors.

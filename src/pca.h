@@ -5,17 +5,15 @@
 #ifndef PCA_H_
 #define PCA_H_
 
+/*!
+ * Computes the pca of an input values. Matrix should be row-major.
+ *
+ * \param[in] d_inMatrix The matrix to use as pca input.
+ * \param[in] inRows The number of rows in the matrix.
+ * \param[in] inCols The number of columns in the matrix.
+ * \param[out] d_outMatrix The projected data.
+ */
 void pca(float* d_inMatrix, unsigned int inRows, unsigned int inCols,
     float* d_outMatrix);
-
-void pcaUpdateMean(float* d_inMatrix, unsigned int inRows, unsigned int inCols);
-
-void pcaCalculateYMatrix(float* d_inMatrix, unsigned int inRows, unsigned int
-    inCols, float* d_Y);
-
-void pcaSVD(float* d_Y, unsigned int inRows, unsigned int inCols, float* d_PC);
-
-void pcaCalculateSignals(float* d_PC, float* d_inMatrix, unsigned int inRows,
-    unsigned int inCols, float* d_Signals);
 
 #endif /* PCA_H_ */
