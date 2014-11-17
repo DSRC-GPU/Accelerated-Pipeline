@@ -99,9 +99,6 @@ int main(int argc, char* argv[])
   utilFreeDeviceData(graph->vertices->vertexXLocs);
   utilFreeDeviceData(graph->vertices->vertexYLocs);
   free(graph->vertices);
-  free(graph->edges->numedges);
-  free(graph->edges->edgeTargets);
-  free(graph->edges);
   free(graph);
 
 
