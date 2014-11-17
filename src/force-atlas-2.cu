@@ -248,22 +248,24 @@ __device__ void fa2Repulsion(unsigned int gid, unsigned int numvertices,
   __shared__ float sDeg[BLOCK_SIZE];
 
   // Tiled iteration. Chuck input in tiles.
-  for (size_t j = 0; j < ceil((double) numvertices / BLOCK_SIZE); j++)
+  unsigned int numTiles = ceil((double) numvertices / BLOCK_SIZE);
+  for (size_t j = 0; j < numTiles; j++)
   {
     // Calculate global index to use when loading element in shared mem.
-    unsigned int index = (gid + j * BLOCK_SIZE) % numvertices;
+    unsigned int index = (gid + j * BLOCK_SIZE) % numTiles * BLOCK_SIZE;
     // Load location and outdegree into shared mem.
+    unsigned int tid = threadIdx.x;
     if (index < numvertices)
     {
-      vxs[index] = vxLocs[index];
-      vys[index] = vyLocs[index];
-      sDeg[index] = deg[index];
+      vxs[tid] = vxLocs[index];
+      vys[tid] = vyLocs[index];
+      sDeg[tid] = deg[index];
     } else {
-      vxs[index] = 0;
-      vys[index] = 0;
+      vxs[tid] = 0;
+      vys[tid] = 0;
       // This causes the enumerator later on to become 0, which in turn causes
       // the repulsion force to become 0.
-      sDeg[index] = -1;
+      sDeg[tid] = -1;
     }
     // Sync to make sure shared mem has been filled.
     __syncthreads();
