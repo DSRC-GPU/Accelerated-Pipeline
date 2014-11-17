@@ -232,35 +232,74 @@ __device__ void fa2Repulsion(unsigned int gid, unsigned int numvertices,
     float* vxLocs, float* vyLocs, float* forceX, float* forceY,
     unsigned int* deg)
 {
-  if (gid < numvertices)
+  // Local accumulators that will be written to global at end of computation.
+  float tempVectorX = 0;
+  float tempVectorY = 0;
+
+  // Local copies of the location and outdegree of the vertex belonging to
+  // this thread.
+  float vx1 = vxLocs[gid];
+  float vy1 = vyLocs[gid];
+  float tDeg = deg[gid];
+
+  // Allocating shared space for locations and outdegrees of other vertices.
+  __shared__ float vxs[BLOCK_SIZE];
+  __shared__ float vys[BLOCK_SIZE];
+  __shared__ float sDeg[BLOCK_SIZE];
+
+  // Tiled iteration. Chuck input in tiles.
+  for (size_t j = 0; j < ceil((double) numvertices / BLOCK_SIZE); j++)
   {
-    float tempVectorX = 0;
-    float tempVectorY = 0;
-    float vx1 = vxLocs[gid];
-    float vy1 = vyLocs[gid];
-    for (size_t j = 0; j < numvertices; j++)
+    // Calculate global index to use when loading element in shared mem.
+    unsigned int index = (gid + j * BLOCK_SIZE) % numvertices;
+    // Load location and outdegree into shared mem.
+    if (index < numvertices)
     {
-      size_t index = (gid + j) % numvertices;
-      if (gid == index)
-        continue;
-      float vx2 = vxLocs[index];
-      float vy2 = vyLocs[index];
+      vxs[index] = vxLocs[index];
+      vys[index] = vyLocs[index];
+      sDeg[index] = deg[index];
+    } else {
+      vxs[index] = 0;
+      vys[index] = 0;
+      // This causes the enumerator later on to become 0, which in turn causes
+      // the repulsion force to become 0.
+      sDeg[index] = -1;
+    }
+    // Sync to make sure shared mem has been filled.
+    __syncthreads();
 
-      vectorSubtract(&vx1, &vy1, vx2, vy2);
-      float dist = vectorGetLength(vx1, vy1);
+    // For all elements in the shared mem, compute repulsion.
+    for (size_t i = 0; i < BLOCK_SIZE; i++)
+    {
+      // Create copy of the location of this vertex. Is overwritten when
+      // computing the distance to vertex from shared mem.
+      float xdist = vx1;
+      float ydist = vy1;
+      // Compute distance to other vertex and overwrite.
+      vectorSubtract(&xdist, &ydist, vxs[i], vys[i]);
+      // Calculate euclidian distance to other vertex.
+      float dist = vectorGetLength(xdist, ydist);
 
+      // Check because we are using dist as denominator.
       if (dist > 0)
       {
-        vectorNormalize(&vx1, &vy1);
-        vectorMultiply(&vx1, &vy1,
-            K_R * (((deg[gid] + 1) * (deg[index] + 1)) / dist));
-        // vectorMultiply(&vx1, &vy1, 0.5);
-
-        vectorAdd(&tempVectorX, &tempVectorY, vx1, vy1);
+        // Shrink vertex to have length of 1.
+        vectorNormalize(&xdist, &ydist);
+        // Multiply by factor as specified in fa2 paper to compute repulsion
+        // between vertices.
+        vectorMultiply(&xdist, &ydist,
+            K_R * (((tDeg + 1) * (sDeg[i] + 1)) / dist));
+        // Add this repulsion to local variables.
+        vectorAdd(&tempVectorX, &tempVectorY, xdist, ydist);
       }
     }
-    vectorAdd(forceX, forceY, tempVectorX, tempVectorY);
+
+    // Prevent threads from loading new values in shared mem while others are
+    // still computing.
+    __syncthreads();
   }
+  // Add accumulated repulsion value to global mem variable.
+  vectorAdd(forceX, forceY, tempVectorX, tempVectorY);
 }
 
 __device__ void fa2Attraction(unsigned int gid, unsigned int numvertices,
