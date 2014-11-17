@@ -14,7 +14,7 @@ import (
   "time"
 )
 
-var resource = "-l gpu=GTX680"
+var resource = "-l gpu=GTX480"
 
 func GetUserName() string {
   cmd := exec.Command("whoami")
