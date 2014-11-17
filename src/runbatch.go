@@ -112,4 +112,7 @@ func main () {
 
     CleanNode(nodeid)
   }
+  if len(files) == 0 {
+    fmt.Println("No input files found.")
+  }
 }
