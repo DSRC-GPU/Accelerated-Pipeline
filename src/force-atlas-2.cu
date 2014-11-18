@@ -228,7 +228,7 @@ __device__ void fa2Gravity(unsigned int gid, unsigned int numvertices,
   }
 }
 
-__device__ void fa2Repulsion(unsigned int gid, unsigned int numvertices,
+__device__ __forceinline__ void fa2Repulsion(unsigned int gid, unsigned int numvertices,
     float* vxLocs, float* vyLocs, float* forceX, float* forceY,
     unsigned int* deg)
 {
@@ -278,21 +278,24 @@ __device__ void fa2Repulsion(unsigned int gid, unsigned int numvertices,
       float xdist = vx1;
       float ydist = vy1;
       // Compute distance to other vertex and overwrite.
-      vectorSubtract(&xdist, &ydist, vxs[i], vys[i]);
+      xdist -= vxs[i];
+      ydist -= vys[i];
       // Calculate euclidian distance to other vertex.
-      float dist = vectorGetLength(xdist, ydist);
+      float dist = sqrt(xdist * xdist + ydist * ydist);
 
       // Check because we are using dist as denominator.
       if (dist > 0)
       {
         // Shrink vertex to have length of 1.
-        vectorNormalize(&xdist, &ydist);
+        xdist /= dist;
+        ydist /= dist;
         // Multiply by factor as specified in fa2 paper to compute repulsion
         // between vertices.
-        vectorMultiply(&xdist, &ydist,
-            K_R * (((tDeg + 1) * (sDeg[i] + 1)) / dist));
+        xdist *= K_R * (((tDeg + 1) * (sDeg[i] + 1)) / dist);
+        ydist *= K_R * (((tDeg + 1) * (sDeg[i] + 1)) / dist);
         // Add this repulsion to local variables.
-        vectorAdd(&tempVectorX, &tempVectorY, xdist, ydist);
+        tempVectorX += xdist;
+        tempVectorY += ydist;
       }
     }
 
@@ -301,7 +304,8 @@ __device__ void fa2Repulsion(unsigned int gid, unsigned int numvertices,
     __syncthreads();
   }
   // Add accumulated repulsion value to global mem variable.
-  vectorAdd(forceX, forceY, tempVectorX, tempVectorY);
+  *forceX += tempVectorX;
+  *forceY += tempVectorY;
 }
 
 __device__ void fa2Attraction(unsigned int gid, unsigned int numvertices,
