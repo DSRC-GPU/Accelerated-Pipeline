@@ -1,0 +1,953 @@
+timer: time: all forces and moving vertices.
+kernel time (ms): 12.289248
+timer: time: graph swing and traction.
+kernel time (ms): 0.012896
+timer: time: embedding iteration.
+kernel time (ms): 12.414976
+timer: time: all forces and moving vertices.
+kernel time (ms): 11.683456
+timer: time: graph swing and traction.
+kernel time (ms): 0.011360
+timer: time: embedding iteration.
+kernel time (ms): 11.757664
+timer: time: all forces and moving vertices.
+kernel time (ms): 11.623808
+timer: time: graph swing and traction.
+kernel time (ms): 0.010720
+timer: time: embedding iteration.
+kernel time (ms): 11.696128
+timer: time: all forces and moving vertices.
+kernel time (ms): 11.526720
+timer: time: graph swing and traction.
+kernel time (ms): 0.010720
+timer: time: embedding iteration.
+kernel time (ms): 11.598144
+timer: time: all forces and moving vertices.
+kernel time (ms): 11.515392
+timer: time: graph swing and traction.
+kernel time (ms): 0.010688
+timer: time: embedding iteration.
+kernel time (ms): 11.586688
+timer: time: all forces and moving vertices.
+kernel time (ms): 11.520928
+timer: time: graph swing and traction.
+kernel time (ms): 0.010784
+timer: time: embedding iteration.
+kernel time (ms): 11.592704
+timer: time: all forces and moving vertices.
+kernel time (ms): 11.547712
+timer: time: graph swing and traction.
+kernel time (ms): 0.010656
+timer: time: embedding iteration.
+kernel time (ms): 11.619808
+timer: time: all forces and moving vertices.
+kernel time (ms): 11.543360
+timer: time: graph swing and traction.
+kernel time (ms): 0.010560
+timer: time: embedding iteration.
+kernel time (ms): 11.615136
+timer: time: all forces and moving vertices.
+kernel time (ms): 11.517760
+timer: time: graph swing and traction.
+kernel time (ms): 0.010720
+timer: time: embedding iteration.
+kernel time (ms): 11.590048
+timer: time: all forces and moving vertices.
+kernel time (ms): 11.523104
+timer: time: graph swing and traction.
+kernel time (ms): 0.010624
+timer: time: embedding iteration.
+kernel time (ms): 11.594560
+timer: time: all forces and moving vertices.
+kernel time (ms): 11.471552
+timer: time: graph swing and traction.
+kernel time (ms): 0.010688
+timer: time: embedding iteration.
+kernel time (ms): 11.543200
+timer: time: all forces and moving vertices.
+kernel time (ms): 11.488544
+timer: time: graph swing and traction.
+kernel time (ms): 0.010624
+timer: time: embedding iteration.
+kernel time (ms): 11.561600
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 45.027615
+timer: time: graph swing and traction.
+kernel time (ms): 0.012384
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.438465
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.736801
+timer: time: graph swing and traction.
+kernel time (ms): 0.018656
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.176064
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.687679
+timer: time: graph swing and traction.
+kernel time (ms): 0.012416
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 59.808929
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.794720
+timer: time: graph swing and traction.
+kernel time (ms): 0.012544
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.400639
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.512608
+timer: time: graph swing and traction.
+kernel time (ms): 0.012640
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 59.707840
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 45.029442
+timer: time: graph swing and traction.
+kernel time (ms): 0.012672
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.747070
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.810848
+timer: time: graph swing and traction.
+kernel time (ms): 0.012320
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.028160
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.443935
+timer: time: graph swing and traction.
+kernel time (ms): 0.012256
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 59.491585
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 45.001343
+timer: time: graph swing and traction.
+kernel time (ms): 0.012320
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 59.929344
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.879646
+timer: time: graph swing and traction.
+kernel time (ms): 0.012320
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 59.843742
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.810337
+timer: time: graph swing and traction.
+kernel time (ms): 0.012288
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 59.865631
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 45.029663
+timer: time: graph swing and traction.
+kernel time (ms): 0.012160
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 59.935871
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.892097
+timer: time: graph swing and traction.
+kernel time (ms): 0.012320
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 59.912575
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.791454
+timer: time: graph swing and traction.
+kernel time (ms): 0.012544
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.005791
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 45.012863
+timer: time: graph swing and traction.
+kernel time (ms): 0.012320
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.196575
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 45.207329
+timer: time: graph swing and traction.
+kernel time (ms): 0.012384
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.626751
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 45.048481
+timer: time: graph swing and traction.
+kernel time (ms): 0.012768
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.170464
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 45.116673
+timer: time: graph swing and traction.
+kernel time (ms): 0.012576
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.551361
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.604191
+timer: time: graph swing and traction.
+kernel time (ms): 0.012512
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 59.752384
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 45.027905
+timer: time: graph swing and traction.
+kernel time (ms): 0.012576
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.493088
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 45.034206
+timer: time: graph swing and traction.
+kernel time (ms): 0.012416
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.145985
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.936447
+timer: time: graph swing and traction.
+kernel time (ms): 0.012512
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.323231
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 45.213600
+timer: time: graph swing and traction.
+kernel time (ms): 0.013888
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.368546
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.900959
+timer: time: graph swing and traction.
+kernel time (ms): 0.012480
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 59.909374
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 45.066784
+timer: time: graph swing and traction.
+kernel time (ms): 0.012512
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.350880
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.981792
+timer: time: graph swing and traction.
+kernel time (ms): 0.012544
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.009888
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.810719
+timer: time: graph swing and traction.
+kernel time (ms): 0.012352
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 59.918945
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.977665
+timer: time: graph swing and traction.
+kernel time (ms): 0.012416
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.030785
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.569218
+timer: time: graph swing and traction.
+kernel time (ms): 0.012448
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 59.524258
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 45.017601
+timer: time: graph swing and traction.
+kernel time (ms): 0.012480
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.429409
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 45.073566
+timer: time: graph swing and traction.
+kernel time (ms): 0.012384
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.741665
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 45.009377
+timer: time: graph swing and traction.
+kernel time (ms): 0.012384
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.417023
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 45.020607
+timer: time: graph swing and traction.
+kernel time (ms): 0.014240
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.505791
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.885281
+timer: time: graph swing and traction.
+kernel time (ms): 0.012608
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.082111
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.825729
+timer: time: graph swing and traction.
+kernel time (ms): 0.012480
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.125343
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 45.062496
+timer: time: graph swing and traction.
+kernel time (ms): 0.012640
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.058369
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.664162
+timer: time: graph swing and traction.
+kernel time (ms): 0.012352
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.000481
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 45.138401
+timer: time: graph swing and traction.
+kernel time (ms): 0.012544
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.584480
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.406815
+timer: time: graph swing and traction.
+kernel time (ms): 0.013792
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 59.577343
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.857822
+timer: time: graph swing and traction.
+kernel time (ms): 0.012384
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.217918
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.886719
+timer: time: graph swing and traction.
+kernel time (ms): 0.012224
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 59.871552
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.861439
+timer: time: graph swing and traction.
+kernel time (ms): 0.012352
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 59.976704
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.932129
+timer: time: graph swing and traction.
+kernel time (ms): 0.012384
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.535233
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.999809
+timer: time: graph swing and traction.
+kernel time (ms): 0.012416
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.260258
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.667007
+timer: time: graph swing and traction.
+kernel time (ms): 0.012384
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 59.853344
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 45.014786
+timer: time: graph swing and traction.
+kernel time (ms): 0.012448
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.187298
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.825054
+timer: time: graph swing and traction.
+kernel time (ms): 0.012416
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.643681
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.246849
+timer: time: graph swing and traction.
+kernel time (ms): 0.012480
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 59.903553
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 45.138527
+timer: time: graph swing and traction.
+kernel time (ms): 0.012384
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.208096
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 45.252064
+timer: time: graph swing and traction.
+kernel time (ms): 0.014048
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.925697
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.839424
+timer: time: graph swing and traction.
+kernel time (ms): 0.012672
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.188736
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.719872
+timer: time: graph swing and traction.
+kernel time (ms): 0.042720
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.421345
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.775040
+timer: time: graph swing and traction.
+kernel time (ms): 0.012640
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 59.715935
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.724094
+timer: time: graph swing and traction.
+kernel time (ms): 0.012800
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.043007
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 45.207489
+timer: time: graph swing and traction.
+kernel time (ms): 0.012512
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.284641
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.976002
+timer: time: graph swing and traction.
+kernel time (ms): 0.012576
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.217758
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 45.116898
+timer: time: graph swing and traction.
+kernel time (ms): 0.012448
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.399326
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.813984
+timer: time: graph swing and traction.
+kernel time (ms): 0.013728
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.472351
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.855392
+timer: time: graph swing and traction.
+kernel time (ms): 0.012416
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.348640
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 45.024609
+timer: time: graph swing and traction.
+kernel time (ms): 0.012416
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.086399
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 45.108833
+timer: time: graph swing and traction.
+kernel time (ms): 0.012384
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.138046
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.945087
+timer: time: graph swing and traction.
+kernel time (ms): 0.012448
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.043137
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.854687
+timer: time: graph swing and traction.
+kernel time (ms): 0.012320
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 59.634720
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.716160
+timer: time: graph swing and traction.
+kernel time (ms): 0.012480
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 59.882942
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.997791
+timer: time: graph swing and traction.
+kernel time (ms): 0.012448
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.435936
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 45.044415
+timer: time: graph swing and traction.
+kernel time (ms): 0.012192
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.346783
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.729313
+timer: time: graph swing and traction.
+kernel time (ms): 0.012320
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 59.846912
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.841503
+timer: time: graph swing and traction.
+kernel time (ms): 0.012480
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 59.694721
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 45.055328
+timer: time: graph swing and traction.
+kernel time (ms): 0.012288
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.193153
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 45.117023
+timer: time: graph swing and traction.
+kernel time (ms): 0.012768
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.536449
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.949375
+timer: time: graph swing and traction.
+kernel time (ms): 0.012448
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.786079
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 45.173218
+timer: time: graph swing and traction.
+kernel time (ms): 0.012480
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.523457
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 45.085056
+timer: time: graph swing and traction.
+kernel time (ms): 0.012256
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.514336
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.967583
+timer: time: graph swing and traction.
+kernel time (ms): 0.012192
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.030945
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.985950
+timer: time: graph swing and traction.
+kernel time (ms): 0.012416
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 59.950817
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.732864
+timer: time: graph swing and traction.
+kernel time (ms): 0.012288
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.031551
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.644192
+timer: time: graph swing and traction.
+kernel time (ms): 0.012288
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 59.355583
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.881088
+timer: time: graph swing and traction.
+kernel time (ms): 0.012512
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.469826
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 45.094688
+timer: time: graph swing and traction.
+kernel time (ms): 0.012224
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.333694
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 45.186302
+timer: time: graph swing and traction.
+kernel time (ms): 0.014688
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.747425
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.723103
+timer: time: graph swing and traction.
+kernel time (ms): 0.012320
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 59.945919
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 45.074623
+timer: time: graph swing and traction.
+kernel time (ms): 0.012352
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.601665
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.700161
+timer: time: graph swing and traction.
+kernel time (ms): 0.012320
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 59.897247
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 45.135967
+timer: time: graph swing and traction.
+kernel time (ms): 0.012864
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.318687
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.819454
+timer: time: graph swing and traction.
+kernel time (ms): 0.012416
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.593441
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.860226
+timer: time: graph swing and traction.
+kernel time (ms): 0.012352
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.144032
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.930752
+timer: time: graph swing and traction.
+kernel time (ms): 0.012480
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 60.690945
+Cannot get length of vector.
+--
+timer: time: all forces and moving vertices.
+kernel time (ms): 44.632191
+timer: time: graph swing and traction.
+kernel time (ms): 0.012512
+Cannot get length of vector.
+--
+timer: time: embedding iteration.
+kernel time (ms): 59.425953
+Normal program exit.
