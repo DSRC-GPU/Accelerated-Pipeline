@@ -228,7 +228,7 @@ __device__ void fa2Gravity(unsigned int gid, unsigned int numvertices,
   }
 }
 
-__device__ __forceinline__ void fa2Repulsion(unsigned int gid, unsigned int numvertices,
+__device__ void fa2Repulsion(unsigned int gid, unsigned int numvertices,
     float* vxLocs, float* vyLocs, float* forceX, float* forceY,
     unsigned int* deg)
 {
