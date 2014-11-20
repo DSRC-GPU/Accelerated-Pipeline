@@ -20,10 +20,10 @@ TARGETS = ap
 MAIN = main.c.o
 SEP_MAIN = se-performance.c.o
 OBJECTS = graph.c.o gexfparser.c.o pipeline.c.o
-OBJECTS_SEQ = vector.c.o force-atlas-2.c.o util.c.o \
+OBJECTS_SEQ = vector.c.o spring-embedding.c.o util.c.o \
 	smoothening.c.o pca.cpp.o vector-average.c.o break-edges.c.o \
   connected-component.c.o pipeline.c.o timer.c.o
-OBJECTS_PAR = vector.o force-atlas-2.o cuda-stream.o util.o \
+OBJECTS_PAR = vector.o spring-embedding.o cuda-stream.o util.o \
 	smoothening.o pca.o test-pca.o test-util.o \
   vector-average.o break-edges.o connected-component.o timer.o
 
