@@ -1,11 +1,18 @@
 /*!
- \file force-atlas-2.h
+ \file spring-embedding.h
  Force Atlas 2 spring embedding implementation.
  */
 #ifndef FORCE_ATLAS_2_H
 #define FORCE_ATLAS_2_H
 
 #include "graph.h"
+
+#ifdef YIFAN_HU
+
+#define YIFAN_HU_C 1.0
+#define YIFAN_HU_K 1.0
+
+#else // Force Atlas 2 constants
 
 /*!
  * Repulsion constant.
@@ -31,6 +38,8 @@
  * Force atlas 2 parameter.
  */
 #define TAU 0.01
+
+#endif
 
 /*!
  * Small number that is assigned to variables when they currently equal 0,

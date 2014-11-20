@@ -9,7 +9,7 @@
 #include <float.h>
 #include <limits.h>
 #include <assert.h>
-#include "force-atlas-2.h"
+#include "spring-embedding.h"
 #include "math.h"
 #include "timer.h"
 #include "vector.h"

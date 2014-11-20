@@ -8,7 +8,7 @@
 #include <string.h>
 #include <float.h>
 #include <assert.h>
-#include "force-atlas-2.h"
+#include "spring-embedding.h"
 #include "math.h"
 #include "timer.h"
 #include "cuda-stream.h"
@@ -236,13 +236,15 @@ __device__ void fa2Repulsion(unsigned int gid, unsigned int numvertices,
   {
     float tempVectorX = 0;
     float tempVectorY = 0;
-    float vx1 = vxLocs[gid];
-    float vy1 = vyLocs[gid];
+    float vxLoc = vxLocs[gid];
+    float vyLoc = vyLocs[gid];
     for (size_t j = 0; j < numvertices; j++)
     {
       size_t index = (gid + j) % numvertices;
       if (gid == index)
         continue;
+      float vx1 = vxLoc;
+      float vy1 = vyLoc;
       float vx2 = vxLocs[index];
       float vy2 = vyLocs[index];
 
@@ -251,11 +253,16 @@ __device__ void fa2Repulsion(unsigned int gid, unsigned int numvertices,
 
       if (dist > 0)
       {
+#ifdef YIFAN_HU
+        // We do x_i - x_j, they do x_j - x_i. Therefore, we drop the negation
+        // for C.
+        vx1 *= YIFAN_HU_C * YIFAN_HU_K * YIFAN_HU_K / (dist * dist);
+        vy1 *= YIFAN_HU_C * YIFAN_HU_K * YIFAN_HU_K / (dist * dist);
+#else // Force Atlas 2
         vectorNormalize(&vx1, &vy1);
         vectorMultiply(&vx1, &vy1,
             K_R * (((deg[gid] + 1) * (deg[index] + 1)) / dist));
-        // vectorMultiply(&vx1, &vy1, 0.5);
-
+#endif
         vectorAdd(&tempVectorX, &tempVectorY, vx1, vy1);
       }
     }
@@ -283,8 +290,13 @@ __device__ void fa2Attraction(unsigned int gid, unsigned int numvertices,
       float vx2 = vxLocs[target];
       float vy2 = vyLocs[target];
 
+      // v2 <- v2 - v1
       vectorSubtract(&vx2, &vy2, vx1, vy1);
-      // vectorMultiply(&vx2, &vy2, 0.5);
+#ifdef YIFAN_HU
+      float dist = sqrt(vx2 * vx2 + vy2 * vy2);
+      vx2 *= dist / YIFAN_HU_K;
+      vy2 *= dist / YIFAN_HU_K;
+#endif
       vectorAdd(forceX, forceY, vx2, vy2);
       if (gid == 0)
         DEBUG_PRINT("a:%f\t%u\n", vx2, target);
@@ -324,14 +336,15 @@ __device__ void fa2UpdateTract(unsigned int gid, unsigned int numvertices,
 /*!
  * Updates the swing value for the graph itself.
  *
- * \param[in] numvertices The total number of vertices in the graph.
- * \param[in] swg Array holding the swing values of each vertex in the graph.
- * \param[in] deg Array holding the out degree values of each vertex in the
+ * \param[in] numElements The total number of vertices in the graph.
+ * \param[in] gMultiplyArray Array holding the swing values of each vertex in the graph.
+ * \param[in] gAccumulateArray Array holding the out gAccumulateArrayree values of each vertex in the
  *    graph.
- * \param[out] gswing Pointer to where the graph swing value should be stored.
+ * \param[out] out Pointer to where the graph swing value should be stored.
  */
-__device__ void fa2UpdateSwingGraph(unsigned int numvertices, float* swg,
-    unsigned int* deg, float* gswing)
+__device__ void arrayReduction(unsigned int numElements,
+    float* gMultiplyArray, int incrementValue, unsigned int* gAccumulateArray,
+    float* out)
 {
   __shared__ float scratch[BLOCK_SIZE * 2];
 
@@ -340,16 +353,18 @@ __device__ void fa2UpdateSwingGraph(unsigned int numvertices, float* swg,
   unsigned int base = tx + (blockIdx.x * BLOCK_SIZE * 2);
   unsigned int stride = BLOCK_SIZE;
 
-  if (base < numvertices)
+  if (base < numElements)
   {
-    scratch[tx] = (deg[base] + 1) * swg[base];
+    scratch[tx] = (gAccumulateArray[base] + incrementValue)
+        * gMultiplyArray[base];
   }
   else
     scratch[tx] = 0;
 
-  if (base + stride < numvertices)
+  if (base + stride < numElements)
   {
-    scratch[tx + stride] = (deg[base + stride] + 1) * swg[base + stride];
+    scratch[tx + stride] = (gAccumulateArray[base + stride] + incrementValue)
+        * gMultiplyArray[base + stride];
   }
   else
     scratch[tx + stride] = 0;
@@ -369,57 +384,7 @@ __device__ void fa2UpdateSwingGraph(unsigned int numvertices, float* swg,
   // Do atomic add per block to obtain final value.
   __syncthreads();
   if (tx == 0)
-    atomicAdd(gswing, scratch[tx]);
-}
-
-/*!
- * Updates the graph traction value.
- *
- * \param[in] numvertices The total number of vertices in the graph.
- * \param[in] tra Array holding the traction values of individual vertices.
- * \param[in] deg Array holding the number of outgoing edges for each vertex.
- * \param[out] gtract Pointer to where the graph traction should be stored.
- */
-__device__ void fa2UpdateTractGraph(unsigned int numvertices, float* tra,
-    unsigned int* deg, float* gtract)
-{
-  __shared__ float scratch[BLOCK_SIZE * 2];
-
-  // Setup local data to perform reduction.
-  unsigned int tx = threadIdx.x;
-  unsigned int base = tx + (blockIdx.x * BLOCK_SIZE * 2);
-  unsigned int stride = BLOCK_SIZE;
-
-  if (base < numvertices)
-  {
-    scratch[tx] = (deg[base] + 1) * tra[base];
-  }
-  else
-    scratch[tx] = 0;
-
-  if (base + stride < numvertices)
-  {
-    scratch[tx + stride] = (deg[base + stride] + 1) * tra[base + stride];
-  }
-  else
-    scratch[tx + stride] = 0;
-
-  // Do block-local reduction.
-  while (stride > 0)
-  {
-    __syncthreads();
-    if (tx < stride)
-    {
-      scratch[tx] += scratch[tx + stride];
-    }
-
-    stride >>= 1;
-  }
-
-  // Do atomic add per block to obtain final value.
-  __syncthreads();
-  if (tx == 0)
-    atomicAdd(gtract, scratch[tx]);
+    atomicAdd(out, scratch[tx]);
 }
 
 __device__ void fa2UpdateSpeedGraph(float gswing, float gtract, float* gspeed)
@@ -512,10 +477,10 @@ __global__ void fa2GraphSwingTract(unsigned int numvertices, float* swg,
     float* graphTract)
 {
   // Update swing of Graph.
-  fa2UpdateSwingGraph(numvertices, swg, numNeighbours, graphSwing);
+  arrayReduction(numvertices, swg, 1, numNeighbours, graphSwing);
 
   // Update traction of Graph.
-  fa2UpdateTractGraph(numvertices, tra, numNeighbours, graphTract);
+  arrayReduction(numvertices, tra, 1, numNeighbours, graphTract);
 }
 
 /*!
@@ -546,11 +511,14 @@ __global__ void fa2kernel(float* vxLocs, float* vyLocs,
     forceX[gid] = 0;
     forceY[gid] = 0;
     
+#ifdef YIFAN_HU
+#else // Force Atlas 2
     if (gid == 0)
       DEBUG_PRINT("Computing gravity\n");
     // Gravity force
     fa2Gravity(gid, numvertices, vxLocs, vyLocs, &forceX[gid], &forceY[gid],
         numedges);
+#endif
     if (gid == 0)
       DEBUG_PRINT("Computing repulsion\n");
     // Repulsion between vertices
@@ -562,6 +530,8 @@ __global__ void fa2kernel(float* vxLocs, float* vyLocs,
     fa2Attraction(gid, numvertices, vxLocs, vyLocs, numedges, edgeTargets,
         maxedges, &forceX[gid], &forceY[gid]);
 
+#ifdef YIFAN_HU
+#else
     if (gid == 0)
       DEBUG_PRINT("Computing swing\n");
     // Calculate speed of vertices.
@@ -575,6 +545,7 @@ __global__ void fa2kernel(float* vxLocs, float* vyLocs,
     fa2UpdateTract(gid, numvertices, forceX[gid], forceY[gid], oldForceX,
         oldForceY, tra);
   }
+#endif
 }
 
 /*!
