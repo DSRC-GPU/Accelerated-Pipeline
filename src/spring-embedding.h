@@ -11,6 +11,8 @@
 
 #define YIFAN_HU_C 1.0
 #define YIFAN_HU_K 1.0
+#define YIFAN_HU_STEP 1
+#define YIFAN_HU_T 0.9
 
 #else // Force Atlas 2 constants
 
@@ -39,6 +41,12 @@
  */
 #define TAU 0.01
 
+#endif
+
+#ifdef YIFAN_HU
+#define GLOBAL_VARS 4
+#else // Force Atlas 2
+#define GLOBAL_VARS 2
 #endif
 
 /*!
@@ -84,14 +92,6 @@ typedef struct ForceAtlas2Data
    * Array that holds the y-force value for each vertex, from the previous iteration.
    */
   float* oldForceY;
-  /*!
-   * Pointer to the graph swing value in the global memory on the device.
-   */
-  float* graphSwing;
-  /*!
-   * Pointer to the graph swing value in the global memory on the device.
-   */
-  float* graphTract;
   /*!
    * Pointer to the graph speed value in the global memory on the device.
    */
