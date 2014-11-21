@@ -6,7 +6,7 @@ LDFLAGS = -lm -lxml2 -lpthread -L../alglib/cpp/lib -lalglib
 
 NVCC = nvcc
 CUDA_LINK = link.o
-CUDA_ARCH = -arch=sm_30
+CUDA_ARCH = -arch=sm_20
 NVCCFLAGS	= -lineinfo -Xcompiler -rdynamic $(CUDA_ARCH) -dc \
             --ptxas-options=-v -prec-sqrt=true -prec-div=true \
             -ccbin=`which g++`  -I$(CULA_INC_PATH)
@@ -55,6 +55,10 @@ par: $(MAIN) $(OBJECTS_PAR) $(OBJECTS)
 sep: $(SEP_MAIN) $(OBJECTS_PAR) $(OBJECTS)
 	$(NVCC) $(CUDA_ARCH) $(OBJECTS_PAR) -dlink -o $(CUDA_LINK)
 	$(CC) -rdynamic -o $(TARGETS) $(CUDA_LINK) $^ $(CUDA_LIBS) $(CUDA_LDFLAGS)
+
+yifan-hu: NVCCFLAGS += -DYIFAN_HU -DDEBUG -G -g
+yifan-hu: CFLAGS += -DDEBUG -g
+yifan-hu: sep
 
 clean:
 	rm -rf *.o
