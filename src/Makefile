@@ -19,13 +19,16 @@ TARGETS = ap
 
 MAIN = main.c.o
 SEP_MAIN = se-performance.c.o
-OBJECTS = graph.c.o gexfparser.c.o pipeline.c.o
+OBJECTS = graph.c.o gexfparser.c.o pipeline.c.o graphparser.c.o
 OBJECTS_SEQ = vector.c.o spring-embedding.c.o util.c.o \
 	smoothening.c.o pca.cpp.o vector-average.c.o break-edges.c.o \
   connected-component.c.o pipeline.c.o timer.c.o
 OBJECTS_PAR = vector.o spring-embedding.o cuda-stream.o util.o \
 	smoothening.o pca.o test-pca.o test-util.o \
   vector-average.o break-edges.o connected-component.o timer.o
+
+TEST_GRAPH_PARSER_MAIN = test-graph-parser.c.o
+TEST_GRAPH_PARSER_OBJECTS = graph.c.o graphparser.c.o
 
 %.c.o: %.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
@@ -59,6 +62,10 @@ sep: $(SEP_MAIN) $(OBJECTS_PAR) $(OBJECTS)
 yifan-hu: NVCCFLAGS += -DYIFAN_HU -DDEBUG -G -g
 yifan-hu: CFLAGS += -DDEBUG -g
 yifan-hu: sep
+
+test-graph-parser: CFLAGS += -DDEBUG -g
+test-graph-parser: $(TEST_GRAPH_PARSER_MAIN) $(TEST_GRAPH_PARSER_OBJECTS)
+	$(CC) -o $(TARGETS) $(CFLAGS) $^ $(LDFLAGS) 
 
 clean:
 	rm -rf *.o
