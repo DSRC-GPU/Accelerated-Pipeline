@@ -15,6 +15,7 @@
 #include <stdio.h>
 
 #include "gexfparser.h"
+#include "graphparser.h"
 #include "pipeline.h"
 #include "timer.h"
 #include "util.h"
@@ -61,10 +62,11 @@ int main(int argc, char* argv[])
     exit(EXIT_FAILURE);
   }
   
-  Graph* graph = (Graph*) calloc(1, sizeof(Graph));
-  graph->vertices = gexfParseFileVertices(inputFile);
-  graph->edges = gexfParseFileEdgesSomewhereInInterval(inputFile, graph, 0,
-      WINDOW_SIZE);
+  //Graph* graph = (Graph*) calloc(1, sizeof(Graph));
+  //graph->vertices = gexfParseFileVertices(inputFile);
+  //graph->edges = gexfParseFileEdgesSomewhereInInterval(inputFile, graph, 0,
+  //    WINDOW_SIZE);
+  Graph* graph = graphParse(inputFile);
 
   float numvertices = graph->vertices->numvertices;
 

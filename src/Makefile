@@ -19,7 +19,7 @@ TARGETS = ap
 
 MAIN = main.c.o
 SEP_MAIN = se-performance.c.o
-OBJECTS = graph.c.o gexfparser.c.o pipeline.c.o
+OBJECTS = graph.c.o gexfparser.c.o pipeline.c.o graphparser.c.o
 OBJECTS_SEQ = vector.c.o force-atlas-2.c.o util.c.o \
 	smoothening.c.o pca.cpp.o vector-average.c.o break-edges.c.o \
   connected-component.c.o pipeline.c.o timer.c.o

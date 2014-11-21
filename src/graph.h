@@ -26,6 +26,10 @@ typedef struct Edges
    * where n can range from 0 to maxedges.
    */
   unsigned int* edgeTargets;
+  /*!
+   * The size of edgeTargets and in number of elements.
+   */
+  unsigned int arraySize;
 } Edges;
 
 /*!
@@ -119,6 +123,8 @@ void printGraph(Graph* g);
  * Free the memory allocated for the graph struct.
  */
 void freeGraph(Graph* graph);
+
+void graphShrinkEdgeArrayToActualSize(Graph* g);
 
 #endif
 
