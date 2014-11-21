@@ -14,7 +14,7 @@ import (
   "time"
 )
 
-var resource = "-l gpu=GTX680"
+var resource = "-l gpu=GTX480"
 
 func GetUserName() string {
   cmd := exec.Command("whoami")
@@ -111,5 +111,8 @@ func main () {
     command.Wait()
 
     CleanNode(nodeid)
+  }
+  if len(files) == 0 {
+    fmt.Println("No input files found.")
   }
 }
