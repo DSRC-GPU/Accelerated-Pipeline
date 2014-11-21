@@ -67,6 +67,7 @@ int main(int argc, char* argv[])
   //graph->edges = gexfParseFileEdgesSomewhereInInterval(inputFile, graph, 0,
   //    WINDOW_SIZE);
   Graph* graph = graphParse(inputFile);
+  graphRandomizeLocation(graph);
 
   float numvertices = graph->vertices->numvertices;
 

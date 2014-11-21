@@ -148,3 +148,12 @@ void graphShrinkEdgeArrayToActualSize(Graph* g)
     g->edges->arraySize = numelements;
   }
 }
+
+void graphRandomizeLocation(Graph* g)
+{
+  for (size_t i = 0; i < g->vertices->numvertices; i++)
+  {
+    g->vertices->vertexXLocs[i] = rand() % g->vertices->numvertices;
+    g->vertices->vertexYLocs[i] = rand() % g->vertices->numvertices;
+  }
+}

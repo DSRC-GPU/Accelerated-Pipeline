@@ -127,7 +127,10 @@ void printGraphEdges(Graph* g);
 void freeGraph(Graph* graph);
 
 void graphIncreaseEdgeArraySize(Graph* g, unsigned int inc);
+
 void graphShrinkEdgeArrayToActualSize(Graph* g);
+
+void graphRandomizeLocation(Graph* g);
 
 #endif
 
