@@ -119,11 +119,14 @@ Graph* newGraph(unsigned int numVertices);
  */
 void printGraph(Graph* g);
 
+void printGraphEdges(Graph* g);
+
 /*!
  * Free the memory allocated for the graph struct.
  */
 void freeGraph(Graph* graph);
 
+void graphIncreaseEdgeArraySize(Graph* g, unsigned int inc);
 void graphShrinkEdgeArrayToActualSize(Graph* g);
 
 #endif

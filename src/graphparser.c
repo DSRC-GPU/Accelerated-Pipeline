@@ -1,5 +1,7 @@
 
+#include <stdlib.h>
 #include <stdio.h>
+#include "graph.h"
 
 #define BUFFERSIZE 1000
 
@@ -14,21 +16,25 @@ Graph* graphParseFile(FILE* ifp)
 
   Graph* graph = newGraph(numVertices);
 
-  for (size_t i = 0, i < numVertices; i++)
+  for (size_t i = 0; i < numVertices; i++)
   {
     fgets(buffer, BUFFERSIZE, ifp);
     char* end = buffer;
-    unsigned int neighbour = (unsigned int) strol(end, &end, 10);
-    // We are making each graph undirected. We do this by ignoring edges that go
-    // from (v,u) where v > u. If we find an edge (v,u) where v <= u, we create
-    // edges (v,u) and (u,v).
-    if (i <= neighbour)
+    unsigned int neighbour = 0;
+    while((neighbour = (unsigned int) strtol(end, &end, 10)) != 0)
     {
-      graphAddEdgeToVertex(i, neighbour);
-      graphAddEdgeToVertex(neighbour, i);
+      neighbour--;
+      // We are making each graph undirected. We do this by ignoring edges that go
+      // from (v,u) where v > u. If we find an edge (v,u) where v <= u, we create
+      // edges (v,u) and (u,v).
+      if (i <= neighbour)
+      {
+        graphAddEdgeToVertex(graph, i, neighbour);
+        graphAddEdgeToVertex(graph, neighbour, i);
+      }
     }
   }
-  graphShrinkEdgeArrayToActualSize(g);
+  graphShrinkEdgeArrayToActualSize(graph);
 
   return graph;
 }
@@ -43,5 +49,5 @@ Graph* graphParse(const char* filename)
     printf("Could not open file %s.\n", filename);
     exit(1);
   }
-  return graphParseFile(FILE* ifp);    
+  return graphParseFile(ifp);    
 }

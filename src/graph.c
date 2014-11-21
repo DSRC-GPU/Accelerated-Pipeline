@@ -10,7 +10,7 @@ Edges* newEdges(unsigned int numvertices)
   edges->maxedges = 0;
   edges->numedges = (unsigned int*) calloc(numvertices, sizeof(unsigned int));
   edges->arraySize = numvertices;
-  edges->edgeTargets = (unsigned int*) calloc(arraySize,
+  edges->edgeTargets = (unsigned int*) calloc(edges->arraySize,
       sizeof(unsigned int));
   return edges;
 }
@@ -20,7 +20,7 @@ Vertices* newVertices(unsigned int num)
   Vertices* vertices = (Vertices*) calloc(1, sizeof(Vertices));
   vertices->vertexXLocs = (float*) calloc(num, sizeof(float));
   vertices->vertexYLocs = (float*) calloc(num, sizeof(float));
-  vertices->numvertices = 0;
+  vertices->numvertices = num;
   return vertices;
 }
 
@@ -40,8 +40,7 @@ void graphSetEdgeSpaceForAllVertices(Graph* graph)
   graph->edges->edgeTargets = (unsigned int*) calloc(
       graph->vertices->numvertices * graph->edges->maxedges,
       sizeof(unsigned int));
-  for (size_t i = 0; i < graph->vertices->numvertices * graph->edges->maxedges;
-      i++)
+  for (size_t i = 0; i < graph->edges->arraySize; i++)
   {
     graph->edges->edgeTargets[i] = UINT_MAX;
   }
@@ -55,7 +54,7 @@ void graphAddEdgeToVertex(Graph* graph, unsigned int sourceVertexId,
   if (graph->edges->numedges[sourceVertexId] + 1 * graph->vertices->numvertices
       > graph->edges->arraySize)
   {
-    graphIncreaseEdgeArraySize(10);
+    graphIncreaseEdgeArraySize(graph, 10);
   }
   graph->edges->numedges[sourceVertexId]++;
   if (graph->edges->numedges[sourceVertexId] > graph->edges->maxedges)
@@ -73,6 +72,20 @@ void printGraph(Graph* g)
   {
     printf("%zu %.15f %.15f\n", i,
         g->vertices->vertexXLocs[i], g->vertices->vertexYLocs[i]);
+  }
+}
+
+void printGraphEdges(Graph* g)
+{
+  if (!g)
+    return;
+  for (size_t i = 0; i < g->vertices->numvertices; i++)
+  {
+    for (size_t j = 0; j < g->edges->numedges[i]; j++)
+    {
+      unsigned int index = i + (j * g->vertices->numvertices);
+      printf("Edge from %u to %u\n", i, g->edges->edgeTargets[index]);
+    }
   }
 }
 
@@ -107,7 +120,7 @@ void graphIncreaseEdgeArraySize(Graph* g, unsigned int inc)
 {
   unsigned int numelements = g->edges->arraySize
       + (inc * g->vertices->numvertices);
-  g->edges->edgeTargets = realloc(g->edges->edgeTargets,
+  g->edges->edgeTargets = (unsigned int*) realloc(g->edges->edgeTargets,
       numelements * sizeof(unsigned int));
   if (!g->edges->edgeTargets)
   {
@@ -117,9 +130,9 @@ void graphIncreaseEdgeArraySize(Graph* g, unsigned int inc)
   g->edges->arraySize = numelements;
   for (size_t i = 0; i < g->vertices->numvertices; i++)
   {
-    for (size_t index = g->edges->numedges[i]; index < g->edges->maxedges;
-        index++)
+    for (size_t j = g->edges->numedges[i]; j < g->edges->maxedges; j++)
     {
+      unsigned int index = i + (j * g->vertices->numvertices);
       g->edges->edgeTargets[index] = UINT_MAX;
     }
   }
@@ -130,7 +143,8 @@ void graphShrinkEdgeArrayToActualSize(Graph* g)
   unsigned int numelements = g->edges->maxedges * g->vertices->numvertices;
   if (numelements < g->edges->arraySize)
   {
-    g->edges->edgeTargets = realloc(numelements, g->edges->edgeTargets);
+    g->edges->edgeTargets = (unsigned int*) realloc(g->edges->edgeTargets,
+        numelements * sizeof(unsigned int));
     g->edges->arraySize = numelements;
   }
 }
