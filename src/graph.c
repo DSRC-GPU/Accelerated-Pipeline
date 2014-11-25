@@ -52,7 +52,7 @@ void graphAddEdgeToVertex(Graph* graph, unsigned int sourceVertexId,
 {
   unsigned int index = sourceVertexId
    + graph->edges->numedges[sourceVertexId] * graph->vertices->numvertices;
-  if (index > graph->edges->arraySize)
+  if (index >= graph->edges->arraySize)
   {
     graphIncreaseEdgeArraySize(graph, 10);
   }
@@ -133,6 +133,7 @@ void graphIncreaseEdgeArraySize(Graph* g, unsigned int inc)
     for (size_t j = g->edges->numedges[i]; j < g->edges->maxedges; j++)
     {
       unsigned int index = i + (j * g->vertices->numvertices);
+      assert(index < g->edges->arraySize);
       g->edges->edgeTargets[index] = UINT_MAX;
     }
   }

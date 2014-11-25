@@ -210,80 +210,83 @@ __global__ void fa2Repulsion(unsigned int numvertices,
     unsigned int* deg)
 {
   unsigned int gid = threadIdx.x + (blockIdx.x * BLOCK_SIZE);
-  // Local accumulators that will be written to global at end of computation.
-  float tempVectorX = 0;
-  float tempVectorY = 0;
-
-  // Local copies of the location and outdegree of the vertex belonging to
-  // this thread.
-  float vx1 = vxLocs[gid];
-  float vy1 = vyLocs[gid];
-  float tDeg = deg[gid];
-
-  // Allocating shared space for locations and outdegrees of other vertices.
-  __shared__ float vxs[BLOCK_SIZE];
-  __shared__ float vys[BLOCK_SIZE];
-  __shared__ float sDeg[BLOCK_SIZE];
-
-  // Tiled iteration. Chuck input in tiles.
-  unsigned int numTiles = ceil((double) numvertices / BLOCK_SIZE);
-  for (size_t j = 0; j < numTiles; j++)
+  if (gid < numvertices)
   {
-    // Calculate global index to use when loading element in shared mem.
-    unsigned int index = (gid + j * BLOCK_SIZE) % (numTiles * BLOCK_SIZE);
-    // Load location and outdegree into shared mem.
-    unsigned int tid = threadIdx.x;
-    if (index < numvertices)
-    {
-      vxs[tid] = vxLocs[index];
-      vys[tid] = vyLocs[index];
-      sDeg[tid] = deg[index];
-    } else {
-      vxs[tid] = 0;
-      vys[tid] = 0;
-      // This causes the enumerator later on to become 0, which in turn causes
-      // the repulsion force to become 0.
-      sDeg[tid] = -1;
-    }
-    // Sync to make sure shared mem has been filled.
-    __syncthreads();
+    // Local accumulators that will be written to global at end of computation.
+    float tempVectorX = 0;
+    float tempVectorY = 0;
 
-    // For all elements in the shared mem, compute repulsion.
-    for (size_t i = 0; i < BLOCK_SIZE; i++)
-    {
-      // Create copy of the location of this vertex. Is overwritten when
-      // computing the distance to vertex from shared mem.
-      float xdist = vx1;
-      float ydist = vy1;
-      // Compute distance to other vertex and overwrite.
-      xdist -= vxs[i];
-      ydist -= vys[i];
-      // Calculate euclidian distance to other vertex.
-      float dist = sqrt(xdist * xdist + ydist * ydist);
+    // Local copies of the location and outdegree of the vertex belonging to
+    // this thread.
+    float vx1 = vxLocs[gid];
+    float vy1 = vyLocs[gid];
+    float tDeg = deg[gid];
 
-      // Check because we are using dist as denominator.
-      if (dist > 0)
+    // Allocating shared space for locations and outdegrees of other vertices.
+    __shared__ float vxs[BLOCK_SIZE];
+    __shared__ float vys[BLOCK_SIZE];
+    __shared__ float sDeg[BLOCK_SIZE];
+
+    // Tiled iteration. Chuck input in tiles.
+    unsigned int numTiles = ceil((double) numvertices / BLOCK_SIZE);
+    for (size_t j = 0; j < numTiles; j++)
+    {
+      // Calculate global index to use when loading element in shared mem.
+      unsigned int index = (gid + j * BLOCK_SIZE) % (numTiles * BLOCK_SIZE);
+      // Load location and outdegree into shared mem.
+      unsigned int tid = threadIdx.x;
+      if (index < numvertices)
       {
-        // Shrink vertex to have length of 1.
-        xdist /= dist;
-        ydist /= dist;
-        // Multiply by factor as specified in fa2 paper to compute repulsion
-        // between vertices.
-        xdist *= K_R * (((tDeg + 1) * (sDeg[i] + 1)) / dist);
-        ydist *= K_R * (((tDeg + 1) * (sDeg[i] + 1)) / dist);
-        // Add this repulsion to local variables.
-        tempVectorX += xdist;
-        tempVectorY += ydist;
+        vxs[tid] = vxLocs[index];
+        vys[tid] = vyLocs[index];
+        sDeg[tid] = deg[index];
+      } else {
+        vxs[tid] = 0;
+        vys[tid] = 0;
+        // This causes the enumerator later on to become 0, which in turn causes
+        // the repulsion force to become 0.
+        sDeg[tid] = -1;
       }
-    }
+      // Sync to make sure shared mem has been filled.
+      __syncthreads();
 
-    // Prevent threads from loading new values in shared mem while others are
-    // still computing.
-    __syncthreads();
+      // For all elements in the shared mem, compute repulsion.
+      for (size_t i = 0; i < BLOCK_SIZE; i++)
+      {
+        // Create copy of the location of this vertex. Is overwritten when
+        // computing the distance to vertex from shared mem.
+        float xdist = vx1;
+        float ydist = vy1;
+        // Compute distance to other vertex and overwrite.
+        xdist -= vxs[i];
+        ydist -= vys[i];
+        // Calculate euclidian distance to other vertex.
+        float dist = sqrt(xdist * xdist + ydist * ydist);
+
+        // Check because we are using dist as denominator.
+        if (dist > 0)
+        {
+          // Shrink vertex to have length of 1.
+          xdist /= dist;
+          ydist /= dist;
+          // Multiply by factor as specified in fa2 paper to compute repulsion
+          // between vertices.
+          xdist *= K_R * (((tDeg + 1) * (sDeg[i] + 1)) / dist);
+          ydist *= K_R * (((tDeg + 1) * (sDeg[i] + 1)) / dist);
+          // Add this repulsion to local variables.
+          tempVectorX += xdist;
+          tempVectorY += ydist;
+        }
+      }
+
+      // Prevent threads from loading new values in shared mem while others are
+      // still computing.
+      __syncthreads();
+    }
+    // Add accumulated repulsion value to global mem variable.
+    *forceX += tempVectorX;
+    *forceY += tempVectorY;
   }
-  // Add accumulated repulsion value to global mem variable.
-  *forceX += tempVectorX;
-  *forceY += tempVectorY;
 }
 
 __global__ void fa2Attraction(unsigned int numvertices,
@@ -470,11 +473,12 @@ void fa2UpdateSpeedGraph(float gswing, float gtract, float* gspeed)
 }
 
 __global__ void fa2UpdateSpeed(unsigned int numvertices,
-    float* speed, float* swg, float* dForceX, float* dForceY, float* globalVars)
+    float** globalArrays, float* swg, float* dForceX, float* dForceY, float* globalVars)
 {
   unsigned int gid = threadIdx.x + (blockIdx.x * BLOCK_SIZE);
   if (gid < numvertices)
   {
+    float* speed = globalArrays[2];
     float gs = globalVars[2];
     float vSwg = swg[gid];
     float forceX = dForceX[gid];
@@ -852,7 +856,7 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
     cudaMemcpy(gGlobalVars, hGlobalVars, GLOBAL_VARS * sizeof(float),
       cudaMemcpyHostToDevice);
     // Update speed of vertices.
-    fa2UpdateSpeed<<<numblocks, BLOCK_SIZE>>>(g->vertices->numvertices, gGlobalArrays[2], data.swg,
+    fa2UpdateSpeed<<<numblocks, BLOCK_SIZE>>>(g->vertices->numvertices, gGlobalArrays, data.swg,
     data.forceX, data.forceY,
         gGlobalVars);
 
