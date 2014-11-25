@@ -15,10 +15,11 @@
 #include <stdio.h>
 
 #include "gexfparser.h"
+#include "graphparser.h"
 #include "pipeline.h"
 #include "timer.h"
 #include "util.h"
-#include "force-atlas-2.h"
+#include "spring-embedding.h"
 #include "vector-average.h"
 
 const char* argPhiFine = "--phi-fine";
@@ -61,10 +62,12 @@ int main(int argc, char* argv[])
     exit(EXIT_FAILURE);
   }
   
-  Graph* graph = (Graph*) calloc(1, sizeof(Graph));
-  graph->vertices = gexfParseFileVertices(inputFile);
-  graph->edges = gexfParseFileEdgesSomewhereInInterval(inputFile, graph, 0,
-      WINDOW_SIZE);
+  //Graph* graph = (Graph*) calloc(1, sizeof(Graph));
+  //graph->vertices = gexfParseFileVertices(inputFile);
+  //graph->edges = gexfParseFileEdgesSomewhereInInterval(inputFile, graph, 0,
+  //    WINDOW_SIZE);
+  Graph* graph = graphParse(inputFile);
+  graphRandomizeLocation(graph);
 
   float numvertices = graph->vertices->numvertices;
 

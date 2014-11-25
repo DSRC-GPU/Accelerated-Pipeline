@@ -7,7 +7,7 @@
 #include "gexfparser.h"
 #include "vector-average.h"
 #include "util.h"
-#include "force-atlas-2.h"
+#include "spring-embedding.h"
 #include "pca.h"
 #include "smoothening.h"
 #include "break-edges.h"
