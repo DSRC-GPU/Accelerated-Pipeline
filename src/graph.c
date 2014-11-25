@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <limits.h>
+#include <assert.h>
 #include "graph.h"
 
 Edges* newEdges(unsigned int numvertices)
@@ -51,8 +52,7 @@ void graphAddEdgeToVertex(Graph* graph, unsigned int sourceVertexId,
 {
   unsigned int index = sourceVertexId
    + graph->edges->numedges[sourceVertexId] * graph->vertices->numvertices;
-  if (graph->edges->numedges[sourceVertexId] + 1 * graph->vertices->numvertices
-      > graph->edges->arraySize)
+  if (index > graph->edges->arraySize)
   {
     graphIncreaseEdgeArraySize(graph, 10);
   }
