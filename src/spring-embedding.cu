@@ -199,7 +199,6 @@ __global__ void fa2Gravity(unsigned int numvertices,
     vy *= -factor;
     if (gid == 0)
       DEBUG_PRINT("g:%f\n", vx);
-    vectorAdd(forceX, forceY, vx, vy);
     forceX[gid] += vx;
     forceY[gid] += vy;
   }
@@ -265,6 +264,8 @@ __global__ void fa2Attraction(unsigned int numvertices,
   {
     float vx1 = vxLocs[gid];
     float vy1 = vyLocs[gid];
+    float tempVectorX = 0;
+    float tempVectorY = 0;
     // Each thread goes through its array of edges.
     for (size_t i = 0; i < numedges[gid]; i++)
     {
@@ -277,17 +278,20 @@ __global__ void fa2Attraction(unsigned int numvertices,
       float vy2 = vyLocs[target];
 
       // v2 <- v2 - v1
-      vectorSubtract(&vx2, &vy2, vx1, vy1);
+      vx2 -= vx1;
+      vy2 -= vy1;
 #ifdef YIFAN_HU
       float dist = sqrt(vx2 * vx2 + vy2 * vy2);
       vx2 *= dist / YIFAN_HU_K;
       vy2 *= dist / YIFAN_HU_K;
 #endif
-      forceX[gid] += vx2;
-      forceY[gid] += vy2;
+      tempVectorX += vx2;
+      tempVectorY += vy2;
       if (gid == 0)
         DEBUG_PRINT("a:%f\t%u\n", vx2, target);
     }
+    forceX[gid] += tempVectorX;
+    forceY[gid] += tempVectorY;
   }
 }
 
@@ -769,17 +773,17 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
     resetTimer(timer);
 
     startTimer(timer);
-    fa2Gravity<<<numblocks, BLOCK_SIZE>>>(g->vertices->numvertices, vxLocs,
-    vyLocs, data.forceX, data.forceY, numEdges);
-    stopTimer(timer);
-    printTimer(timer, "time: force: gravity.");
-    resetTimer(timer);
-
-    startTimer(timer);
     fa2Repulsion<<<numblocks, BLOCK_SIZE>>>(g->vertices->numvertices, vxLocs,
     vyLocs, data.forceX, data.forceY, numEdges);
     stopTimer(timer);
     printTimer(timer, "time: force: repulsion.");
+    resetTimer(timer);
+
+    startTimer(timer);
+    fa2Gravity<<<numblocks, BLOCK_SIZE>>>(g->vertices->numvertices, vxLocs,
+    vyLocs, data.forceX, data.forceY, numEdges);
+    stopTimer(timer);
+    printTimer(timer, "time: force: gravity.");
     resetTimer(timer);
 
     startTimer(timer);
