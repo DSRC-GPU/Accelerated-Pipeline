@@ -28,7 +28,7 @@
  *    thread.
  * \param[in] deg Array holding the out degree values for each vertex.
  */
-__device__ void fa2Gravity(unsigned int gid, unsigned int numvertices,
+__global__ void fa2Gravity(unsigned int numvertices,
     float* vxLocs, float* vyLocs, float* forceX, float* forceY,
     unsigned int* deg);
 
@@ -45,7 +45,7 @@ __device__ void fa2Gravity(unsigned int gid, unsigned int numvertices,
  *    thread.
  * \param[in] deg Array holding the out degree values for each vertex.
  */
-__device__ void fa2Repulsion(unsigned int gid, unsigned int numvertices,
+__global__ void fa2Repulsion(unsigned int numvertices,
     float* vxLocs, float* vyLocs, float* forceX, float* forceY,
     unsigned int* deg);
 
@@ -64,7 +64,7 @@ __device__ void fa2Repulsion(unsigned int gid, unsigned int numvertices,
  * \param[out] forceY Pointer to the y force on the vertex that belongs to this
  *    thread.
  */
-__device__ void fa2Attraction(unsigned int gid, unsigned int numvertices,
+__global__ void fa2Attraction(unsigned int numvertices,
     float* vxLocs, float* vyLocs, unsigned int* numedges,
     unsigned int* edgeTargets, unsigned int maxedges, float* forceX,
     float* forceY);
@@ -85,36 +85,8 @@ __device__ void fa2Attraction(unsigned int gid, unsigned int numvertices,
  * \param[out] swg Array where the swing values for each vertex should be
  *    stored.
  */
-__device__ void fa2UpdateSwing(unsigned int gid, unsigned int numvertices,
-    float forceX, float forceY, float* oldForceX, float* oldForceY, float* swg);
-
-/*!
- * Updates the traction value for each vertex in the graph.
- *
- * \param[in] gid The global ID of this thread.
- * \param[in] numvertices The total number of vertices in the graph.
- * \param[in] forceX The x force value on the vertex that belongs to this
- *    thread.
- * \param[in] forceY The y force value on the vertex that belongs to this
- *    thread.
- * \param[in] oldForceX Array holding the x forces of each vertex from the
- *    previous iteration.
- * \param[in] oldForceY Array holding the y forces of each vertex from the
- *    previous iteration.
- * \param[out] tra Array where the traction values for each vertex should be
- *    stored.
- */
-__device__ void fa2UpdateTract(unsigned int gid, unsigned int numvertices,
-    float forceX, float forceY, float* oldForceX, float* oldForceY, float* tra);
-
-/*!
- * Updates the speed value for the graph itself.
- *
- * \param[in] gswing The swing value of the graph.
- * \param[in] gtract The traction value of the graph.
- * \param[out] gspeed Pointer where the graph speed should be stored.
- */
-__device__ void fa2UpdateSpeedGraph(float gswing, float gtract, float* gspeed);
+__global__ void fa2UpdateSwing(unsigned int numvertices,
+    float* forceX, float* forceY, float* oldForceX, float* oldForceY, float* swg);
 
 /*!
  * Updates the speed value for each vertex in the graph.
@@ -128,8 +100,8 @@ __device__ void fa2UpdateSpeedGraph(float gswing, float gtract, float* gspeed);
  * \param[in] forceY The y force on the vertex that belongs to this thread.
  * \param[in] gs The graph speed value.
  */
-__device__ void fa2UpdateSpeed(unsigned int gid, unsigned int numvertices,
-    float* speed, float* swg, float forceX, float forceY, float gs);
+__global__ void fa2UpdateSpeed(unsigned int numvertices,
+    float* speed, float* swg, float* forceX, float* forceY, float* gs);
 
 /*!
  * Copies the forces of this iteration to another array. Overwrites the values
@@ -209,40 +181,46 @@ __global__ void fa2ComputeDegrees(unsigned int numvertices,
 __global__ void fa2GraphSwingTract(unsigned int numvertices,
     float** gGlobalArrays, unsigned int* numNeighbours, float* gGlobalVars);
 
-#ifdef YIFAN_HU
-#else
-__device__ void fa2Gravity(unsigned int gid, unsigned int numvertices,
+__global__ void fa2Gravity(unsigned int numvertices,
     float* vxLocs, float* vyLocs, float* forceX, float* forceY,
     unsigned int* deg)
 {
+  unsigned int gid = threadIdx.x + (blockIdx.x * BLOCK_SIZE);
+#ifdef YIFAN_HU
+#else
   if (gid < numvertices)
   {
     float vx = vxLocs[gid];
     float vy = vyLocs[gid];
-    float vlen = vectorGetLength(vx, vy);
+    float vlen = sqrt(vx * vx + vy * vy);
     assert(vlen != 0);
-    vectorInverse(&vx, &vy);
-    vectorMultiply(&vx, &vy, K_G * (deg[gid] + 1) / vlen);
+    float factor = K_G * (deg[gid] + 1) / vlen;
+    vx *= -factor;
+    vy *= -factor;
     if (gid == 0)
       DEBUG_PRINT("g:%f\n", vx);
     vectorAdd(forceX, forceY, vx, vy);
+    forceX[gid] += vx;
+    forceY[gid] += vy;
   }
-}
 #endif
+}
 
-__device__ void fa2Repulsion(unsigned int gid, unsigned int numvertices,
+__global__ void fa2Repulsion(unsigned int numvertices,
     float* vxLocs, float* vyLocs, float* forceX, float* forceY,
     unsigned int* deg)
 {
+  unsigned int gid = threadIdx.x + (blockIdx.x * BLOCK_SIZE);
   if (gid < numvertices)
   {
     float tempVectorX = 0;
     float tempVectorY = 0;
     float vxLoc = vxLocs[gid];
     float vyLoc = vyLocs[gid];
+    unsigned int degree = deg[gid];
     for (size_t j = 0; j < numvertices; j++)
     {
-      size_t index = (gid + j) % numvertices;
+      size_t index = j;//(gid + j) % numvertices;
       if (gid == index)
         continue;
       float vx1 = vxLoc;
@@ -261,22 +239,28 @@ __device__ void fa2Repulsion(unsigned int gid, unsigned int numvertices,
         vx1 *= YIFAN_HU_C * YIFAN_HU_K * YIFAN_HU_K / (dist * dist);
         vy1 *= YIFAN_HU_C * YIFAN_HU_K * YIFAN_HU_K / (dist * dist);
 #else // Force Atlas 2
-        vectorNormalize(&vx1, &vy1);
-        vectorMultiply(&vx1, &vy1,
-            K_R * (((deg[gid] + 1) * (deg[index] + 1)) / dist));
+        float len = sqrt(vx1 * vx1 + vy1 * vy1);
+        vx1 /= len;
+        vy1 /= len;
+        float factor = K_R * (((degree + 1) + deg[index] + 1)) / dist;
+        vx1 *= factor;
+        vy1 *= factor;
 #endif
-        vectorAdd(&tempVectorX, &tempVectorY, vx1, vy1);
+        tempVectorX += vx1;
+        tempVectorY += vy1;
       }
     }
-    vectorAdd(forceX, forceY, tempVectorX, tempVectorY);
+    forceX[gid] += tempVectorX;
+    forceY[gid] += tempVectorY;
   }
 }
 
-__device__ void fa2Attraction(unsigned int gid, unsigned int numvertices,
+__global__ void fa2Attraction(unsigned int numvertices,
     float* vxLocs, float* vyLocs, unsigned int* numedges,
     unsigned int* edgeTargets, unsigned int maxedges, float* forceX,
     float* forceY)
 {
+  unsigned int gid = threadIdx.x + (blockIdx.x * BLOCK_SIZE);
   if (gid < numvertices)
   {
     float vx1 = vxLocs[gid];
@@ -307,31 +291,25 @@ __device__ void fa2Attraction(unsigned int gid, unsigned int numvertices,
 }
 
 // Updates the swing for each vertex, as described in the Force Atlas 2 paper.
-__device__ void fa2UpdateSwing(unsigned int gid, unsigned int numvertices,
-    float forceX, float forceY, float* oldForceX, float* oldForceY, float* swg)
+__global__ void fa2UpdateSwing(unsigned int numvertices,
+    float* dForcesX, float* dForcesY, float* oldForceX, float* oldForceY, float* swg,
+    float* tra)
 {
+  unsigned int gid = threadIdx.x + (blockIdx.x * BLOCK_SIZE);
   if (gid < numvertices)
   {
-    float fx = oldForceX[gid];
-    float fy = oldForceY[gid];
-    vectorSubtract(&fx, &fy, forceX, forceY);
-    float vlen = vectorGetLength(fx, fy);
-    swg[gid] = vlen;
-  }
-}
+    float originalOldfx = oldForceX[gid];
+    float originalOldfy = oldForceY[gid];
+    float forceX = dForcesX[gid];
+    float forceY = dForcesY[gid];
 
-// Updates the traction for each vertex, as described in the Force Atlas 2
-// paper.
-__device__ void fa2UpdateTract(unsigned int gid, unsigned int numvertices,
-    float forceX, float forceY, float* oldForceX, float* oldForceY, float* tra)
-{
-  if (gid < numvertices)
-  {
-    float fx = oldForceX[gid];
-    float fy = oldForceY[gid];
-    vectorAdd(&fx, &fy, forceX, forceY);
-    float vlen = vectorGetLength(fx, fy);
-    tra[gid] = vlen / 2;
+    float fx = originalOldfx - forceX;
+    float fy = originalOldfy - forceY;
+    swg[gid] = sqrt(fx * fx + fy * fy);
+
+    fx = originalOldfx + forceX;
+    fy = originalOldfy + forceY;
+    tra[gid] = sqrt(fx * fx + fy * fy) / 2;
   }
 }
 
@@ -436,7 +414,7 @@ __device__ void arrayReductionFloat(unsigned int numElements,
 
 #ifdef YIFAN_HU
 #else
-__device__ void fa2UpdateSpeedGraph(float gswing, float gtract, float* gspeed)
+void fa2UpdateSpeedGraph(float gswing, float gtract, float* gspeed)
 {
   float oldSpeed = *gspeed;
 
@@ -454,19 +432,29 @@ __device__ void fa2UpdateSpeedGraph(float gswing, float gtract, float* gspeed)
 
 }
 
-__device__ void fa2UpdateSpeed(unsigned int gid, unsigned int numvertices,
-    float* speed, float* swg, float forceX, float forceY, float gs)
+__global__ void fa2UpdateSpeed(unsigned int numvertices,
+    float* speed, float* swg, float* dForceX, float* dForceY, float* globalVars)
 {
+  unsigned int gid = threadIdx.x + (blockIdx.x * BLOCK_SIZE);
   if (gid < numvertices)
   {
+    float gs = globalVars[2];
     float vSwg = swg[gid];
+    float forceX = dForceX[gid];
+    float forceY = dForceY[gid];
     if (vSwg <= 0)
       vSwg = EPSILON;
-    float vForceLen = vectorGetLength(forceX, forceY);
+    float vForceLen = sqrt(forceX * forceX + forceY * forceY);
     if (vForceLen <= 0)
       vForceLen = EPSILON;
 
-    *speed = K_S * gs / (1 + (gs * sqrt(vSwg)));
+    float vSpeed = K_S * gs / (1 + (gs * sqrt(vSwg)));
+    float upperBound = K_SMAX / vForceLen;
+    if (vSpeed > upperBound)
+    {
+      vSpeed = upperBound;
+    }
+    speed[gid] = vSpeed;
   }
 }
 #endif
@@ -542,68 +530,13 @@ __global__ void fa2GraphSwingTract(unsigned int numvertices,
 #endif
 }
 
-/*!
- * The kernel that computes the forces on all vertices.
- *
- * \param[in] vxLocs Array holding the x locations for each vertex.
- * \param[in] vyLocs Array holding the y locations for each vertex.
- * \param[in] numvertices The total number of vertices.
- * \param[in] edgeTargets Array representing the edges.
- * \param[in] numedges Array that holds the number of edges for each vertex.
- * \param[in] maxedges the maximum number of edges per vertex.
- * \param[out] tra Array that will be used to store the vertex traction values.
- * \param[out] swg Array that will be used to store the vertex swing values.
- * \param[out] forceX Array that will be used to store the x forces on each vertex.
- * \param[out] forceY Array that will be used to store the y forces on each vertex.
- * \param[in] oldForceX Array that holds the x forces for each vertex from the previous iteration.
- * \param[in] oldForceY Array that holds the y forces for each vertex from the previous iteration.
- */
-__global__ void fa2kernel(float* vxLocs, float* vyLocs,
-    unsigned int numvertices, unsigned int* edgeTargets, unsigned int* numedges,
-    unsigned int maxedges, float* tra, float* swg, float* forceX, float* forceY,
-    float* oldForceX, float* oldForceY)
+__global__ void resetForcesKernel(unsigned int numvertices, float* forceX, float* forceY)
 {
   unsigned int gid = threadIdx.x + (blockIdx.x * BLOCK_SIZE);
-
   if (gid < numvertices)
   {
     forceX[gid] = 0;
     forceY[gid] = 0;
-    
-#ifdef YIFAN_HU
-#else // Force Atlas 2
-    if (gid == 0)
-      DEBUG_PRINT("Computing gravity\n");
-    // Gravity force
-    fa2Gravity(gid, numvertices, vxLocs, vyLocs, &forceX[gid], &forceY[gid],
-        numedges);
-#endif
-    if (gid == 0)
-      DEBUG_PRINT("Computing repulsion\n");
-    // Repulsion between vertices
-    fa2Repulsion(gid, numvertices, vxLocs, vyLocs, &forceX[gid], &forceY[gid],
-        numedges);
-    if (gid == 0)
-      DEBUG_PRINT("Computing attraction\n");
-    // Attraction on edges
-    fa2Attraction(gid, numvertices, vxLocs, vyLocs, numedges, edgeTargets,
-        maxedges, &forceX[gid], &forceY[gid]);
-
-#ifdef YIFAN_HU
-#else
-    if (gid == 0)
-      DEBUG_PRINT("Computing swing\n");
-    // Calculate speed of vertices.
-    // Update swing of vertices.
-    fa2UpdateSwing(gid, numvertices, forceX[gid], forceY[gid], oldForceX,
-        oldForceY, swg);
-
-    if (gid == 0)
-      DEBUG_PRINT("Computing traction\n");
-    // Update traction of vertices.
-    fa2UpdateTract(gid, numvertices, forceX[gid], forceY[gid], oldForceX,
-        oldForceY, tra);
-#endif
   }
 }
 
@@ -628,7 +561,7 @@ __global__ void fa2kernel(float* vxLocs, float* vyLocs,
 __global__ void fa2MoveVertices(float* vxLocs, float* vyLocs,
     unsigned int numvertices, float* gGlobalVars, float* tra, float* swg,
     float* forceX, float* forceY, float* oldForceX, float* oldForceY,
-    float* graphSpeed)
+    float* speed)
 {
   unsigned int gid = threadIdx.x + (blockIdx.x * BLOCK_SIZE);
 
@@ -647,17 +580,8 @@ __global__ void fa2MoveVertices(float* vxLocs, float* vyLocs,
     dispY = step * (vertexForceY / sqrt(vertexForceX * vertexForceX +
         vertexForceY * vertexForceY));
 #else
-    float speed = 0;
-    // Update speed of Graph.
-    fa2UpdateSpeedGraph(gGlobalVars[0], gGlobalVars[1], graphSpeed);
-
-    // Update speed of vertices.
-    fa2UpdateSpeed(gid, numvertices, &speed, swg, forceX[gid], forceY[gid],
-        *graphSpeed);
-
-    // Update displacement of vertices.
-    fa2UpdateDisplacement(gid, numvertices, speed, forceX[gid], forceY[gid],
-        &dispX, &dispY);
+    dispX = forceX[gid] * speed[gid];
+    dispY = forceY[gid] * speed[gid];
 #endif
 
     // Update vertex locations based on speed.
@@ -681,19 +605,12 @@ void fa2PrepareGeneralMemory(ForceAtlas2Data* data, unsigned int numvertices)
   // Allocate data for vertices, edges, and fa2 data.
   cudaMalloc(&data->tra, numvertices * sizeof(float));
   cudaMalloc(&data->swg, numvertices * sizeof(float));
+  cudaMalloc(&data->speed, numvertices * sizeof(float));
   cudaMalloc(&data->forceX, numvertices * sizeof(float));
   cudaMalloc(&data->forceY, numvertices * sizeof(float));
   cudaMalloc(&data->oldForceX, numvertices * sizeof(float));
   cudaMalloc(&data->oldForceY, numvertices * sizeof(float));
   cudaMalloc(&data->graphSpeed, sizeof(float));
-
-  cudaMemset(data->tra, 0, numvertices * sizeof(float));
-  cudaMemset(data->swg, 0, numvertices * sizeof(float));
-  cudaMemset(data->forceX, 0, numvertices * sizeof(float));
-  cudaMemset(data->forceY, 0, numvertices * sizeof(float));
-  cudaMemset(data->oldForceX, 0, numvertices * sizeof(float));
-  cudaMemset(data->oldForceY, 0, numvertices * sizeof(float));
-  cudaMemset(data->graphSpeed, 0, sizeof(float));
 }
 
 /*!
@@ -718,6 +635,7 @@ void fa2CleanGeneralMemory(ForceAtlas2Data* data)
 {
   cudaFree(data->tra);
   cudaFree(data->swg);
+  cudaFree(data->speed);
   cudaFree(data->forceX);
   cudaFree(data->forceY);
   cudaFree(data->oldForceX);
@@ -779,12 +697,13 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
   // Global vars and arrays are used to compute global variables based on
   // reductions on vertex information.
 #ifdef YIFAN_HU
-  // Energy, Energy^0 (previous iteration), step, progress
+  // Energy, Energy^0 (previous iteration)
   unsigned int numGlobalArrays = 2;
 #else
   // Graph Swing
   // Graph Traction
-  unsigned int numGlobalArrays = 2;
+  // Node speed
+  unsigned int numGlobalArrays = 3;
 #endif
   float* gGlobalVars;
   cudaMalloc(&gGlobalVars, GLOBAL_VARS * sizeof(float));
@@ -796,12 +715,13 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
   unsigned int* numEdges = g->edges->numedges;
   unsigned int* edgeTargets = g->edges->edgeTargets;
 
-  // Initialize the global variables.
+  // Initialize the global variables. step, progress
 #ifdef YIFAN_HU
-  float floatMax = FLT_MAX;
-  cudaMemcpy(&gGlobalVars[0], &floatMax, sizeof(float),
-      cudaMemcpyHostToDevice);
+  utilVectorSetByScalar(gGlobalVars, 0, GLOBAL_VARS);
+  utilVectorSetByScalar(gGlobalVars, FLT_MAX, 1);
 #else
+  // Graph swing, traction. Graph speed, speed
+  utilVectorSetByScalar(gGlobalVars, 0, GLOBAL_VARS);
 #endif
 
   // Set pointers to global arrays.
@@ -815,12 +735,16 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
       cudaMemcpyHostToDevice);
   cudaMemcpy(&gGlobalArrays[1], &data.tra, sizeof(float*),
       cudaMemcpyHostToDevice);
+  cudaMemcpy(&gGlobalArrays[2], &data.speed, sizeof(float*),
+      cudaMemcpyHostToDevice);
 #endif
 
   unsigned int numblocks = ceil(g->vertices->numvertices / (float) BLOCK_SIZE);
   unsigned int numblocks_reduction = ceil(numblocks / 2.0);
 
+#ifdef DEBUG
   checkErrors(0);
+#endif
 
   for (size_t i = 0; i < iterations; i++)
   {
@@ -837,46 +761,92 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
 
     // Compute graph speed, vertex forces, speed and displacement.
     startTimer(timer);
-    fa2kernel<<<numblocks, BLOCK_SIZE>>>(vxLocs, vyLocs,
-        g->vertices->numvertices, edgeTargets, numEdges,
-        g->edges->maxedges, data.tra, data.swg, data.forceX, data.forceY,
-        data.oldForceX, data.oldForceY);
+    resetForcesKernel<<<numblocks, BLOCK_SIZE>>>(g->vertices->numvertices,
+    data.forceX, data.forceY);
     stopTimer(timer);
-
-    checkErrors(1);
-
-    printTimer(timer, "time: all forces and moving vertices.");
+    printTimer(timer, "time: force: reset.");
     resetTimer(timer);
 
-    // DEBUG_PRINT_DEVICE(data.forceX, g->vertices->numvertices);
+    startTimer(timer);
+    fa2Gravity<<<numblocks, BLOCK_SIZE>>>(g->vertices->numvertices, vxLocs,
+    vyLocs, data.forceX, data.forceY, numEdges);
+    stopTimer(timer);
+    printTimer(timer, "time: force: gravity.");
+    resetTimer(timer);
 
-    cudaMemset(&gGlobalArrays[0], 0, sizeof(float));
-    cudaMemset(&gGlobalArrays[1], 0, sizeof(float));
+    startTimer(timer);
+    fa2Repulsion<<<numblocks, BLOCK_SIZE>>>(g->vertices->numvertices, vxLocs,
+    vyLocs, data.forceX, data.forceY, numEdges);
+    stopTimer(timer);
+    printTimer(timer, "time: force: repulsion.");
+    resetTimer(timer);
+
+    startTimer(timer);
+    fa2Attraction<<<numblocks, BLOCK_SIZE>>>(g->vertices->numvertices, vxLocs,
+    vyLocs, numEdges, edgeTargets, g->edges->maxedges, data.forceX, data.forceY);
+    stopTimer(timer);
+    printTimer(timer, "time: force: attraction.");
+    resetTimer(timer);
+
+#ifdef DEBUG
+    checkErrors(1);
+#endif
+
+#ifdef YIFAN_HU
+#else
+    startTimer(timer);
+    fa2UpdateSwing<<<numblocks, BLOCK_SIZE>>>(g->vertices->numvertices,
+    data.forceX, data.forceY, data.oldForceX, data.oldForceY, data.swg, data.tra);
+    stopTimer(timer);
+    printTimer(timer, "time: globals: traction and swing.");
+    resetTimer(timer);
 
     // Run reductions on vertex swing and traction.
+    // Or in the case of yifan hu: energy
     startTimer(timer);
     fa2GraphSwingTract<<<numblocks_reduction, BLOCK_SIZE>>>(
         g->vertices->numvertices, gGlobalArrays, numEdges,
         gGlobalVars);
+
+    cudaMemcpy(hGlobalVars, gGlobalVars, GLOBAL_VARS * sizeof(float),
+      cudaMemcpyDeviceToHost);
+    // Update speed of Graph.
+    fa2UpdateSpeedGraph(hGlobalVars[0], hGlobalVars[1], &hGlobalVars[2]);
+    cudaMemcpy(gGlobalVars, hGlobalVars, GLOBAL_VARS * sizeof(float),
+      cudaMemcpyHostToDevice);
+    // Update speed of vertices.
+    fa2UpdateSpeed<<<numblocks, BLOCK_SIZE>>>(g->vertices->numvertices, gGlobalArrays[2], data.swg,
+    data.forceX, data.forceY,
+        gGlobalVars);
+
     stopTimer(timer);
     printTimer(timer, "time: graph swing and traction.");
     resetTimer(timer);
+#endif
 
+#ifdef DEBUG
     checkErrors(2);
+#endif
 
     fa2MoveVertices<<<numblocks, BLOCK_SIZE>>>(vxLocs, vyLocs,
         g->vertices->numvertices, gGlobalVars, data.tra, data.swg,
         data.forceX, data.forceY,
-        data.oldForceX, data.oldForceY, data.graphSpeed);
+        data.oldForceX, data.oldForceY, data.speed);
 
+#ifdef DEBUG
     checkErrors(3);
+#endif
 
 #ifdef YIFAN_HU
+    startTimer(timer);
     cudaMemcpy(hGlobalVars, gGlobalVars, GLOBAL_VARS * sizeof(float),
       cudaMemcpyDeviceToHost);
     yifanhuUpdateStepLength(hGlobalVars);
     cudaMemcpy(gGlobalVars, hGlobalVars, GLOBAL_VARS * sizeof(float),
       cudaMemcpyHostToDevice);
+    stopTimer(timer);
+    printTimer(timer, "time: globals: step length.");
+    resetTimer(timer);
 #else
 #endif
 

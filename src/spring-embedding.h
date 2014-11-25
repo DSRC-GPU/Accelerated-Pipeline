@@ -46,7 +46,7 @@
 #ifdef YIFAN_HU
 #define GLOBAL_VARS 4
 #else // Force Atlas 2
-#define GLOBAL_VARS 2
+#define GLOBAL_VARS 4
 #endif
 
 /*!
@@ -76,6 +76,7 @@ typedef struct ForceAtlas2Data
    * Array that holds the swing values for each vertex.
    */
   float* swg;
+  float* speed;
   /*!
    * Array that holds the x-force value for each vertex.
    */
