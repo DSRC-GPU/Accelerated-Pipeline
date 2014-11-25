@@ -101,7 +101,7 @@ __global__ void fa2UpdateSwing(unsigned int numvertices,
  * \param[in] gs The graph speed value.
  */
 __global__ void fa2UpdateSpeed(unsigned int numvertices,
-    float* speed, float* swg, float* forceX, float* forceY, float* gs);
+    float** globalArrays, float* swg, float* forceX, float* forceY, float* gs);
 
 /*!
  * Copies the forces of this iteration to another array. Overwrites the values
@@ -438,11 +438,12 @@ void fa2UpdateSpeedGraph(float gswing, float gtract, float* gspeed)
 }
 
 __global__ void fa2UpdateSpeed(unsigned int numvertices,
-    float* speed, float* swg, float* dForceX, float* dForceY, float* globalVars)
+    float** globalArrays, float* swg, float* dForceX, float* dForceY, float* globalVars)
 {
   unsigned int gid = threadIdx.x + (blockIdx.x * BLOCK_SIZE);
   if (gid < numvertices)
   {
+    float* speed = globalArrays[2];
     float gs = globalVars[2];
     float vSwg = swg[gid];
     float forceX = dForceX[gid];
@@ -820,7 +821,7 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
     cudaMemcpy(gGlobalVars, hGlobalVars, GLOBAL_VARS * sizeof(float),
       cudaMemcpyHostToDevice);
     // Update speed of vertices.
-    fa2UpdateSpeed<<<numblocks, BLOCK_SIZE>>>(g->vertices->numvertices, gGlobalArrays[2], data.swg,
+    fa2UpdateSpeed<<<numblocks, BLOCK_SIZE>>>(g->vertices->numvertices, gGlobalArrays, data.swg,
     data.forceX, data.forceY,
         gGlobalVars);
 
