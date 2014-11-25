@@ -1,7 +1,9 @@
 #!/bin/bash
 
+GPU=GTX480
+
 if [ "$3" == "debug" ]; then
-  prun -no-panda -native "-l gpu=GTX480" cuda-gdb 1 --args ./ap -i $1 -n $2
+  prun -no-panda -native "-l gpu=$GPU" cuda-gdb 1 --args ./ap -i $1 -n $2
 else
-  prun -no-panda -native "-l gpu=GTX480" ./ap 1 -i $1 -n $2
+  prun -no-panda -native "-l gpu=$GPU" ./ap 1 -i $1 -n $2
 fi

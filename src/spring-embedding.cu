@@ -270,7 +270,7 @@ __global__ void fa2Attraction(unsigned int numvertices,
     for (size_t i = 0; i < numedges[gid]; i++)
     {
       unsigned int index = gid + (numvertices * i);
-      assert(index < numvertices + (numvertices * maxedges));
+      assert(index < numvertices * maxedges);
       unsigned int target = edgeTargets[index];
       assert(target < numvertices);
       // Compute attraction force.
