@@ -283,7 +283,8 @@ __global__ void fa2Attraction(unsigned int numvertices,
       vx2 *= dist / YIFAN_HU_K;
       vy2 *= dist / YIFAN_HU_K;
 #endif
-      vectorAdd(forceX, forceY, vx2, vy2);
+      forceX[gid] += vx2;
+      forceY[gid] += vy2;
       if (gid == 0)
         DEBUG_PRINT("a:%f\t%u\n", vx2, target);
     }
