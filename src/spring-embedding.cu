@@ -210,6 +210,7 @@ __global__ void fa2Repulsion(unsigned int numvertices,
     float* vxLocs, float* vyLocs, float* forceX, float* forceY,
     unsigned int* deg)
 {
+  unsigned int gid = threadIdx.x + (blockIdx.x * BLOCK_SIZE);
   // Local accumulators that will be written to global at end of computation.
   float tempVectorX = 0;
   float tempVectorY = 0;
