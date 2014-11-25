@@ -66,7 +66,10 @@ int main(int argc, char* argv[])
   //graph->vertices = gexfParseFileVertices(inputFile);
   //graph->edges = gexfParseFileEdgesSomewhereInInterval(inputFile, graph, 0,
   //    WINDOW_SIZE);
+  puts("Loading graph...");
   Graph* graph = graphParse(inputFile);
+  printf("Loaded graph with %u vertices that have a maximim degree of %u.\n",
+      graph->vertices->numvertices, graph->edges->maxedges);
   graphRandomizeLocation(graph);
 
   float numvertices = graph->vertices->numvertices;

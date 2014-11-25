@@ -55,12 +55,13 @@ par: $(MAIN) $(OBJECTS_PAR) $(OBJECTS)
 	$(NVCC) $(CUDA_ARCH) $(OBJECTS_PAR) -dlink -o $(CUDA_LINK)
 	$(CC) -rdynamic -o $(TARGETS) $(CUDA_LINK) $^ $(CUDA_LIBS) $(CUDA_LDFLAGS)
 
+#sep: NVCCFLAGS += -DDEBUG -G -g
+#sep: CFLAGS += -DDEBUG -g
 sep: $(SEP_MAIN) $(OBJECTS_PAR) $(OBJECTS)
 	$(NVCC) $(CUDA_ARCH) $(OBJECTS_PAR) -dlink -o $(CUDA_LINK)
 	$(CC) -rdynamic -o $(TARGETS) $(CUDA_LINK) $^ $(CUDA_LIBS) $(CUDA_LDFLAGS)
 
-yifan-hu: NVCCFLAGS += -DYIFAN_HU -DDEBUG -G -g
-yifan-hu: CFLAGS += -DDEBUG -g
+yifan-hu: NVCCFLAGS += -DYIFAN_HU
 yifan-hu: sep
 
 test-graph-parser: CFLAGS += -DDEBUG -g
