@@ -2,7 +2,7 @@
 CC = g++
 CPPFLAGS = -I/usr/include/libxml2 -I../alglib/cpp/src
 CFLAGS = -Wall -Wextra -pedantic -ffloat-store -std=c++0x
-LDFLAGS = -lm -lxml2 -lpthread -L../alglib/cpp/lib -lalglib
+LDFLAGS = -lm -lxml2 -lpthread -L../alglib/cpp/lib -lalglib -lrt
 
 NVCC = nvcc
 CUDA_LINK = link.o
@@ -44,7 +44,7 @@ all: seq
 seq-debug: CFLAGS += -DDEBUG -g
 seq-debug: seq
 
-seq: $(MAIN) $(OBJECTS) $(OBJECTS_SEQ)
+seq: $(SEP_MAIN) $(OBJECTS) $(OBJECTS_SEQ)
 	$(CC) -o $(TARGETS) $(CFLAGS) $^ $(LDFLAGS) 
 
 par-debug: NVCCFLAGS += -DDEBUG -G -g

@@ -9,22 +9,8 @@
  * Struct used for computing execution times in sequential code.
  */
 typedef struct SeqTimer {
-  /*!
-   * Struct to save wall time start.
-   */
-  time_t wallTimerStart;
-  /*!
-   * Struct to save wall time end.
-   */
-  time_t wallTimerEnd;
-  /*!
-   * Struct to save cpu time start.
-   */
-  clock_t cpuTimerStart;
-  /*!
-   * Struct to save cpu time end.
-   */
-  clock_t cpuTimerEnd;
+  struct timespec start;
+  struct timespec end;
 } SeqTimer;
 
 Timer* timerNew()
@@ -46,46 +32,30 @@ void timerClean(Timer* timer)
 void startTimer(Timer* t)
 {
   SeqTimer* timer = (SeqTimer*) t->internals;
-  timer->wallTimerEnd = 0;
-  timer->cpuTimerEnd = 0;
-  timer->wallTimerStart = time(NULL );
-  timer->cpuTimerStart = clock();
+  clock_gettime(CLOCK_MONOTONIC, &timer->start);
 }
 
 void stopTimer(Timer* t)
 {
   SeqTimer* timer = (SeqTimer*) t->internals;
-  timer->wallTimerEnd = time(NULL );
-  timer->cpuTimerEnd = clock();
+  clock_gettime(CLOCK_MONOTONIC, &timer->end);
 }
 
 void resetTimer(Timer* t)
 {
   SeqTimer* timer = (SeqTimer*) t->internals;
-  timer->wallTimerEnd = 0;
-  timer->cpuTimerEnd = 0;
-  timer->wallTimerStart = 0;
-  timer->cpuTimerStart = 0;
+  timer->start.tv_sec = 0;
+  timer->start.tv_nsec = 0;
+  timer->end.tv_sec = 0;
+  timer->end.tv_nsec = 0;
 }
 
 void printTimer(Timer* t, char* msg)
 {
   SeqTimer* timer = (SeqTimer*) t->internals;
-  time_t wallEnd;
-  clock_t cpuEnd;
-  if (timer->wallTimerEnd != 0 || timer->cpuTimerEnd != 0)
-  {
-    wallEnd = timer->wallTimerEnd;
-    cpuEnd = timer->cpuTimerEnd;
-  }
-  else
-  {
-    wallEnd = time(NULL );
-    cpuEnd = clock();
-  }
-  //printf("Elapsed wall time (s):  %ld\n",
-  //    (long) (wallEnd - timer->wallTimerStart));
-  printf("timer: %s\ncpu time (ms):  %f\n", msg,
-      (float) 1000 * (cpuEnd - timer->cpuTimerStart) / CLOCKS_PER_SEC);
+  double ms = timer->end.tv_sec - timer->start.tv_sec;
+  ms *= 1000;
+  ms += (timer->end.tv_nsec - timer->start.tv_nsec)/1000000;
+  printf("timer %s:\n%lf ms\n", msg, ms);
 }
 
