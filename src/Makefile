@@ -64,6 +64,9 @@ sep: $(SEP_MAIN) $(OBJECTS_PAR) $(OBJECTS)
 yifan-hu: NVCCFLAGS += -DYIFAN_HU
 yifan-hu: sep
 
+simple: NVCCFLAGS += -DSIMPLE
+simple: sep
+
 test-graph-parser: CFLAGS += -DDEBUG -g
 test-graph-parser: $(TEST_GRAPH_PARSER_MAIN) $(TEST_GRAPH_PARSER_OBJECTS)
 	$(CC) -o $(TARGETS) $(CFLAGS) $^ $(LDFLAGS) 

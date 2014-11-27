@@ -11,7 +11,7 @@
 
 #define YIFAN_HU_C 1.0
 #define YIFAN_HU_K 1.0
-#define YIFAN_HU_STEP 1
+#define YIFAN_HU_STEP 1.0
 #define YIFAN_HU_T 0.9
 
 #else // Force Atlas 2 constants

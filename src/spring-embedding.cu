@@ -187,6 +187,7 @@ __global__ void fa2Gravity(unsigned int numvertices,
 {
   unsigned int gid = threadIdx.x + (blockIdx.x * BLOCK_SIZE);
 #ifdef YIFAN_HU
+#elif SIMPLE
 #else
   if (gid < numvertices)
   {
@@ -237,6 +238,9 @@ __global__ void fa2Repulsion(unsigned int numvertices,
         // for C.
         vx1 *= YIFAN_HU_C * YIFAN_HU_K * YIFAN_HU_K / (dist * dist);
         vy1 *= YIFAN_HU_C * YIFAN_HU_K * YIFAN_HU_K / (dist * dist);
+#elif SIMPLE
+        vx1 *= 1 / (dist * dist);
+        vy1 *= 1 / (dist * dist);
 #else // Force Atlas 2
         float len = sqrt(vx1 * vx1 + vy1 * vy1);
         vx1 /= len;
@@ -284,6 +288,10 @@ __global__ void fa2Attraction(unsigned int numvertices,
       float dist = sqrt(vx2 * vx2 + vy2 * vy2);
       vx2 *= dist / YIFAN_HU_K;
       vy2 *= dist / YIFAN_HU_K;
+#elif SIMPLE
+      float dist = sqrt(vx2 * vx2 + vy2 * vy2);
+      vx2 *= dist;
+      vy2 *= dist;
 #endif
       tempVectorX += vx2;
       tempVectorY += vy2;
@@ -418,6 +426,7 @@ __device__ void arrayReductionFloat(unsigned int numElements,
 }
 
 #ifdef YIFAN_HU
+#elif SIMPLE
 #else
 void fa2UpdateSpeedGraph(float gswing, float gtract, float* gspeed)
 {
@@ -527,6 +536,7 @@ __global__ void fa2GraphSwingTract(unsigned int numvertices,
       &gGlobalVars[0]);
   arrayReductionFloat(numvertices, gGlobalArrays[1], 0, gGlobalArrays[1],
       &gGlobalVars[0]);
+#elif SIMPLE
 #else // Force Atlas 2
   // Update swing of Graph.
   arrayReduction(numvertices, gGlobalArrays[0], 1, numNeighbours, &gGlobalVars[0]);
@@ -585,6 +595,9 @@ __global__ void fa2MoveVertices(float* vxLocs, float* vyLocs,
         vertexForceY * vertexForceY));
     dispY = step * (vertexForceY / sqrt(vertexForceX * vertexForceX +
         vertexForceY * vertexForceY));
+#elif SIMPLE
+    dispX = forceX[gid];
+    dispY = forceY[gid];
 #else
     dispX = forceX[gid] * speed[gid];
     dispY = forceY[gid] * speed[gid];
@@ -593,9 +606,11 @@ __global__ void fa2MoveVertices(float* vxLocs, float* vyLocs,
     // Update vertex locations based on speed.
     fa2UpdateLocation(gid, numvertices, vxLocs, vyLocs, dispX, dispY);
 
+#ifndef SIMPLE
     // Set current forces as old forces in vertex data.
     fa2SaveOldForces(gid, numvertices, forceX[gid], forceY[gid], oldForceX,
         oldForceY);
+#endif
   }
 }
 
@@ -705,6 +720,8 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
 #ifdef YIFAN_HU
   // Energy, Energy^0 (previous iteration)
   unsigned int numGlobalArrays = 2;
+#elif SIMPLE
+  unsigned int numGlobalArrays = 0;
 #else
   // Graph Swing
   // Graph Traction
@@ -725,6 +742,7 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
 #ifdef YIFAN_HU
   utilVectorSetByScalar(gGlobalVars, 0, GLOBAL_VARS);
   utilVectorSetByScalar(gGlobalVars, FLT_MAX, 1);
+#elif SIMPLE
 #else
   // Graph swing, traction. Graph speed, speed
   utilVectorSetByScalar(gGlobalVars, 0, GLOBAL_VARS);
@@ -736,6 +754,7 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
       cudaMemcpyHostToDevice);
   cudaMemcpy(&gGlobalArrays[1], &data.forceY, sizeof(float*),
       cudaMemcpyHostToDevice);
+#elif SIMPLE
 #else // Force Atlas 2
   cudaMemcpy(&gGlobalArrays[0], &data.swg, sizeof(float*),
       cudaMemcpyHostToDevice);
@@ -759,7 +778,8 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
         cudaMemcpyDeviceToDevice);
     float zero = 0;
     cudaMemcpy(&gGlobalVars[0], &zero, sizeof(float), cudaMemcpyHostToDevice);
-#else
+#elif SIMPLE
+#else // FA2
 #endif
 
     // Run fa2 spring embedding kernel.
@@ -798,8 +818,7 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
     checkErrors(1);
 #endif
 
-#ifdef YIFAN_HU
-#else
+#ifndef SIMPLE
     startTimer(timer);
     fa2UpdateSwing<<<numblocks, BLOCK_SIZE>>>(g->vertices->numvertices,
     data.forceX, data.forceY, data.oldForceX, data.oldForceY, data.swg, data.tra);
@@ -814,6 +833,8 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
         g->vertices->numvertices, gGlobalArrays, numEdges,
         gGlobalVars);
 
+#ifdef YIFAN_HU
+#else
     cudaMemcpy(hGlobalVars, gGlobalVars, GLOBAL_VARS * sizeof(float),
       cudaMemcpyDeviceToHost);
     // Update speed of Graph.
@@ -824,6 +845,7 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
     fa2UpdateSpeed<<<numblocks, BLOCK_SIZE>>>(g->vertices->numvertices, gGlobalArrays, data.swg,
     data.forceX, data.forceY,
         gGlobalVars);
+#endif
 
     stopTimer(timer);
     printTimer(timer, "time: graph swing and traction.");
@@ -853,6 +875,7 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
     stopTimer(timer);
     printTimer(timer, "time: globals: step length.");
     resetTimer(timer);
+#elif SIMPLE
 #else
 #endif
 
