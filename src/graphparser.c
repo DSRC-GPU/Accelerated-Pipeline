@@ -5,6 +5,9 @@
 
 #define BUFFERSIZE 1000
 
+#define FORMAT_FROMTO
+//#define FORMAT_LINENUMTO
+
 Graph* graphParseFile(FILE* ifp)
 {
   char buffer[BUFFERSIZE];
@@ -16,6 +19,7 @@ Graph* graphParseFile(FILE* ifp)
 
   Graph* graph = newGraph(numVertices);
 
+#ifdef FORMAT_LINENUMTO
   for (size_t i = 0; i < numVertices; i++)
   {
     fgets(buffer, BUFFERSIZE, ifp);
@@ -34,6 +38,16 @@ Graph* graphParseFile(FILE* ifp)
       }
     }
   }
+#elif FORMAT_FROMTO
+  while (fgets(buffer, BUFFERSIZE, ifp)
+  {
+    
+  }
+#else
+  puts("No parse format defined.");
+  exit(1);
+#endif
+
   graphShrinkEdgeArrayToActualSize(graph);
 
   return graph;
