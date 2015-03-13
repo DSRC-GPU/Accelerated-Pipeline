@@ -139,8 +139,8 @@ void gexfParseEdge(xmlNode* n, Graph* graph)
   unsigned int target = atoi((const char*) targetChar);
   xmlFree(sourceChar);
   xmlFree(targetChar);
-  graphAddEdgeToVertex(graph, source, target);
-  graphAddEdgeToVertex(graph, target, source);
+  graphAddEdge(graph, source, target);
+  graphAddEdge(graph, target, source);
 }
 
 void gexfParseVertices(xmlNode* gexf, float* vertexXLocs, float* vertexYLocs)
@@ -231,7 +231,6 @@ Edges* gexfParseEdgesFromRoot(xmlNode* rootelem, Graph* graph, unsigned int maxe
 {
   Edges* edges = newEdges(graph->vertices->numvertices);
   edges->maxedges = maxedges;
-  graphSetEdgeSpaceForAllVertices(graph);
   gexfParseEdges(rootelem, graph, 0, INT_MAX);
   return edges;
 }
@@ -245,7 +244,6 @@ Edges* gexfParseEdgesFromRootInInterval(xmlNode* rootelem, Graph* graph, unsigne
   graph->edges = edges;
   graph->edges->maxedges = maxedges;
 
-  graphSetEdgeSpaceForAllVertices(graph);
   gexfParseEdges(rootelem, graph, timestepStart, timestepEnd);
 
   graph->edges = originalEdges;

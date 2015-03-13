@@ -68,6 +68,8 @@ int main(int argc, char* argv[])
   //    WINDOW_SIZE);
   puts("Loading graph...");
   Graph* graph = graphParse(inputFile);
+  // Puts the edges is a single array. Easier to transfer to the device.
+  graphExportEdges(graph);
   printf("Loaded graph with %u vertices that have a maximim degree of %u.\n",
       graph->vertices->numvertices, graph->edges->maxedges);
   graphRandomizeLocation(graph);
@@ -85,13 +87,17 @@ int main(int argc, char* argv[])
    utilDataTransferHostToDevice(graph->vertices->vertexYLocs, numvertices *
        sizeof(float), 1);
 
-  float sizeEdgeArray = graph->edges->maxedges * numvertices;
-
   // Transfer the edge data to the gpu.
-  graph->edges->numedges = (unsigned int*) utilDataTransferHostToDevice(graph->edges->numedges,
-      numvertices * sizeof(unsigned int), 1);
   graph->edges->edgeTargets = (unsigned int*)
    utilDataTransferHostToDevice(graph->edges->edgeTargets,
+      graph->edges->totalEdges * sizeof(unsigned int), 1);
+
+  float sizeEdgeArray = graph->edges->arraySize;
+
+  graph->edges->numedges = (unsigned int*) utilDataTransferHostToDevice(graph->edges->numedges,
+      numvertices * sizeof(unsigned int), 1);
+  graph->edges->edgeTargetOffset = (unsigned int*)
+   utilDataTransferHostToDevice(graph->edges->edgeTargetOffset,
       sizeEdgeArray * sizeof(unsigned int), 1);
 
   fa2RunOnGraph(graph, numSpringEmbeddingIters);

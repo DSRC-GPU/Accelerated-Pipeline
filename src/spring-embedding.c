@@ -226,12 +226,11 @@ void fa2Attraction(Graph* g, float* forceX, float* forceY)
     float vy1 = vyLocs[gid];
     // Each thread goes through its array of edges.
     unsigned int maxedges = g->edges->numedges[gid];
-    for (size_t i = 0; i < maxedges; i++)
+    unsigned int offset = g->edges->edgeTargetOffset[gid];
+    for (size_t i = offset; i < maxedges + offset; i++)
     {
-      unsigned int index = gid + (g->vertices->numvertices * i);
-      unsigned int target = g->edges->edgeTargets[index];
-      if (target == UINT_MAX)
-        continue;
+      unsigned int target = g->edges->edgeTargets[i];
+      printf("A %u %u\n", gid, target);
       // Compute attraction force.
       float vx2 = vxLocs[target];
       float vy2 = vyLocs[target];

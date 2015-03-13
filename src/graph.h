@@ -20,6 +20,10 @@ typedef struct Edges
   unsigned int* numedges;
   unsigned int** edgeSet;
   unsigned int arraySize;
+
+  unsigned int totalEdges;
+  unsigned int* edgeTargets;
+  unsigned int* edgeTargetOffset;
 } Edges;
 
 /*!
@@ -83,6 +87,9 @@ Graph* newGraph(unsigned int numVertices);
 
 
 void graphAddEdge(Graph* graph, unsigned int source, unsigned int target);
+
+void graphExportEdges(Graph* graph);
+
 /*!
  Print the details of the graph to stdout.
  \param[in] g The graph to print.

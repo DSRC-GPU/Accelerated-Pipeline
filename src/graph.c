@@ -12,6 +12,9 @@ Edges* newEdges(unsigned int numvertices)
   edges->edgeSet = (unsigned int**) calloc(numvertices, sizeof(unsigned int*));
   edges->numedges = (unsigned int*) calloc(numvertices, sizeof(unsigned int));
   edges->arraySize = numvertices;
+
+  edges->edgeTargets = NULL;
+  edges->edgeTargetOffset = NULL;
   return edges;
 }
 
@@ -82,6 +85,41 @@ void graphAddEdge(Graph* graph, unsigned int source, unsigned int target)
       puts("Could not allocate mem for new edge.");
     }
   }
+}
+
+void graphExportEdges(Graph* graph)
+{
+  unsigned int totalNumEdges = 0;
+  for (size_t i = 0; i < graph->edges->arraySize; i++)
+  {
+    totalNumEdges += graph->edges->numedges[i];
+  }
+  unsigned int* edges = (unsigned int*) malloc(totalNumEdges * sizeof(unsigned int));
+  unsigned int index = 0;
+  for (size_t i = 0; i < graph->edges->arraySize; i++)
+  {
+    for (size_t j = 0; j < graph->edges->numedges[i]; j++)
+    {
+      edges[index++] = graph->edges->edgeSet[i][j]; 
+    }
+  }
+  if (graph->edges->edgeTargets)
+  {
+    free(graph->edges->edgeTargets);
+  }
+  graph->edges->edgeTargets = edges;
+  graph->edges->totalEdges = totalNumEdges;
+
+  unsigned int* edgeTargetOffset = (unsigned int*) calloc(graph->edges->arraySize, sizeof(unsigned int));
+  for (size_t i = 1; i < graph->edges->arraySize; i++)
+  {
+    edgeTargetOffset[i] = edgeTargetOffset[i - 1] + graph->edges->numedges[i - 1];
+  }
+  if (graph->edges->edgeTargetOffset)
+  {
+    free(graph->edges->edgeTargetOffset);
+  }
+  graph->edges->edgeTargetOffset = edgeTargetOffset;
 }
 
 void printGraph(Graph* g)
