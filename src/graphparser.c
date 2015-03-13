@@ -12,14 +12,15 @@ Graph* graphParseFile(FILE* ifp)
 {
   char buffer[BUFFERSIZE];
  
+#ifdef FORMAT_LINENUMTO
   unsigned int numVertices;
   unsigned int numEdges;
+
   fgets(buffer, BUFFERSIZE, ifp);
   sscanf(buffer, "%u %u", &numVertices, &numEdges);
 
   Graph* graph = newGraph(numVertices);
 
-#ifdef FORMAT_LINENUMTO
   for (size_t i = 0; i < numVertices; i++)
   {
     fgets(buffer, BUFFERSIZE, ifp);
@@ -38,10 +39,21 @@ Graph* graphParseFile(FILE* ifp)
       }
     }
   }
-#elif FORMAT_FROMTO
-  while (fgets(buffer, BUFFERSIZE, ifp)
+#elif defined(FORMAT_FROMTO)
+  Graph* graph = newGraph(1);
+
+  while (fgets(buffer, BUFFERSIZE, ifp))
   {
-    
+    if (buffer[0] != '#')
+    {
+      unsigned int from;
+      unsigned int to;
+      sscanf(buffer, "%u %u", &from, &to);
+      graphUpdateNumVertices(graph, to + 1);
+      graphUpdateNumVertices(graph, from + 1);
+      graphAddEdgeToVertex(graph, from, to);
+      graphAddEdgeToVertex(graph, to, from);
+    }
   }
 #else
   puts("No parse format defined.");
