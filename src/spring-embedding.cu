@@ -305,9 +305,9 @@ __global__ void fa2Attraction(unsigned int numvertices,
     unsigned int maxedges = numedges[gid];
     unsigned int offset = edgeTargetOffset[gid];
     // Each thread goes through its array of edges.
-    for (size_t index = offset; i < maxedges + offset; i++)
+    for (size_t i = offset; i < maxedges + offset; i++)
     {
-      unsigned int target = edgeTargets[index];
+      unsigned int target = edgeTargets[i];
       assert(target < numvertices);
       // Compute attraction force.
       float vx2 = vxLocs[target];
