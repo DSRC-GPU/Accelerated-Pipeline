@@ -18,17 +18,7 @@ typedef struct Edges
    * An array specifying the number of edges for each vertex.
    */
   unsigned int* numedges;
-  /*!
-   * An array specifying the target vertex for each edge.
-   * This is a 2D array that is column-major mapped to a 1D array.
-   * This means every edge for vertex i can be found at:
-   * i + numvertices * n
-   * where n can range from 0 to maxedges.
-   */
-  unsigned int* edgeTargets;
-  /*!
-   * The size of edgeTargets and in number of elements.
-   */
+  unsigned int** edgeSet;
   unsigned int arraySize;
 } Edges;
 
@@ -72,28 +62,6 @@ typedef struct Graph
 Edges* newEdges(unsigned int num);
 
 /*!
- * Allocates memory to save an amount of edges from the specified vertex.
- */
-void graphSetEdgeSpaceForVertex(Graph* graph, unsigned int vertexId,
-    unsigned int numedges);
-
-/*!
- * Allocates memory to save an amount of edges for all vertices.
- */
-void graphSetEdgeSpaceForAllVertices(Graph* graph);
-
-/*!
- * Add an outgoing edge to a vertex. This edge is one-way.
- */
-void graphAddEdgeToVertex(Graph* graph, unsigned int sourceVertexId,
-    unsigned int targetVertexId);
-
-/*!
- * Reallocate the memory for all edges to match the number of edges each vertex has.
- */
-void graphShrinkEdgeSpaceToNumberOfEdges(Graph* graph);
-
-/*!
  * Frees the memory allocated for the edges struct.
  */
 void freeEdges(Edges* edges);
@@ -113,6 +81,8 @@ void freeVertices(Vertices* vertices);
  */
 Graph* newGraph(unsigned int numVertices);
 
+
+void graphAddEdge(Graph* graph, unsigned int source, unsigned int target);
 /*!
  Print the details of the graph to stdout.
  \param[in] g The graph to print.
@@ -125,10 +95,6 @@ void printGraphEdges(Graph* g);
  * Free the memory allocated for the graph struct.
  */
 void freeGraph(Graph* graph);
-
-void graphIncreaseEdgeArraySize(Graph* g, unsigned int inc);
-
-void graphShrinkEdgeArrayToActualSize(Graph* g);
 
 void graphRandomizeLocation(Graph* g);
 

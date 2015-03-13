@@ -12,7 +12,6 @@
 Graph* graphParseFile(FILE* ifp)
 {
   char buffer[BUFFERSIZE];
-  fgets(buffer, BUFFERSIZE, ifp);
  
 #ifdef FORMAT_LINENUMTO
   unsigned int numVertices;
@@ -41,31 +40,21 @@ Graph* graphParseFile(FILE* ifp)
     }
   }
 #elif defined(FORMAT_FROMTO)
-  unsigned int numVertices;
-  unsigned int maxEdges;
-  sscanf(buffer, "#%u %u", &numVertices, &maxEdges);
-
-  Graph* graph = newGraph(numVertices);
-  graph->edges->maxedges = maxEdges;
-  graphSetEdgeSpaceForAllVertices(graph);
+  Graph* graph = newGraph(0);
 
   unsigned int from, to;
-  fseek(ifp, 0, SEEK_SET);
   while (fgets(buffer, BUFFERSIZE, ifp))
   {
     if (buffer[0] != '#')
     {
       sscanf(buffer, "%u\t%u", &from, &to);
-      graphAddEdgeToVertex(graph, from, to);
-      graphAddEdgeToVertex(graph, to, from);
+      graphAddEdge(graph, from, to);
     }
   }
 #else
   puts("No parse format defined.");
   exit(1);
 #endif
-
-  graphShrinkEdgeArrayToActualSize(graph);
 
   return graph;
 }

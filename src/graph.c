@@ -9,10 +9,9 @@ Edges* newEdges(unsigned int numvertices)
 {
   Edges* edges = (Edges*) calloc(1, sizeof(Edges));
   edges->maxedges = 0;
+  edges->edgeSet = (unsigned int**) calloc(numvertices, sizeof(unsigned int*));
   edges->numedges = (unsigned int*) calloc(numvertices, sizeof(unsigned int));
   edges->arraySize = numvertices;
-  edges->edgeTargets = (unsigned int*) calloc(edges->arraySize,
-      sizeof(unsigned int));
   return edges;
 }
 
@@ -33,37 +32,56 @@ Graph* newGraph(unsigned int numvertices)
   return graph;
 }
 
-void graphSetEdgeSpaceForAllVertices(Graph* graph)
+void graphAddEdge(Graph* graph, unsigned int source, unsigned int target)
 {
-  unsigned int* targets = graph->edges->edgeTargets;
-  if (targets)
-    free(targets);
-  graph->edges->edgeTargets = (unsigned int*) calloc(
-      graph->vertices->numvertices * graph->edges->maxedges,
-      sizeof(unsigned int));
-  assert(graph->edges->edgeTargets != NULL);
-  for (size_t i = 0; i < graph->edges->arraySize; i++)
+  if (graph)
   {
-    graph->edges->edgeTargets[i] = UINT_MAX;
-  }
-}
+    unsigned int max = source > target ? source : target;
+    max++;
 
-void graphAddEdgeToVertex(Graph* graph, unsigned int sourceVertexId,
-    unsigned int targetVertexId)
-{
-  unsigned int index = sourceVertexId
-   + graph->edges->numedges[sourceVertexId] * graph->vertices->numvertices;
-  assert(index < graph->edges->arraySize);
-  //if (index >= graph->edges->arraySize)
-  //{
-  //  graphIncreaseEdgeArraySize(graph, 10);
-  //}
-  graph->edges->numedges[sourceVertexId]++;
-  if (graph->edges->numedges[sourceVertexId] > graph->edges->maxedges)
-  {
-    graph->edges->maxedges = graph->edges->numedges[sourceVertexId];
+    float* newVertexXLocs;
+    float* newVertexYLocs;
+    unsigned int* newNumEdges;
+    unsigned int** newEdgeSet;
+    if (max > graph->vertices->numvertices)
+    {
+      newVertexXLocs = (float*) realloc(graph->vertices->vertexXLocs, max * sizeof(float));
+      newVertexYLocs = (float*) realloc(graph->vertices->vertexYLocs, max * sizeof(float));
+      newNumEdges = (unsigned int*) realloc(graph->edges->numedges, max * sizeof(unsigned int));
+      newEdgeSet = (unsigned int**) realloc(graph->edges->edgeSet, max * sizeof(unsigned int*));
+      if (newVertexXLocs && newVertexYLocs && newNumEdges && newEdgeSet)
+      {
+        for (size_t i = graph->vertices->numvertices; i < max; i++)
+        {
+          newVertexXLocs[i] = 0;
+          newVertexYLocs[i] = 0;
+          newNumEdges[i] = 0;
+          newEdgeSet[i] = NULL;
+        }
+
+      } else {
+        printf("Could not allocate mem for new vertex.\nRequested %u elements.\n", max);
+        exit(1);
+      }
+      graph->vertices->vertexXLocs = newVertexXLocs;
+      graph->vertices->vertexYLocs = newVertexYLocs;
+      graph->edges->numedges = newNumEdges;
+      graph->edges->edgeSet = newEdgeSet;
+
+      graph->vertices->numvertices = max;
+      graph->edges->arraySize = max;
+    }
+
+    unsigned int numEdgesSource = ++graph->edges->numedges[source];
+    unsigned int* newEdgeSetSource = (unsigned int*) realloc(graph->edges->edgeSet[source], numEdgesSource * sizeof(unsigned int));
+    if (newEdgeSetSource)
+    {
+      newEdgeSetSource[numEdgesSource - 1] = target;
+      graph->edges->edgeSet[source] = newEdgeSetSource;
+    } else {
+      puts("Could not allocate mem for new edge.");
+    }
   }
-  graph->edges->edgeTargets[index] = targetVertexId;
 }
 
 void printGraph(Graph* g)
@@ -85,8 +103,7 @@ void printGraphEdges(Graph* g)
   {
     for (size_t j = 0; j < g->edges->numedges[i]; j++)
     {
-      unsigned int index = i + (j * g->vertices->numvertices);
-      printf("Edge from %u to %u\n", i, g->edges->edgeTargets[index]);
+      printf("Edge from %lu to %u\n", i, g->edges->edgeSet[i][j]);
     }
   }
 }
@@ -95,7 +112,14 @@ void freeEdges(Edges* edges)
 {
   if (edges)
   {
-    free(edges->edgeTargets);
+    if (edges->edgeSet)
+    {
+      for (size_t i = 0; i < edges->arraySize; i++)
+      {
+        free(edges->edgeSet[i]);
+      }
+    }
+    free(edges->edgeSet);
     free(edges->numedges);
     free(edges);
   }
@@ -116,40 +140,6 @@ void freeGraph(Graph* graph)
   freeEdges(graph->edges);
   freeVertices(graph->vertices);
   free(graph);
-}
-
-void graphIncreaseEdgeArraySize(Graph* g, unsigned int inc)
-{
-  unsigned int numelements = g->edges->arraySize
-      + (inc * g->vertices->numvertices);
-  g->edges->edgeTargets = (unsigned int*) realloc(g->edges->edgeTargets,
-      numelements * sizeof(unsigned int));
-  if (!g->edges->edgeTargets)
-  {
-    puts("Could not allocate enough memory for edges.");
-    exit(1);
-  }
-  g->edges->arraySize = numelements;
-  for (size_t i = 0; i < g->vertices->numvertices; i++)
-  {
-    for (size_t j = g->edges->numedges[i]; j < g->edges->maxedges; j++)
-    {
-      unsigned int index = i + (j * g->vertices->numvertices);
-      assert(index < g->edges->arraySize);
-      g->edges->edgeTargets[index] = UINT_MAX;
-    }
-  }
-}
-
-void graphShrinkEdgeArrayToActualSize(Graph* g)
-{
-  unsigned int numelements = g->edges->maxedges * g->vertices->numvertices;
-  if (numelements < g->edges->arraySize)
-  {
-    g->edges->edgeTargets = (unsigned int*) realloc(g->edges->edgeTargets,
-        numelements * sizeof(unsigned int));
-    g->edges->arraySize = numelements;
-  }
 }
 
 void graphRandomizeLocation(Graph* g)
