@@ -61,7 +61,7 @@ sep: $(SEP_MAIN) $(OBJECTS_PAR) $(OBJECTS)
 	$(NVCC) $(CUDA_ARCH) $(OBJECTS_PAR) -dlink -o $(CUDA_LINK)
 	$(CC) -rdynamic -o $(TARGETS) $(CUDA_LINK) $^ $(CUDA_LIBS) $(CUDA_LDFLAGS)
 
-sepseq: CFLAGS += -DDEBUG -g
+#sepseq: CFLAGS += -DDEBUG -g
 sepseq: $(SEP_MAIN) $(OBJECTS_SEQ) $(OBJECTS)
 	$(CC) -o $(TARGETS) $(CFLAGS) $^ $(LDFLAGS) 
 
