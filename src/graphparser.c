@@ -1,6 +1,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <assert.h>
 #include "graph.h"
 
 #define BUFFERSIZE 1000
@@ -11,12 +12,12 @@
 Graph* graphParseFile(FILE* ifp)
 {
   char buffer[BUFFERSIZE];
+  fgets(buffer, BUFFERSIZE, ifp);
  
 #ifdef FORMAT_LINENUMTO
   unsigned int numVertices;
   unsigned int numEdges;
 
-  fgets(buffer, BUFFERSIZE, ifp);
   sscanf(buffer, "%u %u", &numVertices, &numEdges);
 
   Graph* graph = newGraph(numVertices);
@@ -40,17 +41,21 @@ Graph* graphParseFile(FILE* ifp)
     }
   }
 #elif defined(FORMAT_FROMTO)
-  Graph* graph = newGraph(1);
+  unsigned int numVertices;
+  unsigned int maxEdges;
+  sscanf(buffer, "#%u %u", &numVertices, &maxEdges);
 
+  Graph* graph = newGraph(numVertices);
+  graph->edges->maxedges = maxEdges;
+  graphSetEdgeSpaceForAllVertices(graph);
+
+  unsigned int from, to;
+  fseek(ifp, 0, SEEK_SET);
   while (fgets(buffer, BUFFERSIZE, ifp))
   {
     if (buffer[0] != '#')
     {
-      unsigned int from;
-      unsigned int to;
-      sscanf(buffer, "%u %u", &from, &to);
-      graphUpdateNumVertices(graph, to + 1);
-      graphUpdateNumVertices(graph, from + 1);
+      sscanf(buffer, "%u\t%u", &from, &to);
       graphAddEdgeToVertex(graph, from, to);
       graphAddEdgeToVertex(graph, to, from);
     }

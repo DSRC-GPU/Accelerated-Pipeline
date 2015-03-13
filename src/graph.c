@@ -41,6 +41,7 @@ void graphSetEdgeSpaceForAllVertices(Graph* graph)
   graph->edges->edgeTargets = (unsigned int*) calloc(
       graph->vertices->numvertices * graph->edges->maxedges,
       sizeof(unsigned int));
+  assert(graph->edges->edgeTargets != NULL);
   for (size_t i = 0; i < graph->edges->arraySize; i++)
   {
     graph->edges->edgeTargets[i] = UINT_MAX;
@@ -52,10 +53,11 @@ void graphAddEdgeToVertex(Graph* graph, unsigned int sourceVertexId,
 {
   unsigned int index = sourceVertexId
    + graph->edges->numedges[sourceVertexId] * graph->vertices->numvertices;
-  if (index >= graph->edges->arraySize)
-  {
-    graphIncreaseEdgeArraySize(graph, 10);
-  }
+  assert(index < graph->edges->arraySize);
+  //if (index >= graph->edges->arraySize)
+  //{
+  //  graphIncreaseEdgeArraySize(graph, 10);
+  //}
   graph->edges->numedges[sourceVertexId]++;
   if (graph->edges->numedges[sourceVertexId] > graph->edges->maxedges)
   {
