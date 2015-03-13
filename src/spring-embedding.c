@@ -230,7 +230,6 @@ void fa2Attraction(Graph* g, float* forceX, float* forceY)
     for (size_t i = offset; i < maxedges + offset; i++)
     {
       unsigned int target = g->edges->edgeTargets[i];
-      printf("A %u %u\n", gid, target);
       // Compute attraction force.
       float vx2 = vxLocs[target];
       float vy2 = vyLocs[target];
