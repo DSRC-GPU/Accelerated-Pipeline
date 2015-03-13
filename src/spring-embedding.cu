@@ -290,8 +290,8 @@ __global__ void fa2Repulsion(unsigned int numvertices,
 }
 
 __global__ void fa2Attraction(unsigned int numvertices,
-    float* vxLocs, float* vyLocs, unsigned int* numedges,
-    unsigned int* edgeTargets, unsigned int maxedges, float* forceX,
+    float* vxLocs, float* vyLocs, unsigned int* numedges, unsigned int*
+    edgeTargetOffset, unsigned int* edgeTargets, float* forceX,
     float* forceY)
 {
   unsigned int gid = threadIdx.x + (blockIdx.x * BLOCK_SIZE);
@@ -301,11 +301,12 @@ __global__ void fa2Attraction(unsigned int numvertices,
     float vy1 = vyLocs[gid];
     float tempVectorX = 0;
     float tempVectorY = 0;
+
+    unsigned int maxedges = numedges[gid];
+    unsigned int offset = edgeTargetOffset[gid];
     // Each thread goes through its array of edges.
-    for (size_t i = 0; i < numedges[gid]; i++)
+    for (size_t index = offset; i < maxedges + offset; i++)
     {
-      unsigned int index = gid + (numvertices * i);
-      assert(index < numvertices * maxedges);
       unsigned int target = edgeTargets[index];
       assert(target < numvertices);
       // Compute attraction force.
@@ -755,6 +756,7 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
   float* vyLocs = g->vertices->vertexYLocs;
   unsigned int* numEdges = g->edges->numedges;
   unsigned int* edgeTargets = g->edges->edgeTargets;
+  unsigned int* edgeTargetOffset = g->edges->edgeTargetOffset;
 
   // Initialize the global variables. step, progress
 #ifdef YIFAN_HU
@@ -824,7 +826,7 @@ void fa2RunOnGraph(Graph* g, unsigned int iterations)
 
     startTimer(timer);
     fa2Attraction<<<numblocks, BLOCK_SIZE>>>(g->vertices->numvertices, vxLocs,
-    vyLocs, numEdges, edgeTargets, g->edges->maxedges, data.forceX, data.forceY);
+    vyLocs, numEdges, edgeTargetOffset, edgeTargets, data.forceX, data.forceY);
     stopTimer(timer);
     printTimer(timer, "time: force: attraction.");
     resetTimer(timer);
