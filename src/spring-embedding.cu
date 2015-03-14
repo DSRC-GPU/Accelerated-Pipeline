@@ -284,8 +284,8 @@ __global__ void fa2Repulsion(unsigned int numvertices,
       __syncthreads();
     }
     // Add accumulated repulsion value to global mem variable.
-    *forceX += tempVectorX;
-    *forceY += tempVectorY;
+    forceX[gid] += tempVectorX;
+    forceY[gid] += tempVectorY;
   }
 }
 
