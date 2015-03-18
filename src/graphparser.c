@@ -19,10 +19,11 @@ Graph* graphParseFile(FILE* ifp)
 
   sscanf(buffer, "%u %u", &numVertices, &numEdges);
 
-  Graph* graph = newGraph(numVertices);
+  Graph* graph = newGraph(0);
 
   for (size_t i = 0; i < numVertices; i++)
   {
+    fgets(buffer, BUFFERSIZE, ifp);
     fgets(buffer, BUFFERSIZE, ifp);
     char* end = buffer;
     unsigned int neighbour = 0;
@@ -34,8 +35,8 @@ Graph* graphParseFile(FILE* ifp)
       // edges (v,u) and (u,v).
       if (i <= neighbour)
       {
-        graphAddEdgeToVertex(graph, i, neighbour);
-        graphAddEdgeToVertex(graph, neighbour, i);
+        graphAddEdge(graph, i, neighbour);
+        graphAddEdge(graph, neighbour, i);
       }
     }
   }
